@@ -1,0 +1,1373 @@
+{% extends 'predictor/base.html' %}
+{% load static %}
+
+{% block title %}Prediction Results - Professional Analysis{% endblock %}
+
+{% block extra_css %}
+<style>
+    .result-container {
+        background: #000000;
+        min-height: 100vh;
+        padding: var(--spacing-lg) var(--spacing-md);
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .result-card {
+        background: #1a1a1a;
+        border-radius: var(--border-radius-lg);
+        padding: var(--spacing-lg);
+        box-shadow: var(--shadow-md);
+        margin-bottom: var(--spacing-lg);
+        border: calc(1px * var(--phi-inverse)) solid #333333;
+        color: #ffffff;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        transition: all 0.3s ease;
+    }
+    
+    .prediction-header {
+        text-align: center;
+        margin-bottom: var(--spacing-lg);
+        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+        color: white;
+        padding: var(--spacing-lg);
+        border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+        margin: calc(-1 * var(--spacing-lg)) calc(-1 * var(--spacing-lg)) var(--spacing-lg) calc(-1 * var(--spacing-lg));
+        border-bottom: calc(2px * var(--phi-inverse)) solid #00d4aa;
+    }
+    
+    .prediction-outcome {
+        font-size: var(--font-xl);
+        font-weight: bold;
+        margin: var(--spacing-md) 0;
+        line-height: calc(var(--font-xl) * var(--phi));
+    }
+    
+    .outcome-home { color: #00d4aa; }
+    .outcome-draw { color: #ff6b35; }
+    .outcome-away { color: #ff6b35; }
+    
+    .match-details {
+        background: #1a1a1a;
+        border-radius: var(--border-radius-lg);
+        padding: var(--spacing-lg);
+        margin: var(--spacing-lg) 0;
+        border: calc(1px * var(--phi-inverse)) solid #333333;
+        color: #ffffff;
+    }
+    
+    .team-comparison {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: var(--spacing-md);
+        align-items: center;
+        margin: var(--spacing-lg) 0;
+        width: 100%;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+        transition: gap 0.3s ease;
+    }
+    
+    .team-info {
+        background: #1a1a1a;
+        color: #ffffff;
+        padding: var(--spacing-md);
+        border-radius: var(--border-radius-lg);
+        text-align: center;
+        border: calc(1px * var(--phi-inverse)) solid #333333;
+        transition: all calc(0.3s * var(--phi-inverse)) ease;
+    }
+    
+    .team-info:hover {
+        border-color: #00d4aa;
+        box-shadow: var(--shadow-md);
+    }
+    
+    .score-display {
+        background: linear-gradient(135deg, #00d4aa 0%, #00b894 100%);
+        color: #000000;
+        padding: var(--spacing-md) var(--spacing-lg);
+        border-radius: var(--border-radius-md);
+        font-size: var(--font-lg);
+        font-weight: bold;
+        box-shadow: var(--shadow-md);
+        line-height: calc(var(--font-lg) * var(--phi));
+    }
+    
+    .analytics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+        gap: var(--spacing-md);
+        margin: var(--spacing-lg) 0;
+        width: 100%;
+        max-width: 100%;
+        transition: gap 0.3s ease;
+    }
+    
+    .analytics-card {
+        background: #1a1a1a;
+        border-radius: var(--border-radius-lg);
+        padding: var(--spacing-md);
+        box-shadow: var(--shadow-md);
+        transition: transform calc(0.3s * var(--phi-inverse)) ease;
+        border: calc(1px * var(--phi-inverse)) solid #333333;
+        color: #ffffff;
+    }
+    
+    .analytics-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0, 212, 170, 0.3);
+        border-color: #00d4aa;
+    }
+    
+    .chart-container {
+        background: #1a1a1a;
+        border-radius: 12px;
+        padding: 20px;
+        margin: 15px 0;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        border: 1px solid #333333;
+        height: 280px;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .chart-title {
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .chart-wrapper {
+        flex: 1;
+        position: relative;
+        min-height: 200px;
+    }
+    
+    .probability-bar {
+        background: #333333;
+        border-radius: 8px;
+        height: 20px;
+        margin: 10px 0;
+        overflow: hidden;
+        border: 1px solid #00d4aa;
+    }
+    
+    .probability-fill {
+        height: 100%;
+        border-radius: 8px;
+        transition: width 1s ease;
+    }
+    
+    .model-details {
+        background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+        border-radius: 12px;
+        padding: 25px;
+        margin: 20px 0;
+        border: 2px solid #f59e0b;
+    }
+    
+    .model-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 15px;
+    }
+    
+    .model-name {
+        font-weight: 600;
+        color: #92400e;
+        font-size: 1.1rem;
+    }
+    
+    .prediction-basis {
+        color: #92400e;
+        font-style: italic;
+        margin: 10px 0;
+    }
+    
+    .stats-overview {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+    }
+    
+    .stat-card {
+        background: #fff7ed;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(146, 64, 14, 0.15);
+        border: 2px solid #fed7aa;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #92400e;
+        margin-bottom: 5px;
+    }
+    
+    .stat-label {
+        color: #92400e;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .team-form-display {
+        padding: 20px;
+    }
+    
+    .form-item {
+        margin-bottom: 20px;
+    }
+    
+    .form-string {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    /* Football-style form balls with individual team colors */
+    .form-ball {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 1.1rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        position: relative;
+        overflow: hidden;
+        cursor: help;
+    }
+    
+    .form-ball::before {
+        content: '';
+        position: absolute;
+        top: 20%;
+        left: 20%;
+        width: 30%;
+        height: 30%;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        opacity: 0.6;
+    }
+    
+    .form-ball-text {
+        position: relative;
+        z-index: 1;
+        color: #ffffff;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+    
+    .form-ball:hover {
+        transform: scale(1.2) translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+    }
+    
+    /* Home team colors (Green theme) */
+    .form-ball-win {
+        background: radial-gradient(circle at 30% 30%, #22c55e, #16a34a);
+        border: 2px solid #15803d;
+    }
+    
+    .form-ball-draw {
+        background: radial-gradient(circle at 30% 30%, #f59e0b, #d97706);
+        border: 2px solid #b45309;
+    }
+    
+    .form-ball-loss {
+        background: radial-gradient(circle at 30% 30%, #ef4444, #dc2626);
+        border: 2px solid #b91c1c;
+    }
+    
+    /* Away team colors (Orange/Red theme) */
+    .form-ball-win-away {
+        background: radial-gradient(circle at 30% 30%, #f97316, #ea580c);
+        border: 2px solid #c2410c;
+    }
+    
+    .form-ball-draw-away {
+        background: radial-gradient(circle at 30% 30%, #eab308, #ca8a04);
+        border: 2px solid #a16207;
+    }
+    
+    .form-ball-loss-away {
+        background: radial-gradient(circle at 30% 30%, #dc2626, #b91c1c);
+        border: 2px solid #991b1b;
+    }
+    
+    /* Keep old form-badge classes for backward compatibility */
+    .form-badge {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        font-size: 1.1rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        cursor: help;
+        color: white;
+    }
+    
+    .form-badge:hover {
+        transform: scale(1.15);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    }
+    
+    .form-badge.form-win {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        box-shadow: 0 3px 10px rgba(16, 185, 129, 0.4);
+    }
+    
+    .form-badge.form-draw {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        box-shadow: 0 3px 10px rgba(245, 158, 11, 0.4);
+    }
+    
+    .form-badge.form-loss {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        box-shadow: 0 3px 10px rgba(239, 68, 68, 0.4);
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 30px;
+        flex-wrap: wrap;
+    }
+    
+    .btn-action {
+        background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+        border: none;
+        padding: 16px 32px;
+        border-radius: 16px;
+        color: white;
+        font-weight: 700;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 8px 25px rgba(220, 38, 38, 0.3);
+        position: relative;
+        overflow: hidden;
+        font-size: 1.1rem;
+    }
+    
+    .btn-action::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .btn-action:hover::before {
+        left: 100%;
+    }
+    
+    .btn-action:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(220, 38, 38, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-action:active {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 25px rgba(220, 38, 38, 0.3);
+    }
+    
+    .btn-secondary {
+        background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+        border: none;
+        padding: 16px 32px;
+        border-radius: 16px;
+        color: white;
+        font-weight: 700;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 8px 25px rgba(100, 116, 139, 0.3);
+        position: relative;
+        overflow: hidden;
+        font-size: 1.1rem;
+    }
+    
+    .btn-secondary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .btn-secondary:hover::before {
+        left: 100%;
+    }
+    
+    .btn-secondary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(100, 116, 139, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-secondary:active {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 25px rgba(100, 116, 139, 0.3);
+    }
+    
+    /* ============================================
+       RESULT PAGE RESPONSIVE ENHANCEMENTS
+       ============================================ */
+    
+    /* Tablets and Below (768px and below) */
+    @media (max-width: 768px) {
+        .result-container {
+            padding: 1rem 0;
+        }
+        
+        .result-card {
+            padding: 1rem;
+        }
+        
+        /* Main result display */
+        .result-card > div[style*="padding: 40px"] {
+            padding: 25px 15px !important;
+        }
+        
+        .result-card h1 {
+            font-size: 1.5rem !important;
+            margin-bottom: 20px !important;
+        }
+        
+        .result-card div[style*="font-size: 3rem"] {
+            font-size: 1.75rem !important;
+            margin-bottom: 10px !important;
+        }
+        
+        .result-card div[style*="font-size: 2.5rem"] {
+            font-size: 1.5rem !important;
+        }
+        
+        .result-card div[style*="font-size: 1.2rem"] {
+            font-size: 1rem !important;
+        }
+        
+        /* Probability section */
+        .result-card > div > div[style*="margin: 40px auto"] {
+            margin: 25px auto !important;
+            max-width: 100% !important;
+        }
+        
+        .result-card h4 {
+            font-size: 1.1rem !important;
+            margin-bottom: 15px !important;
+        }
+        
+        .prob-display-home, .prob-display-draw, .prob-display-away {
+            font-size: 1.1rem !important;
+        }
+        
+        div[style*="font-weight: 700; font-size: 1.1rem"] {
+            font-size: 0.95rem !important;
+        }
+        
+        /* Probability bars */
+        div[style*="height: 30px"] {
+            height: 24px !important;
+        }
+        
+        /* Match details */
+        .match-details {
+            padding: 1rem;
+        }
+        
+        .match-details h3 {
+            font-size: 1.25rem;
+        }
+        
+        .prediction-outcome {
+            font-size: 1.75rem !important;
+        }
+        
+        /* Team comparison */
+        .team-comparison {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+        
+        .team-info {
+            padding: 1rem;
+        }
+        
+        .score-display {
+            font-size: 1.5rem;
+            padding: 1rem 1.25rem;
+        }
+        
+        /* Analytics cards */
+        .analytics-card {
+            padding: 1rem;
+            margin-top: 20px;
+        }
+        
+        .analytics-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        /* Stats overview */
+        .stats-overview {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        
+        .stat-card {
+            padding: 15px;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+        }
+        
+        /* Team form display */
+        .team-form-display {
+            flex-direction: column;
+            gap: 25px;
+            padding: 15px;
+        }
+        
+        .form-item {
+            min-width: 100%;
+        }
+        
+        .form-item h5 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+        
+        .form-ball {
+            width: 42px;
+            height: 42px;
+            font-size: 1rem;
+        }
+        
+        /* VS divider */
+        div[style*="font-size: 1.5rem"]:contains("VS") {
+            display: none;
+        }
+        
+        /* Tables */
+        .analytics-card table {
+            font-size: 0.85rem;
+        }
+        
+        .analytics-card table th,
+        .analytics-card table td {
+            padding: 10px 8px !important;
+        }
+        
+        /* Chart containers */
+        .chart-container {
+            height: auto;
+            min-height: 220px;
+            padding: 15px;
+        }
+        
+        .chart-title {
+            font-size: 0.9rem;
+        }
+        
+        /* Collapsible sections */
+        details summary {
+            padding: 12px !important;
+        }
+        
+        details summary h4 {
+            font-size: 0.95rem !important;
+            flex-wrap: wrap;
+        }
+        
+        details summary h4 span[style*="font-size: 0.9rem"] {
+            font-size: 0.8rem !important;
+            margin-left: 0 !important;
+            display: block;
+            width: 100%;
+            margin-top: 5px;
+        }
+        
+        /* Action buttons */
+        .action-buttons {
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 25px;
+        }
+        
+        .btn-action, .btn-secondary {
+            width: 100%;
+            padding: 14px 24px;
+            font-size: 1rem;
+        }
+        
+        /* Model details */
+        .model-details {
+            padding: 18px;
+            margin: 15px 0;
+        }
+        
+        .model-name {
+            font-size: 1rem;
+        }
+        
+        .prediction-basis {
+            font-size: 0.9rem;
+        }
+    }
+    
+    /* Small Mobile (576px and below) */
+    @media (max-width: 576px) {
+        .result-container {
+            padding: 0.5rem 0;
+        }
+        
+        .result-card {
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        /* Main result */
+        .result-card > div[style*="padding"] {
+            padding: 20px 12px !important;
+        }
+        
+        .result-card h1 {
+            font-size: 1.25rem !important;
+            margin-bottom: 15px !important;
+        }
+        
+        .result-card div[style*="font-size: 3rem"],
+        .result-card div[style*="font-size: 2.5rem"] {
+            font-size: 1.4rem !important;
+            line-height: 1.3;
+            word-break: break-word;
+        }
+        
+        .result-card h4 {
+            font-size: 1rem !important;
+        }
+        
+        .prob-display-home, .prob-display-draw, .prob-display-away {
+            font-size: 1rem !important;
+        }
+        
+        div[style*="font-weight: 700; font-size: 1.1rem"] {
+            font-size: 0.9rem !important;
+        }
+        
+        /* Probability bars */
+        div[style*="height: 30px"],
+        div[style*="height: 24px"] {
+            height: 20px !important;
+        }
+        
+        /* Match details */
+        .match-details {
+            padding: 0.75rem;
+        }
+        
+        .match-details h3 {
+            font-size: 1.1rem;
+        }
+        
+        .prediction-outcome {
+            font-size: 1.5rem !important;
+        }
+        
+        /* Stats */
+        .stat-card {
+            padding: 12px;
+        }
+        
+        .stat-value {
+            font-size: 1.25rem;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+        }
+        
+        /* Form balls */
+        .form-ball {
+            width: 36px;
+            height: 36px;
+            font-size: 0.9rem;
+        }
+        
+        .form-item h5 {
+            font-size: 1rem;
+        }
+        
+        /* Tables */
+        .analytics-card table {
+            font-size: 0.8rem;
+        }
+        
+        .analytics-card table th,
+        .analytics-card table td {
+            padding: 8px 6px !important;
+        }
+        
+        /* Buttons */
+        .btn-action, .btn-secondary {
+            padding: 12px 20px;
+            font-size: 0.95rem;
+        }
+        
+        /* Chart */
+        .chart-container {
+            min-height: 180px;
+            padding: 12px;
+        }
+        
+        /* Collapsible sections */
+        details summary {
+            padding: 10px !important;
+        }
+        
+        details summary h4 {
+            font-size: 0.9rem !important;
+        }
+        
+        details summary h4 span[style*="font-size"] {
+            font-size: 0.75rem !important;
+        }
+        
+        details summary h4 span:last-child {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+        }
+        
+        /* Statistics grid */
+        div[style*="grid-template-columns: repeat(auto-fit"] {
+            grid-template-columns: 1fr !important;
+        }
+        
+        /* Average score display */
+        div[style*="font-size: 2rem"] {
+            font-size: 1.5rem !important;
+        }
+    }
+    
+    /* Landscape phones */
+    @media (max-height: 500px) and (orientation: landscape) {
+        .result-card > div[style*="padding"] {
+            padding: 20px 15px !important;
+        }
+        
+        .result-card h1 {
+            margin-bottom: 15px !important;
+        }
+        
+        .form-ball {
+            width: 36px;
+            height: 36px;
+        }
+    }
+    
+    /* Ensure tables are scrollable */
+    @media (max-width: 768px) {
+        .analytics-card > div[style*="overflow-x: auto"] {
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="result-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <!-- SIMPLE RESULT CARD - Show Clear Answer First -->
+                <div class="result-card" style="background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%); border: 3px solid #00d4aa; margin-bottom: 30px;">
+                    <div style="text-align: center; padding: 40px 20px;">
+                        <h1 style="color: #00d4aa; font-size: 2rem; margin-bottom: 30px;">
+                            PREDICTION RESULT
+                        </h1>
+                        
+                        <!-- Clear Outcome -->
+                        <div style="margin: 30px 0;">
+                            {% if outcome == "Home" %}
+                                <div style="font-size: 3rem; font-weight: 900; color: #00d4aa; margin-bottom: 15px;">
+                                    {{ home_team|upper }} WILL WIN
+                                </div>
+                            {% elif outcome == "Away" %}
+                                <div style="font-size: 3rem; font-weight: 900; color: #00d4aa; margin-bottom: 15px;">
+                                    {{ away_team|upper }} WILL WIN
+                                </div>
+                            {% elif outcome == "1X" %}
+                                <div style="font-size: 2.5rem; font-weight: 900; color: #3b82f6; margin-bottom: 15px;">
+                                    {{ home_team|upper }} OR DRAW
+                                </div>
+                                <div style="font-size: 1.2rem; color: #94a3b8; margin-top: 10px;">
+                                    Double Chance (1X)
+                                </div>
+                            {% elif outcome == "X2" %}
+                                <div style="font-size: 2.5rem; font-weight: 900; color: #3b82f6; margin-bottom: 15px;">
+                                    DRAW OR {{ away_team|upper }}
+                                </div>
+                                <div style="font-size: 1.2rem; color: #94a3b8; margin-top: 10px;">
+                                    Double Chance (X2)
+                                </div>
+                            {% elif outcome == "12" %}
+                                <div style="font-size: 2.5rem; font-weight: 900; color: #3b82f6; margin-bottom: 15px;">
+                                    {{ home_team|upper }} OR {{ away_team|upper }}
+                                </div>
+                                <div style="font-size: 1.2rem; color: #94a3b8; margin-top: 10px;">
+                                    Double Chance (12) - Draw Unlikely
+                                </div>
+                            {% elif outcome == "Draw" %}
+                                <div style="font-size: 3rem; font-weight: 900; color: #f59e0b; margin-bottom: 15px;">
+                                    IT'S A DRAW
+                                </div>
+                            {% else %}
+                                <div style="font-size: 3rem; font-weight: 900; color: #f59e0b; margin-bottom: 15px;">
+                                    IT'S A DRAW
+                                </div>
+                            {% endif %}
+                        </div>                        
+                        <!-- Visual Win Probability -->
+                        <div style="margin: 40px auto; max-width: 600px;">
+                            <h4 style="color: #00d4aa; margin-bottom: 25px; font-size: 1.3rem;">Win Probability</h4>
+                            
+                            <!-- Home Team -->
+                            <div style="margin-bottom: 20px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <span style="color: #ffffff; font-weight: 700; font-size: 1.1rem;">{{ home_team }}</span>
+                                    <span class="prob-display-home" style="color: #00d4aa; font-weight: 900; font-size: 1.3rem;" data-prob="{{ probabilities.Home|default:0.33 }}">0%</span>
+                                </div>
+                                <div style="background: #333; height: 30px; border-radius: 15px; overflow: hidden;">
+                                    <div class="prob-bar-home" style="background: linear-gradient(90deg, #00d4aa 0%, #00b894 100%); height: 100%; width: 0%; transition: width 1s ease;"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Draw -->
+                            <div style="margin-bottom: 20px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <span style="color: #ffffff; font-weight: 700; font-size: 1.1rem;">Draw</span>
+                                    <span class="prob-display-draw" style="color: #f59e0b; font-weight: 900; font-size: 1.3rem;" data-prob="{{ probabilities.Draw|default:0.33 }}">0%</span>
+                                </div>
+                                <div style="background: #333; height: 30px; border-radius: 15px; overflow: hidden;">
+                                    <div class="prob-bar-draw" style="background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%); height: 100%; width: 0%; transition: width 1s ease;"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Away Team -->
+                            <div style="margin-bottom: 20px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <span style="color: #ffffff; font-weight: 700; font-size: 1.1rem;">{{ away_team }}</span>
+                                    <span class="prob-display-away" style="color: #ff6b35; font-weight: 900; font-size: 1.3rem;" data-prob="{{ probabilities.Away|default:0.33 }}">0%</span>
+                                </div>
+                                <div style="background: #333; height: 30px; border-radius: 15px; overflow: hidden;">
+                                    <div class="prob-bar-away" style="background: linear-gradient(90deg, #ff6b35 0%, #ff5722 100%); height: 100%; width: 0%; transition: width 1s ease;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Quick Action Button -->
+                        <div style="margin-top: 40px;">
+                            <a href="{% url 'predictor:predict' %}" style="display: inline-block; background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); color: white; padding: 18px 50px; border-radius: 50px; font-size: 1.3rem; font-weight: 900; text-decoration: none; box-shadow: 0 8px 25px rgba(220, 38, 38, 0.4); transition: all 0.3s ease;">
+                                Make Another Prediction
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- DETAILED ANALYSIS - Collapsible Sections Below -->
+                <div class="result-card">
+                    <div style="text-align: center; padding: 20px; background: rgba(0, 212, 170, 0.05); border-radius: 10px; margin-bottom: 30px;">
+                        <h3 style="color: #00d4aa; margin-bottom: 10px;">Want More Details?</h3>
+                        <p style="color: #94a3b8; margin: 0;">Click any section below to see detailed analysis</p>
+                    </div>
+                    
+                    <!-- Match Details -->
+                    <div class="match-details">
+                        <div class="text-center">
+                            <h3 class="mb-4">{{ home_team }} vs {{ away_team }}</h3>
+                            <div class="prediction-outcome outcome-{{ outcome|lower|slice:":1" }}" style="font-size: 2.5rem; margin-top: 20px;">
+                                {{ outcome }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Historical Probabilities - Collapsible -->
+                    <details class="analytics-card" style="margin-top: 30px; cursor: pointer;" open>
+                        <summary style="list-style: none; cursor: pointer; padding: 15px; background: rgba(0, 212, 170, 0.1); border-radius: 10px; margin-bottom: 20px;">
+                            <h4 style="color: #00d4aa; margin: 0; display: inline-flex; align-items: center; gap: 10px;">
+                                <span>Past Performance</span>
+                                <span style="font-size: 0.9rem; color: #94a3b8; font-weight: normal; margin-left: 10px;">Based on historical matches</span>
+                                <span style="margin-left: auto; font-size: 1.2rem;">▼</span>
+                            </h4>
+                        </summary>
+                        <div class="stats-overview">
+                            <div class="stat-card">
+                                <div class="stat-value" style="color: #00d4aa;" data-prob="{{ historical_probabilities.Home }}">0%</div>
+                                <div class="stat-label">Home Win</div>
+                                <div class="probability-bar" style="margin-top: 10px;">
+                                    <div class="probability-fill prob-home-hist" style="background: linear-gradient(90deg, #00d4aa 0%, #00b894 100%); width: 0%;"></div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" style="color: #ff6b35;" data-prob="{{ historical_probabilities.Draw }}">0%</div>
+                                <div class="stat-label">Draw</div>
+                                <div class="probability-bar" style="margin-top: 10px;">
+                                    <div class="probability-fill prob-draw-hist" style="background: linear-gradient(90deg, #ff6b35 0%, #ff5722 100%); width: 0%;"></div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" style="color: #ff6b35;" data-prob="{{ historical_probabilities.Away }}">0%</div>
+                                <div class="stat-label">Away Win</div>
+                                <div class="probability-bar" style="margin-top: 10px;">
+                                    <div class="probability-fill prob-away-hist" style="background: linear-gradient(90deg, #ff6b35 0%, #ff5722 100%); width: 0%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+                    
+                    <!-- Team Form Display - Collapsible -->
+                    <details class="analytics-card" style="margin-top: 30px; cursor: pointer;" open>
+                        <summary style="list-style: none; cursor: pointer; padding: 15px; background: rgba(0, 212, 170, 0.1); border-radius: 10px; margin-bottom: 20px;">
+                            <h4 style="color: #00d4aa; margin: 0; display: inline-flex; align-items: center; gap: 10px;">
+                                <span>Team Performance</span>
+                                <span style="font-size: 0.9rem; color: #94a3b8; font-weight: normal; margin-left: 10px;">Last 5 matches</span>
+                                <span style="margin-left: auto; font-size: 1.2rem;">▼</span>
+                            </h4>
+                        </summary>
+                        <div class="team-form-display" style="display: flex; flex-direction: row; justify-content: space-around; align-items: center; gap: 40px; flex-wrap: wrap;">
+                            <!-- Home Team Form -->
+                            <div class="form-item" style="flex: 1; min-width: 200px;">
+                                <h5 style="color: #00d4aa; margin-bottom: 20px; text-align: center; font-weight: 700; font-size: 1.2rem;">{{ home_team }}</h5>
+                                <div class="form-string" style="display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;">
+                                    {% for result in home_team_form %}
+                                        {% if result == 'W' %}
+                                            <div class="form-ball form-ball-win" title="Win">
+                                                <span class="form-ball-text">W</span>
+                                            </div>
+                                        {% elif result == 'D' %}
+                                            <div class="form-ball form-ball-draw" title="Draw">
+                                                <span class="form-ball-text">D</span>
+                                            </div>
+                                        {% elif result == 'L' %}
+                                            <div class="form-ball form-ball-loss" title="Loss">
+                                                <span class="form-ball-text">L</span>
+                                            </div>
+                                        {% else %}
+                                            <div class="form-ball form-ball-draw" title="Unknown">
+                                                <span class="form-ball-text">-</span>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <!-- VS Divider -->
+                            <div style="color: #666; font-weight: 700; font-size: 1.5rem; padding: 0 20px;">VS</div>
+                            
+                            <!-- Away Team Form -->
+                            <div class="form-item" style="flex: 1; min-width: 200px;">
+                                <h5 style="color: #ff6b35; margin-bottom: 20px; text-align: center; font-weight: 700; font-size: 1.2rem;">{{ away_team }}</h5>
+                                <div class="form-string" style="display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;">
+                                    {% for result in away_team_form %}
+                                        {% if result == 'W' %}
+                                            <div class="form-ball form-ball-win-away" title="Win">
+                                                <span class="form-ball-text">W</span>
+                                            </div>
+                                        {% elif result == 'D' %}
+                                            <div class="form-ball form-ball-draw-away" title="Draw">
+                                                <span class="form-ball-text">D</span>
+                                            </div>
+                                        {% elif result == 'L' %}
+                                            <div class="form-ball form-ball-loss-away" title="Loss">
+                                                <span class="form-ball-text">L</span>
+                                            </div>
+                                        {% else %}
+                                            <div class="form-ball form-ball-draw-away" title="Unknown">
+                                                <span class="form-ball-text">-</span>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    </details>
+                    
+                    <!-- Head-to-Head Results - Collapsible -->
+                    {% if h2h_matches %}
+                    <details class="analytics-card" style="margin-top: 30px; cursor: pointer;">
+                        <summary style="list-style: none; cursor: pointer; padding: 15px; background: rgba(0, 212, 170, 0.1); border-radius: 10px; margin-bottom: 20px;">
+                            <h4 style="color: #00d4aa; margin: 0; display: inline-flex; align-items: center; gap: 10px;">
+                                <span>Past Meetings</span>
+                                <span style="font-size: 0.9rem; color: #94a3b8; font-weight: normal; margin-left: 10px;">Previous matches between these teams</span>
+                                <span style="margin-left: auto; font-size: 1.2rem;">▼</span>
+                            </h4>
+                        </summary>
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; color: #ffffff;">
+                                <thead>
+                                    <tr style="background: #2a2a2a; border-bottom: 2px solid #00d4aa;">
+                                        <th style="padding: 12px; text-align: left; font-weight: 600;">Date</th>
+                                        <th style="padding: 12px; text-align: center; font-weight: 600;">Score</th>
+                                        <th style="padding: 12px; text-align: center; font-weight: 600;">Result</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for match in h2h_matches %}
+                                    <tr style="border-bottom: 1px solid #333333; transition: background 0.2s ease;">
+                                        <td style="padding: 12px;">{{ match.date }}</td>
+                                        <td style="padding: 12px; text-align: center; font-weight: 600;">
+                                            {{ home_team }} {{ match.home_score }} - {{ match.away_score }} {{ away_team }}
+                                        </td>
+                                        <td style="padding: 12px; text-align: center;">
+                                            {% if match.winner == home_team %}
+                                                <span style="color: #00d4aa; font-weight: 600;">{{ home_team }} Win</span>
+                                            {% elif match.winner == away_team %}
+                                                <span style="color: #ff6b35; font-weight: 600;">{{ away_team }} Win</span>
+                                            {% else %}
+                                                <span style="color: #f59e0b; font-weight: 600;">Draw</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    </details>
+                    {% endif %}
+                    
+                    <!-- Upcoming Matches - Collapsible -->
+                    {% if upcoming_matches %}
+                    <details class="analytics-card" style="margin-top: 30px; cursor: pointer;">
+                        <summary style="list-style: none; cursor: pointer; padding: 15px; background: rgba(59, 130, 246, 0.1); border-radius: 10px; margin-bottom: 20px;">
+                            <h4 style="color: #3b82f6; margin: 0; display: inline-flex; align-items: center; gap: 10px;">
+                                <span>Future Matches</span>
+                                <span style="font-size: 0.9rem; color: #94a3b8; font-weight: normal; margin-left: 10px;">Scheduled games</span>
+                                <span style="margin-left: auto; font-size: 1.2rem;">▼</span>
+                            </h4>
+                        </summary>
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; color: #ffffff;">
+                                <thead>
+                                    <tr style="background: #2a2a2a; border-bottom: 2px solid #00d4aa;">
+                                        <th style="padding: 12px; text-align: left; font-weight: 600;">Date</th>
+                                        <th style="padding: 12px; text-align: center; font-weight: 600;">Match</th>
+                                        <th style="padding: 12px; text-align: center; font-weight: 600;">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for match in upcoming_matches %}
+                                    <tr style="border-bottom: 1px solid #333333; transition: background 0.2s ease;">
+                                        <td style="padding: 12px;">{{ match.date }}</td>
+                                        <td style="padding: 12px; text-align: center; font-weight: 600;">
+                                            {{ home_team }} vs {{ away_team }}
+                                        </td>
+                                        <td style="padding: 12px; text-align: center;">
+                                            <span style="color: #3b82f6; font-weight: 600; background: rgba(59, 130, 246, 0.1); padding: 4px 12px; border-radius: 12px;">
+                                                <i class="fas fa-clock me-1"></i>{{ match.status }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style="margin-top: 15px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; border-radius: 4px;">
+                            <p style="margin: 0; color: #94a3b8; font-size: 0.9rem;">
+                                <i class="fas fa-info-circle me-2"></i>
+                                These matches are scheduled but haven't been played yet. Check back after the match date for actual results.
+                            </p>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- All Predictions for This Matchup - Collapsible -->
+                    {% if all_predictions %}
+                    <details class="analytics-card" style="margin-top: 30px; cursor: pointer;" open>
+                        <summary style="list-style: none; cursor: pointer; padding: 15px; background: rgba(139, 92, 246, 0.1); border-radius: 10px; margin-bottom: 20px;">
+                            <h4 style="color: #8b5cf6; margin: 0; display: inline-flex; align-items: center; gap: 10px;">
+                                <span>Your Prediction History</span>
+                                <span style="font-size: 0.9rem; color: #94a3b8; font-weight: normal; margin-left: 10px;">All predictions for this matchup</span>
+                                <span style="margin-left: auto; font-size: 1.2rem;">▼</span>
+                            </h4>
+                        </summary>
+                        
+                        <!-- Statistics Summary -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px;">
+                            <div style="background: rgba(0, 212, 170, 0.1); padding: 15px; border-radius: 8px; border-left: 3px solid #00d4aa;">
+                                <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 5px;">Total Predictions</div>
+                                <div style="font-size: 1.8rem; font-weight: 700; color: #00d4aa;">{{ prediction_stats.total_count }}</div>
+                            </div>
+                            <div style="background: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 8px; border-left: 3px solid #3b82f6;">
+                                <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 5px;">Home Win Predictions</div>
+                                <div style="font-size: 1.8rem; font-weight: 700; color: #3b82f6;">{{ prediction_stats.home_count }} <span style="font-size: 1rem; color: #94a3b8;">({{ prediction_stats.home_percentage|floatformat:1 }}%)</span></div>
+                            </div>
+                            <div style="background: rgba(245, 158, 11, 0.1); padding: 15px; border-radius: 8px; border-left: 3px solid #f59e0b;">
+                                <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 5px;">Draw Predictions</div>
+                                <div style="font-size: 1.8rem; font-weight: 700; color: #f59e0b;">{{ prediction_stats.draw_count }} <span style="font-size: 1rem; color: #94a3b8;">({{ prediction_stats.draw_percentage|floatformat:1 }}%)</span></div>
+                            </div>
+                            <div style="background: rgba(255, 107, 53, 0.1); padding: 15px; border-radius: 8px; border-left: 3px solid #ff6b35;">
+                                <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 5px;">Away Win Predictions</div>
+                                <div style="font-size: 1.8rem; font-weight: 700; color: #ff6b35;">{{ prediction_stats.away_count }} <span style="font-size: 1rem; color: #94a3b8;">({{ prediction_stats.away_percentage|floatformat:1 }}%)</span></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Average Scores -->
+                        <div style="background: rgba(139, 92, 246, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: center;">
+                            <div style="font-size: 0.9rem; color: #94a3b8; margin-bottom: 10px;">Average Predicted Score</div>
+                            <div style="font-size: 2rem; font-weight: 700; color: #8b5cf6;">
+                                {{ home_team }} {{ prediction_stats.avg_home_score }} - {{ prediction_stats.avg_away_score }} {{ away_team }}
+                            </div>
+                        </div>
+                        
+                        <!-- Predictions Table -->
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; color: #ffffff;">
+                                <thead>
+                                    <tr style="background: #2a2a2a; border-bottom: 2px solid #00d4aa;">
+                                        <th style="padding: 12px; text-align: left; font-weight: 600;">Date</th>
+                                        <th style="padding: 12px; text-align: center; font-weight: 600;">Predicted Score</th>
+                                        <th style="padding: 12px; text-align: center; font-weight: 600;">Outcome</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for pred in all_predictions %}
+                                    <tr style="border-bottom: 1px solid #333333; transition: background 0.2s ease;" onmouseover="this.style.background='#2a2a2a'" onmouseout="this.style.background='transparent'">
+                                        <td style="padding: 12px;">{{ pred.prediction_date|date:"M d, Y H:i" }}</td>
+                                        <td style="padding: 12px; text-align: center; font-weight: 600;">
+                                            {{ pred.home_score }} - {{ pred.away_score }}
+                                        </td>
+                                        <td style="padding: 12px; text-align: center;">
+                                            {% if pred.outcome == "Home" %}
+                                                <span style="color: #00d4aa; font-weight: 600; background: rgba(0, 212, 170, 0.1); padding: 4px 12px; border-radius: 12px;">
+                                                    {{ home_team }} Win
+                                                </span>
+                                            {% elif pred.outcome == "Away" %}
+                                                <span style="color: #ff6b35; font-weight: 600; background: rgba(255, 107, 53, 0.1); padding: 4px 12px; border-radius: 12px;">
+                                                    {{ away_team }} Win
+                                                </span>
+                                            {% else %}
+                                                <span style="color: #f59e0b; font-weight: 600; background: rgba(245, 158, 11, 0.1); padding: 4px 12px; border-radius: 12px;">
+                                                    Draw
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        {% if prediction_stats.total_count > 10 %}
+                        <div style="margin-top: 15px; text-align: center; color: #94a3b8; font-size: 0.9rem;">
+                            Showing last 10 of {{ prediction_stats.total_count }} predictions
+                        </div>
+                        {% endif %}
+                    </div>
+                    </details>
+                    {% endif %}
+                    
+                    <!-- Action Buttons -->
+                    <div class="action-buttons" style="margin-top: 40px;">
+                        <a href="{% url 'predictor:predict' %}" class="btn-action" id="new-prediction-btn">
+                            <i class="fas fa-plus"></i>
+                            New Prediction
+                        </a>
+                        <a href="{% url 'predictor:home' %}" class="btn-secondary">
+                            <i class="fas fa-home"></i>
+                            Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Simple fade-in animation
+    const resultCard = document.querySelector('.result-card');
+    if (resultCard) {
+        resultCard.style.opacity = '0';
+        resultCard.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            resultCard.style.transition = 'all 0.6s ease';
+            resultCard.style.opacity = '1';
+            resultCard.style.transform = 'translateY(0)';
+        }, 100);
+    }
+    
+    // Calculate and display probabilities as percentages for stat cards
+    const probElements = document.querySelectorAll('.stat-value[data-prob]');
+    probElements.forEach(function(elem) {
+        let prob = parseFloat(elem.getAttribute('data-prob'));
+        
+        // Handle both decimal (0-1) and percentage (0-100) formats
+        // If prob > 1, it's already in percentage format, otherwise convert
+        let percentage;
+        if (prob > 1) {
+            // Already in percentage format (0-100)
+            percentage = prob.toFixed(1);
+        } else {
+            // In decimal format (0-1), convert to percentage
+            percentage = (prob * 100).toFixed(1);
+        }
+        
+        elem.textContent = percentage + '%';
+        
+        // Update the corresponding progress bar
+        const card = elem.closest('.stat-card');
+        const probFill = card.querySelector('.probability-fill');
+        if (probFill) {
+            // Animate the width
+            setTimeout(() => {
+                probFill.style.width = percentage + '%';
+            }, 300);
+        }
+    });
+    
+    // Calculate and display probabilities for main Win Probability section
+    const probDisplayHome = document.querySelector('.prob-display-home');
+    const probDisplayDraw = document.querySelector('.prob-display-draw');
+    const probDisplayAway = document.querySelector('.prob-display-away');
+    
+    if (probDisplayHome && probDisplayDraw && probDisplayAway) {
+        let probHome = parseFloat(probDisplayHome.getAttribute('data-prob'));
+        let probDraw = parseFloat(probDisplayDraw.getAttribute('data-prob'));
+        let probAway = parseFloat(probDisplayAway.getAttribute('data-prob'));
+        
+        // Handle both decimal (0-1) and percentage (0-100) formats
+        // If any prob > 1, they're already in percentage format
+        let homePercentage, drawPercentage, awayPercentage;
+        if (probHome > 1 || probDraw > 1 || probAway > 1) {
+            // Already in percentage format (0-100)
+            homePercentage = Math.round(probHome);
+            drawPercentage = Math.round(probDraw);
+            awayPercentage = Math.round(probAway);
+        } else {
+            // In decimal format (0-1), convert to percentage
+            homePercentage = Math.round(probHome * 100);
+            drawPercentage = Math.round(probDraw * 100);
+            awayPercentage = Math.round(probAway * 100);
+        }
+        
+        // Ensure probabilities sum to 100% (handle rounding errors)
+        const total = homePercentage + drawPercentage + awayPercentage;
+        if (total !== 100 && total > 0) {
+            // Normalize to 100%
+            const factor = 100 / total;
+            homePercentage = Math.round(homePercentage * factor);
+            drawPercentage = Math.round(drawPercentage * factor);
+            awayPercentage = Math.round(awayPercentage * factor);
+            
+            // Fix any remaining rounding error by adjusting the largest value
+            const newTotal = homePercentage + drawPercentage + awayPercentage;
+            if (newTotal !== 100) {
+                const diff = 100 - newTotal;
+                if (homePercentage >= drawPercentage && homePercentage >= awayPercentage) {
+                    homePercentage += diff;
+                } else if (drawPercentage >= homePercentage && drawPercentage >= awayPercentage) {
+                    drawPercentage += diff;
+                } else {
+                    awayPercentage += diff;
+                }
+            }
+        }
+        
+        // Update display
+        probDisplayHome.textContent = homePercentage + '%';
+        probDisplayDraw.textContent = drawPercentage + '%';
+        probDisplayAway.textContent = awayPercentage + '%';
+        
+        // Update progress bars
+        const probBarHome = document.querySelector('.prob-bar-home');
+        const probBarDraw = document.querySelector('.prob-bar-draw');
+        const probBarAway = document.querySelector('.prob-bar-away');
+        
+        setTimeout(() => {
+            if (probBarHome) probBarHome.style.width = homePercentage + '%';
+            if (probBarDraw) probBarDraw.style.width = drawPercentage + '%';
+            if (probBarAway) probBarAway.style.width = awayPercentage + '%';
+        }, 300);
+    }
+    
+    // Clear localStorage when clicking "New Prediction" button
+    const newPredictionBtn = document.getElementById('new-prediction-btn');
+    if (newPredictionBtn) {
+        newPredictionBtn.addEventListener('click', function(e) {
+            e.preventDefault();  // Prevent default navigation
+            
+            // Clear the saved form data from localStorage
+            localStorage.removeItem('form_prediction-form');
+            localStorage.removeItem('lastPrediction');
+            
+            // Clear any session storage
+            sessionStorage.clear();
+            
+            // Navigate to predict page with a fresh flag
+            window.location.href = '/predict/?fresh=true';
+        });
+    }
+    
+    // Also handle the "Make Another Prediction" button at the top
+    const makeAnotherBtn = document.querySelector('a[href*="predictor:predict"]');
+    if (makeAnotherBtn && makeAnotherBtn !== newPredictionBtn) {
+        makeAnotherBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            localStorage.removeItem('form_prediction-form');
+            localStorage.removeItem('lastPrediction');
+            sessionStorage.clear();
+            window.location.href = '/predict/?fresh=true';
+        });
+    }
+});
+</script>
+{% endblock %} 

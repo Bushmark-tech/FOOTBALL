@@ -1,0 +1,1220 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Football Predictor Pro{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>">
+    
+    <!-- Bootstrap 5 CSS - Load with integrity check -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    
+    <!-- Font Awesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    
+    <style>
+        :root {
+            --betika-primary: #00d4aa;
+            --betika-secondary: #ff6b35;
+            --betika-dark: #0a0a0a;
+            --betika-darker: #000000;
+            --betika-card: #1a1a1a;
+            --betika-border: #333333;
+            --betika-text: #ffffff;
+            --betika-text-muted: rgba(255, 255, 255, 0.7);
+            --primary-gradient: linear-gradient(135deg, #00d4aa 0%, #00b894 100%);
+            --secondary-gradient: linear-gradient(135deg, #ff6b35 0%, #ff5722 100%);
+            --accent-gradient: linear-gradient(135deg, #00d4aa 0%, #00b894 100%);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000000;
+            color: #ffffff;
+            line-height: 1.6;
+            min-height: 100vh;
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* Ensure smooth scaling for all elements */
+        html {
+            overflow-x: hidden;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        /* Better row behavior */
+        .row {
+            width: 100%;
+            max-width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* Constrain column widths */
+        [class*="col-"] {
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        
+        /* Betika-Style Navbar */
+        .navbar {
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid #00d4aa;
+            padding: 1rem 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 212, 170, 0.2);
+        }
+        
+        .navbar-brand {
+            color: #00d4aa !important;
+            font-weight: 800;
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 600;
+            padding: 0.5rem 1.5rem !important;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            margin: 0 0.25rem;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .navbar-nav .nav-link:hover {
+            color: #00d4aa !important;
+            background: rgba(0, 212, 170, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .navbar-nav .nav-link.active {
+            background: linear-gradient(135deg, #00d4aa 0%, #00b894 100%);
+            color: #000000 !important;
+            font-weight: 700;
+        }
+        
+        /* Betika-Style Cards */
+        .card {
+            background: #1a1a1a;
+            border-radius: 12px;
+            border: 1px solid #333333;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+            color: #ffffff;
+            overflow: hidden;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        
+        /* Constrain card body */
+        .card-body {
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 212, 170, 0.3);
+            border-color: #00d4aa;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border-bottom: 2px solid #00d4aa;
+            border-radius: 12px 12px 0 0 !important;
+            padding: 1.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.95rem;
+        }
+        
+        /* Enhanced Button Styles */
+        .btn {
+            border-radius: 12px;
+            font-weight: 600;
+            padding: 12px 24px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            letter-spacing: 0.025em;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:active {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4aa 0%, #00b894 100%);
+            color: #000000;
+            box-shadow: 0 4px 15px rgba(0, 212, 170, 0.4);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+            color: #000000;
+            box-shadow: 0 8px 25px rgba(0, 212, 170, 0.6);
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(135deg, #047857 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 8px 25px rgba(5, 150, 105, 0.4);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(217, 119, 6, 0.3);
+        }
+        
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #b45309 0%, #d97706 100%);
+            color: white;
+            box-shadow: 0 8px 25px rgba(217, 119, 6, 0.4);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+        }
+        
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%);
+            color: white;
+            box-shadow: 0 8px 25px rgba(220, 38, 38, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(100, 116, 139, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #475569 0%, #334155 100%);
+            color: white;
+            box-shadow: 0 8px 25px rgba(100, 116, 139, 0.4);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #00d4aa;
+            color: #00d4aa;
+            box-shadow: none;
+        }
+        
+        .btn-outline:hover {
+            background: #00d4aa;
+            color: #000000;
+            box-shadow: 0 8px 25px rgba(0, 212, 170, 0.4);
+        }
+        
+        .btn-lg {
+            padding: 16px 32px;
+            font-size: 1.1rem;
+            border-radius: 16px;
+        }
+        
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            border-radius: 8px;
+        }
+        
+        .btn-icon {
+            padding: 12px;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .btn-group .btn {
+            border-radius: 12px;
+        }
+        
+        .btn-group .btn:first-child {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        
+        .btn-group .btn:last-child {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+        
+        .btn-group .btn:not(:first-child):not(:last-child) {
+            border-radius: 0;
+        }
+        
+        /* Enterprise Hero Section */
+        .hero-section {
+            padding: 120px 0 80px;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--primary-gradient);
+            z-index: -1;
+        }
+        
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="rgba(255,255,255,0.05)" points="0,1000 1000,0 1000,1000"/></svg>');
+            z-index: -1;
+        }
+        
+        /* Advanced Animations */
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Enterprise Progress Bars */
+        .progress {
+            height: 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            border-radius: 8px;
+            background: var(--success-gradient);
+            box-shadow: 0 2px 10px rgba(86, 171, 47, 0.3);
+        }
+        
+        /* Glass Morphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+        }
+        
+        /* Enterprise Typography */
+        .display-4 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 800;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        .lead {
+            font-weight: 400;
+            line-height: 1.8;
+        }
+        
+        /* Betika-Style Forms */
+        .form-control, .form-select {
+            border: 2px solid #333333;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #1a1a1a;
+            color: #ffffff;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #00d4aa;
+            box-shadow: 0 0 0 0.2rem rgba(0, 212, 170, 0.25);
+            background: #1a1a1a;
+            color: #ffffff;
+            outline: none;
+        }
+        
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Enterprise Alerts */
+        .alert {
+            border-radius: 12px;
+            border: none;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-primary {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.9) 0%, rgba(59, 130, 246, 0.9) 100%);
+            color: #ffffff;
+            border: 1px solid rgba(59, 130, 246, 0.5);
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, rgba(5, 150, 105, 0.9) 0%, rgba(16, 185, 129, 0.9) 100%);
+            color: #ffffff;
+            border: 1px solid rgba(16, 185, 129, 0.5);
+        }
+        
+        .alert-warning {
+            background: linear-gradient(135deg, rgba(217, 119, 6, 0.9) 0%, rgba(245, 158, 11, 0.9) 100%);
+            color: #ffffff;
+            border: 1px solid rgba(245, 158, 11, 0.5);
+        }
+        
+        .alert-info {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.9) 0%, rgba(59, 130, 246, 0.9) 100%);
+            color: #ffffff;
+            border: 1px solid rgba(59, 130, 246, 0.5);
+        }
+        
+        /* ============================================
+           COMPREHENSIVE RESPONSIVE DESIGN
+           Mobile-First Approach for All Screen Sizes
+           ============================================ */
+        
+        /* Tablets and Below (768px and below) */
+        @media (max-width: 768px) {
+            /* Navbar improvements */
+            .navbar-brand {
+                font-size: 1.3rem;
+            }
+            
+            .navbar-nav .nav-link {
+                padding: 0.75rem 1rem !important;
+                margin: 0.25rem 0;
+                font-size: 0.95rem;
+            }
+            
+            .navbar-collapse {
+                background: rgba(0, 0, 0, 0.95);
+                padding: 1rem;
+                border-radius: 12px;
+                margin-top: 1rem;
+            }
+            
+            /* Hero section scaling */
+            .hero-section {
+                padding: 60px 20px 40px;
+            }
+            
+            .hero-section h1, .display-4 {
+                font-size: 2rem !important;
+                line-height: 1.3;
+            }
+            
+            .hero-section p, .lead {
+                font-size: 1rem;
+            }
+            
+            /* Button responsiveness */
+            .btn-hero, .btn-secondary-hero {
+                padding: 14px 28px;
+                font-size: 1rem;
+                min-width: auto;
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+            
+            /* Card improvements */
+            .card {
+                margin-bottom: 1.5rem;
+                padding: 1.5rem;
+            }
+            
+            .card-header {
+                padding: 1rem;
+                font-size: 0.9rem;
+            }
+            
+            /* Grid layouts stack on mobile */
+            .stats-grid, .feature-grid, .analytics-grid {
+                grid-template-columns: 1fr !important;
+                gap: 1rem;
+            }
+            
+            /* Team selector responsiveness */
+            .team-selector {
+                grid-template-columns: 1fr !important;
+                gap: 1rem;
+            }
+            
+            .vs-badge {
+                display: none; /* Hide VS badge on mobile */
+            }
+            
+            /* Form controls */
+            .form-control, .form-select {
+                font-size: 1rem;
+                padding: 0.75rem 1rem;
+            }
+            
+            /* Table responsiveness */
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .table {
+                font-size: 0.85rem;
+            }
+            
+            .table thead th {
+                font-size: 0.75rem;
+                padding: 0.75rem 0.5rem;
+                white-space: nowrap;
+            }
+            
+            .table tbody td {
+                padding: 0.75rem 0.5rem;
+            }
+            
+            /* Footer adjustments */
+            footer .row {
+                flex-direction: column;
+            }
+            
+            footer .col-md-6 {
+                width: 100%;
+                margin-bottom: 2rem;
+                text-align: center;
+            }
+            
+            /* Prediction result page */
+            .team-comparison {
+                grid-template-columns: 1fr !important;
+                gap: 1rem;
+            }
+            
+            .score-display {
+                font-size: 1.5rem;
+                padding: 1rem 1.5rem;
+            }
+            
+            /* Analytics cards */
+            .analytics-card {
+                padding: 1.5rem;
+            }
+            
+            .chart-container {
+                height: auto;
+                min-height: 250px;
+                padding: 15px;
+            }
+            
+            /* Form balls - make them smaller on mobile */
+            .form-ball {
+                width: 40px;
+                height: 40px;
+                font-size: 0.95rem;
+            }
+            
+            /* Action buttons */
+            .action-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .btn-action, .btn-secondary {
+                width: 100%;
+                padding: 14px 24px;
+                font-size: 1rem;
+            }
+            
+            /* Prediction header */
+            .prediction-header {
+                padding: 1.5rem 1rem;
+                margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+            }
+            
+            .prediction-header h2 {
+                font-size: 1.5rem;
+            }
+            
+            /* Dashboard metrics */
+            .metric-card {
+                padding: 15px;
+            }
+            
+            .metric-value {
+                font-size: 1.5rem;
+            }
+            
+            .metric-label {
+                font-size: 0.8rem;
+            }
+            
+            /* Ensure text is readable */
+            body {
+                font-size: 16px; /* Prevent iOS zoom on focus */
+            }
+        }
+        
+        /* Small Mobile Devices (576px and below) */
+        @media (max-width: 576px) {
+            /* Extra small screens */
+            .container {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+            
+            .navbar-brand {
+                font-size: 1.1rem;
+            }
+            
+            .navbar-brand i {
+                font-size: 1rem;
+            }
+            
+            /* Hero adjustments */
+            .hero-section {
+                padding: 50px 15px 30px;
+            }
+            
+            .hero-section h1, .display-4 {
+                font-size: 1.75rem !important;
+            }
+            
+            /* Buttons */
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+            
+            .btn-predict {
+                min-width: 100%;
+                padding: 15px 30px;
+                font-size: 1.1rem;
+            }
+            
+            /* Cards */
+            .card, .result-card, .prediction-card {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+            
+            .card-header {
+                padding: 0.75rem;
+            }
+            
+            /* Typography scaling */
+            h1 { font-size: 1.75rem; }
+            h2 { font-size: 1.5rem; }
+            h3 { font-size: 1.25rem; }
+            h4 { font-size: 1.1rem; }
+            h5, h6 { font-size: 1rem; }
+            
+            /* Stats grid */
+            .stats-grid {
+                gap: 0.75rem;
+            }
+            
+            .stat-card {
+                padding: 15px;
+            }
+            
+            .stat-value {
+                font-size: 1.25rem;
+            }
+            
+            .stat-label {
+                font-size: 0.8rem;
+            }
+            
+            /* Team form display */
+            .form-ball {
+                width: 35px;
+                height: 35px;
+                font-size: 0.85rem;
+            }
+            
+            /* Prediction outcome */
+            .prediction-outcome {
+                font-size: 1.75rem !important;
+            }
+            
+            /* Tables */
+            .table {
+                font-size: 0.8rem;
+            }
+            
+            .table thead th,
+            .table tbody td {
+                padding: 0.5rem 0.35rem;
+            }
+            
+            /* Form inputs */
+            .form-control, .form-select {
+                font-size: 16px; /* Prevent iOS zoom */
+                padding: 0.65rem 0.85rem;
+            }
+            
+            .form-label {
+                font-size: 0.85rem;
+            }
+            
+            /* Category selector */
+            .category-selector {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+            
+            /* Model details */
+            .model-details {
+                padding: 15px;
+            }
+            
+            .model-name {
+                font-size: 1rem;
+            }
+            
+            /* Chart containers */
+            .chart-container {
+                padding: 12px;
+                height: auto;
+                min-height: 200px;
+            }
+            
+            .chart-title {
+                font-size: 0.9rem;
+            }
+            
+            /* Social icons in footer */
+            .social-icon-link {
+                width: 38px !important;
+                height: 38px !important;
+            }
+            
+            .social-icon-link i {
+                font-size: 16px !important;
+            }
+            
+            /* Collapsible sections */
+            details summary h4 {
+                font-size: 1rem;
+                flex-wrap: wrap;
+            }
+            
+            details summary h4 span:last-child {
+                position: absolute;
+                right: 15px;
+            }
+            
+            /* Probability bars */
+            .probability-bar {
+                height: 18px;
+                margin: 8px 0;
+            }
+            
+            /* Action buttons full width */
+            .btn-action, .btn-secondary {
+                padding: 12px 20px;
+                font-size: 0.95rem;
+            }
+        }
+        
+        /* Large Tablets (769px to 991px) */
+        @media (min-width: 769px) and (max-width: 991px) {
+            .container {
+                max-width: 720px;
+            }
+            
+            .hero-section h1 {
+                font-size: 2.5rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .feature-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        /* Desktops (992px to 1199px) */
+        @media (min-width: 992px) and (max-width: 1199px) {
+            .container {
+                max-width: 960px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        /* Large Desktops (1200px and above) */
+        @media (min-width: 1200px) {
+            .container {
+                max-width: 1140px;
+                padding-left: 30px;
+                padding-right: 30px;
+            }
+        }
+        
+        /* Extra Large Desktops (1400px and above) */
+        @media (min-width: 1400px) {
+            .container {
+                max-width: 1320px;
+                padding-left: 40px;
+                padding-right: 40px;
+            }
+        }
+        
+        /* Ultra Wide Screens (1600px and above) */
+        @media (min-width: 1600px) {
+            .container {
+                max-width: 1400px;
+                padding-left: 50px;
+                padding-right: 50px;
+            }
+            
+            /* Constrain content for readability */
+            .hero-section .container,
+            .result-card,
+            .prediction-card {
+                max-width: 1200px;
+            }
+        }
+        
+        /* 4K and Ultra Wide (1920px and above) */
+        @media (min-width: 1920px) {
+            .container {
+                max-width: 1500px;
+                padding-left: 60px;
+                padding-right: 60px;
+            }
+            
+            /* Further constrain for optimal reading */
+            .hero-section .container {
+                max-width: 1300px;
+            }
+            
+            .result-card,
+            .prediction-card,
+            .history-card {
+                max-width: 1200px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+        
+        /* Landscape orientation optimizations */
+        @media (max-height: 600px) and (orientation: landscape) {
+            .hero-section {
+                padding: 40px 0 30px;
+            }
+            
+            .btn-hero, .btn-secondary-hero {
+                padding: 12px 24px;
+                font-size: 0.95rem;
+            }
+        }
+        
+        /* Touch device optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            /* Increase touch targets */
+            .btn, .nav-link, .form-control, .form-select {
+                min-height: 44px; /* Apple's recommended touch target */
+            }
+            
+            /* Remove hover effects on touch devices */
+            .card:hover,
+            .btn:hover {
+                transform: none;
+            }
+            
+            /* Make scrollbars visible on touch devices */
+            * {
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+        
+        /* Print styles */
+        @media print {
+            .navbar, footer, .btn, .action-buttons {
+                display: none;
+            }
+            
+            .card, .result-card {
+                box-shadow: none;
+                border: 1px solid #ddd;
+                page-break-inside: avoid;
+            }
+        }
+        
+        /* Loading Animation */
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-gradient);
+            border-radius: 8px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-gradient);
+        }
+        
+        /* Enterprise Footer */
+        footer {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        /* Enterprise Tables */
+        .table {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .table thead th {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border: none;
+            padding: 1rem;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .table tbody tr {
+            transition: all 0.3s ease;
+        }
+        
+        .table tbody tr:hover {
+            background: rgba(102, 126, 234, 0.05);
+            transform: scale(1.01);
+        }
+    </style>
+</head>
+<body>
+    <!-- Enterprise Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'predictor:home' %}">
+                <i class="fas fa-chart-line me-2 floating"></i>Football Predictor Pro
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'predictor:home' %}">
+                            <i class="fas fa-home me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'predictor:predict' %}">
+                            <i class="fas fa-chart-bar me-1"></i>Predictions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'predictor:predict' %}?multi=true">
+                            <i class="fas fa-layer-group me-1"></i>Multi-Match
+                        </a>
+                    </li>
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'predictor:history' %}">
+                                <i class="fas fa-history me-1"></i>History
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'admin:logout' %}">
+                                <i class="fas fa-sign-out-alt me-1"></i>Logout
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'admin:login' %}">
+                                <i class="fas fa-sign-in-alt me-1"></i>Login
+                            </a>
+                        </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'predictor:about' %}">
+                            <i class="fas fa-info-circle me-1"></i>About
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content with Golden Ratio Spacing -->
+    <main style="margin-top: calc(var(--spacing-xl) * var(--phi-inverse)); padding: var(--spacing-md) 0;">
+        {% if messages %}
+            <div class="container mt-4">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show glass" role="alert" data-aos="fade-down">
+                        <i class="fas fa-info-circle me-2"></i>{{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Enterprise Footer with Golden Ratio -->
+    <footer class="text-center text-white py-5 mt-5" style="padding: var(--spacing-xl) 0;">
+        <div class="container">
+            <div class="row golden-two-col" style="grid-template-columns: var(--width-primary) var(--width-secondary);">
+                <div class="col-md-6" style="width: var(--width-primary);">
+                    <h5 class="mb-3">Football Predictor Pro</h5>
+                    <p class="small">Advanced AI-powered football predictions with enterprise-grade analytics</p>
+                </div>
+                <div class="col-md-6" style="width: var(--width-secondary);">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <h5 class="mb-3">Quick Links</h5>
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><a href="{% url 'predictor:predict' %}" class="text-white-50 text-decoration-none">Make Prediction</a></li>
+                                <li><a href="{% url 'predictor:about' %}" class="text-white-50 text-decoration-none">About Platform</a></li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="mb-3">Connect With Us</h5>
+                            <div class="d-flex justify-content-md-start justify-content-center gap-3">
+                                <!-- Twitter Icon -->
+                                <a href="https://twitter.com" 
+                                   target="_blank" 
+                                   rel="noopener noreferrer" 
+                                   class="social-icon-link"
+                                   style="display: inline-flex; 
+                                          align-items: center; 
+                                          justify-content: center; 
+                                          width: 42px; 
+                                          height: 42px; 
+                                          border-radius: 50%; 
+                                          background: linear-gradient(135deg, #1DA1F2 0%, #0d8bd9 100%); 
+                                          color: white; 
+                                          text-decoration: none; 
+                                          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+                                          box-shadow: 0 4px 12px rgba(29, 161, 242, 0.3);"
+                                   onmouseover="this.style.transform='translateY(-4px) scale(1.08)'; this.style.boxShadow='0 6px 20px rgba(29, 161, 242, 0.5)';"
+                                   onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 4px 12px rgba(29, 161, 242, 0.3)';"
+                                   aria-label="Follow us on Twitter">
+                                    <i class="fab fa-twitter" style="font-size: 18px;"></i>
+                                </a>
+                                
+                                <!-- LinkedIn Icon -->
+                                <a href="https://linkedin.com" 
+                                   target="_blank" 
+                                   rel="noopener noreferrer" 
+                                   class="social-icon-link"
+                                   style="display: inline-flex; 
+                                          align-items: center; 
+                                          justify-content: center; 
+                                          width: 42px; 
+                                          height: 42px; 
+                                          border-radius: 50%; 
+                                          background: linear-gradient(135deg, #0077B5 0%, #005582 100%); 
+                                          color: white; 
+                                          text-decoration: none; 
+                                          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+                                          box-shadow: 0 4px 12px rgba(0, 119, 181, 0.3);"
+                                   onmouseover="this.style.transform='translateY(-4px) scale(1.08)'; this.style.boxShadow='0 6px 20px rgba(0, 119, 181, 0.5)';"
+                                   onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 4px 12px rgba(0, 119, 181, 0.3)';"
+                                   aria-label="Connect on LinkedIn">
+                                    <i class="fab fa-linkedin-in" style="font-size: 18px;"></i>
+                                </a>
+                                
+                                <!-- GitHub Icon -->
+                                <a href="https://github.com" 
+                                   target="_blank" 
+                                   rel="noopener noreferrer" 
+                                   class="social-icon-link"
+                                   style="display: inline-flex; 
+                                          align-items: center; 
+                                          justify-content: center; 
+                                          width: 42px; 
+                                          height: 42px; 
+                                          border-radius: 50%; 
+                                          background: linear-gradient(135deg, #333 0%, #1a1a1a 100%); 
+                                          color: white; 
+                                          text-decoration: none; 
+                                          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+                                          box-shadow: 0 4px 12px rgba(51, 51, 51, 0.3);"
+                                   onmouseover="this.style.transform='translateY(-4px) scale(1.08)'; this.style.boxShadow='0 6px 20px rgba(51, 51, 51, 0.5)';"
+                                   onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 4px 12px rgba(51, 51, 51, 0.3)';"
+                                   aria-label="View on GitHub">
+                                    <i class="fab fa-github" style="font-size: 18px;"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4" style="margin: var(--spacing-md) 0;">
+            <p class="mb-0">&copy; 2024 Football Predictor Pro. Enterprise-grade football analytics platform.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle - Load with integrity check -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="{% static 'js/app.js' %}"></script>
+    
+    <script>
+        // Initialize AOS animations
+        AOS.init({
+            duration: 1000,
+            once: true,
+            offset: 100
+        });
+        
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.style.background = 'rgba(15, 23, 42, 0.98)';
+                navbar.style.backdropFilter = 'blur(25px)';
+            } else {
+                navbar.style.background = 'rgba(15, 23, 42, 0.95)';
+                navbar.style.backdropFilter = 'blur(20px)';
+            }
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

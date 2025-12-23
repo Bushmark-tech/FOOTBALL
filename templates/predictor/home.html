@@ -1,0 +1,1292 @@
+{% extends 'predictor/base.html' %}
+{% load static %}
+
+{% block title %}Football Predictor Pro - Enterprise Analytics Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+        color: white;
+        padding: var(--spacing-xl) calc(var(--spacing-xl) * var(--phi-inverse)) 0;
+        text-align: center;
+        border-bottom: calc(3px * var(--phi-inverse)) solid #00d4aa;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+        gap: var(--spacing-md);
+        margin: var(--spacing-lg) 0;
+        width: 100%;
+        max-width: 100%;
+        transition: gap 0.3s ease;
+    }
+    
+    .stat-card {
+        background: #1a1a1a;
+        border-radius: var(--border-radius-lg);
+        padding: var(--spacing-md);
+        box-shadow: var(--shadow-md);
+        text-align: center;
+        transition: transform calc(0.3s * var(--phi-inverse)) ease;
+        border: calc(1px * var(--phi-inverse)) solid #333333;
+        color: #ffffff;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0, 212, 170, 0.3);
+        border-color: #00d4aa;
+    }
+    
+    .stat-number {
+        font-size: var(--font-lg);
+        font-weight: bold;
+        color: #00d4aa;
+        margin-bottom: var(--spacing-sm);
+        line-height: calc(var(--font-lg) * var(--phi));
+    }
+    
+    .stat-label {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: var(--font-base);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: calc(0.5px * var(--phi-inverse));
+    }
+    
+    .chart-container {
+        background: #1a1a1a;
+        border-radius: var(--border-radius-lg);
+        padding: var(--spacing-lg);
+        border: calc(1px * var(--phi-inverse)) solid #333333;
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    .chart-container h3 {
+        color: #ffffff;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+        gap: var(--spacing-lg);
+        margin: var(--spacing-lg) 0;
+        width: 100%;
+        max-width: 100%;
+        transition: gap 0.3s ease;
+    }
+    
+    .feature-card {
+        background: #fff7ed;
+        border-radius: var(--border-radius-xl);
+        padding: var(--spacing-lg);
+        box-shadow: var(--shadow-md);
+        transition: all calc(0.3s * var(--phi-inverse)) ease;
+        border: calc(2px * var(--phi-inverse)) solid #fed7aa;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(calc(-8px * var(--phi-inverse)));
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .feature-icon {
+        font-size: var(--font-xl);
+        margin-bottom: var(--spacing-md);
+        color: #92400e;
+    }
+    
+    .cta-section {
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        color: white;
+        padding: var(--spacing-xl) 0;
+        text-align: center;
+        margin-top: var(--spacing-xl);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+        border: none;
+        padding: 15px 40px;
+        border-radius: 8px;
+        color: white;
+        font-size: 1.1rem;
+        font-weight: bold;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-block;
+        box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(220, 38, 38, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .chart-container {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        margin: 30px 0;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .prediction-accuracy {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 16px;
+        margin: 30px 0;
+    }
+    
+    .dashboard-header {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        color: white;
+        padding: 40px 0;
+        margin-bottom: 40px;
+    }
+    
+    .metric-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        border-left: 4px solid #667eea;
+        transition: all 0.3s ease;
+    }
+    
+    .metric-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    }
+    
+    .metric-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1e3a8a;
+    }
+    
+    .metric-label {
+        color: #64748b;
+        font-weight: 500;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .recent-predictions {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .prediction-item {
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        background: #f8fafc;
+        border-left: 4px solid #667eea;
+        transition: all 0.3s ease;
+    }
+    
+    .prediction-item:hover {
+        background: #f1f5f9;
+        transform: translateX(5px);
+    }
+    
+    .accuracy-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .accuracy-high { background: #dcfce7; color: #166534; }
+    .accuracy-medium { background: #fef3c7; color: #92400e; }
+    .accuracy-low { background: #fee2e2; color: #991b1b; }
+
+    .table {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e2e8f0;
+    }
+    
+    .table thead th {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border: none;
+        padding: 1rem;
+        font-weight: 600;
+        color: #374151;
+        white-space: nowrap;
+    }
+    
+    .table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    
+    .table tbody tr:hover {
+        background: rgba(102, 126, 234, 0.05);
+        transform: scale(1.01);
+    }
+    
+    .table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+    
+    .prediction-date {
+        color: #1e3a8a;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    
+    .team-name {
+        font-weight: 600;
+        color: #374151;
+        font-size: 0.95rem;
+    }
+    
+    /* Beautiful Star-based Outcome Badges */
+    .outcome-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .outcome-label {
+        display: inline-flex;
+        align-items: center;
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        animation: fadeInScale 0.5s ease-out;
+    }
+    
+    .outcome-label:hover {
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+    
+    .outcome-label.home-win {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+    
+    .outcome-label.home-win i {
+        color: #ffd700;
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        animation: starTwinkle 2s ease-in-out infinite;
+    }
+    
+    .outcome-label.away-win {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+    }
+    
+    .outcome-label.away-win i {
+        color: #ffd700;
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        animation: starTwinkle 2s ease-in-out infinite 0.3s;
+    }
+    
+    .outcome-label.draw {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+    }
+    
+    .outcome-label.draw i {
+        color: #ffd700;
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        animation: starTwinkle 2s ease-in-out infinite 0.6s;
+    }
+    
+    .outcome-label i.fa-star {
+        margin-right: 2px;
+        font-size: 0.85rem;
+    }
+    
+    @keyframes starTwinkle {
+        0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 0.6;
+            transform: scale(0.9);
+        }
+    }
+    
+    @keyframes fadeInScale {
+        from {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    
+    .empty-state {
+        color: #64748b;
+    }
+    
+    .empty-icon {
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .cta-buttons {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        margin-top: 30px;
+        flex-wrap: wrap;
+    }
+    
+    .btn-hero {
+        background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+        color: white;
+        padding: 18px 40px;
+        border-radius: 16px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 8px 25px rgba(220, 38, 38, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .btn-hero:hover::before {
+        left: 100%;
+    }
+    
+    .btn-hero:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 35px rgba(220, 38, 38, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-hero:active {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(220, 38, 38, 0.3);
+    }
+    
+    .btn-secondary-hero {
+        background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+        color: white;
+        padding: 18px 40px;
+        border-radius: 16px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 8px 25px rgba(100, 116, 139, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-secondary-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .btn-secondary-hero:hover::before {
+        left: 100%;
+    }
+    
+    .btn-secondary-hero:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 35px rgba(100, 116, 139, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-secondary-hero:active {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(100, 116, 139, 0.3);
+    }
+    
+    /* ============================================
+       HOME/DASHBOARD RESPONSIVE ENHANCEMENTS
+       ============================================ */
+    
+    /* Tablets and Below (768px and below) */
+    @media (max-width: 768px) {
+        .hero-section {
+            padding: 60px 20px 40px;
+        }
+        
+        .hero-section .display-4 {
+            font-size: 1.75rem;
+        }
+        
+        .hero-section .lead {
+            font-size: 0.95rem;
+        }
+        
+        .cta-buttons {
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .btn-hero, .btn-secondary-hero {
+            width: 100%;
+            max-width: 100%;
+            padding: 14px 28px;
+            font-size: 1rem;
+            border-radius: 12px;
+        }
+        
+        .btn-hero i, .btn-secondary-hero i {
+            font-size: 1rem;
+        }
+        
+        /* Dashboard header */
+        .dashboard-header {
+            padding: 25px 0;
+            margin-bottom: 25px;
+        }
+        
+        .dashboard-header .row {
+            flex-direction: column;
+        }
+        
+        .dashboard-header .col-md-8,
+        .dashboard-header .col-md-4 {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .dashboard-header h2 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .dashboard-header p {
+            font-size: 0.9rem;
+        }
+        
+        .dashboard-header .d-flex {
+            justify-content: center !important;
+        }
+        
+        .dashboard-header .h4 {
+            font-size: 1.25rem;
+        }
+        
+        /* Metrics */
+        .metric-card {
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .metric-value {
+            font-size: 1.5rem;
+        }
+        
+        .metric-label {
+            font-size: 0.8rem;
+        }
+        
+        /* Recent predictions */
+        .recent-predictions {
+            padding: 20px;
+        }
+        
+        .recent-predictions h3 {
+            font-size: 1.25rem;
+        }
+        
+        .recent-predictions .d-flex {
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .recent-predictions .btn {
+            width: 100%;
+        }
+        
+        /* Table */
+        .table {
+            font-size: 0.85rem;
+        }
+        
+        .table thead th {
+            font-size: 0.75rem;
+            padding: 0.75rem 0.5rem;
+        }
+        
+        .table tbody td {
+            padding: 0.75rem 0.5rem;
+        }
+        
+        .prediction-date {
+            font-size: 0.85rem;
+        }
+        
+        .team-name {
+            font-size: 0.85rem;
+        }
+        
+        .outcome-label {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+        
+        .outcome-label i {
+            font-size: 0.7rem;
+            margin-right: 1px;
+        }
+        
+        /* Empty state */
+        .empty-state .empty-icon i {
+            font-size: 3rem !important;
+        }
+        
+        .empty-state h4 {
+            font-size: 1.1rem;
+        }
+        
+        .empty-state p {
+            font-size: 0.9rem;
+        }
+        
+        /* Feature cards */
+        .feature-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .feature-card {
+            padding: 20px;
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+        }
+        
+        .feature-card h4 {
+            font-size: 1.1rem;
+        }
+        
+        .feature-card p {
+            font-size: 0.9rem;
+        }
+        
+        /* CTA section */
+        .cta-section {
+            padding: 40px 20px;
+            margin-top: 40px;
+        }
+        
+        .cta-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .cta-section .lead {
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+        }
+        
+        .cta-section .btn-primary {
+            padding: 14px 32px;
+            font-size: 1rem;
+        }
+        
+        /* Stats grid */
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .stat-card {
+            padding: 15px;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+        }
+    }
+    
+    /* Small Mobile (576px and below) */
+    @media (max-width: 576px) {
+        .hero-section {
+            padding: 50px 15px 30px;
+        }
+        
+        .hero-section .display-4 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .hero-section .lead {
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+        
+        .cta-buttons {
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .btn-hero, .btn-secondary-hero {
+            padding: 12px 24px;
+            font-size: 0.95rem;
+            border-radius: 10px;
+        }
+        
+        /* Dashboard header */
+        .dashboard-header {
+            padding: 20px 15px;
+            margin-bottom: 20px;
+        }
+        
+        .dashboard-header h2 {
+            font-size: 1.25rem;
+        }
+        
+        .dashboard-header p {
+            font-size: 0.85rem;
+        }
+        
+        .dashboard-header .h4 {
+            font-size: 1.1rem;
+        }
+        
+        .dashboard-header small {
+            font-size: 0.75rem;
+        }
+        
+        /* Metrics - stack vertically on small screens */
+        .container > .row {
+            margin: 0 -10px;
+        }
+        
+        .container > .row > [class*="col-"] {
+            padding: 0 10px;
+        }
+        
+        .metric-card {
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .metric-value {
+            font-size: 1.25rem;
+        }
+        
+        .metric-label {
+            font-size: 0.75rem;
+        }
+        
+        /* Recent predictions */
+        .recent-predictions {
+            padding: 15px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .recent-predictions h3 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+        
+        /* Table - very compact on small screens */
+        .table-responsive {
+            margin: 0 -15px;
+            padding: 0 15px;
+        }
+        
+        .table {
+            font-size: 0.8rem;
+        }
+        
+        .table thead th {
+            font-size: 0.7rem;
+            padding: 0.6rem 0.4rem;
+            white-space: nowrap;
+        }
+        
+        .table tbody td {
+            padding: 0.6rem 0.4rem;
+        }
+        
+        .prediction-date {
+            font-size: 0.75rem;
+        }
+        
+        .prediction-date + small {
+            font-size: 0.65rem;
+        }
+        
+        .team-name {
+            font-size: 0.8rem;
+        }
+        
+        .text-muted[style*="font-size: 0.8rem"] {
+            font-size: 0.7rem !important;
+        }
+        
+        .outcome-label {
+            padding: 4px 8px;
+            font-size: 0.7rem;
+            border-radius: 8px;
+        }
+        
+        .outcome-label i {
+            font-size: 0.6rem;
+            margin-right: 0;
+        }
+        
+        .outcome-label .ms-2 {
+            margin-left: 4px !important;
+        }
+        
+        /* Empty state */
+        .empty-state {
+            padding: 30px 15px;
+        }
+        
+        .empty-state .empty-icon i {
+            font-size: 2.5rem !important;
+        }
+        
+        .empty-state h4 {
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+        
+        .empty-state p {
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+        }
+        
+        .empty-state .btn {
+            padding: 12px 24px;
+            font-size: 0.95rem;
+        }
+        
+        /* Feature cards */
+        .feature-grid {
+            gap: 15px;
+        }
+        
+        .feature-card {
+            padding: 15px;
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+        
+        .feature-icon i {
+            font-size: 2rem;
+        }
+        
+        .feature-card h4 {
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+        
+        .feature-card p {
+            font-size: 0.85rem;
+            margin-bottom: 0;
+        }
+        
+        /* CTA section */
+        .cta-section {
+            padding: 30px 15px;
+            margin-top: 30px;
+        }
+        
+        .cta-section h2 {
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+        }
+        
+        .cta-section .lead {
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+        }
+        
+        .cta-section .btn-primary {
+            padding: 12px 28px;
+            font-size: 0.95rem;
+        }
+        
+        /* Stats grid - single column on very small screens */
+        .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        
+        .stat-card {
+            padding: 12px;
+        }
+        
+        .stat-number {
+            font-size: 1.25rem;
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+        }
+        
+        /* Platform features section */
+        .container.mt-5 {
+            margin-top: 2rem !important;
+        }
+        
+        .container h2 {
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+        }
+    }
+    
+    /* Landscape phones */
+    @media (max-height: 500px) and (orientation: landscape) {
+        .hero-section {
+            padding: 30px 20px 20px;
+        }
+        
+        .btn-hero, .btn-secondary-hero {
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
+        
+        .dashboard-header {
+            padding: 20px 0;
+        }
+    }
+    
+    /* Two column grid for medium tablets */
+    @media (min-width: 577px) and (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .feature-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .container > .row > .col-md-3 {
+            flex: 0 0 50%;
+            max-width: 50%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <h1 class="display-4 mb-4">Professional Football Analytics Platform</h1>
+        <p class="lead mb-4">Advanced AI-powered predictions with enterprise-grade analytics and real-time insights</p>
+        <div class="cta-buttons">
+            <a href="{% url 'predictor:predict' %}" class="btn-hero">
+                <i class="fas fa-play-circle"></i>
+                Start Predicting
+            </a>
+            <a href="{% url 'predictor:predict' %}" class="btn-secondary-hero">
+                <i class="fas fa-info-circle"></i>
+                Learn More
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Dashboard Header with Golden Ratio -->
+<section class="dashboard-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2 class="mb-3">Analytics Dashboard</h2>
+                <p class="mb-0">Comprehensive overview of prediction performance and platform metrics</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="d-flex justify-content-end gap-3">
+                    <div class="text-center">
+                        <div class="h4 mb-0">{{ accuracy_rate }}%</div>
+                        <small>Accuracy Rate</small>
+                    </div>
+                    <div class="text-center">
+                        <div class="h4 mb-0">{{ total_predictions|floatformat:0 }}</div>
+                        <small>Your Predictions</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Key Metrics with Golden Ratio -->
+<section class="container">
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="metric-card">
+                <div class="metric-value" id="total-predictions">{{ total_predictions|floatformat:0 }}</div>
+                <div class="metric-label">Your Predictions</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="metric-card">
+                <div class="metric-value" id="accuracy-rate">{{ accuracy_rate }}%</div>
+                <div class="metric-label">Accuracy Rate</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="metric-card">
+                <div class="metric-value" id="teams-covered">{{ teams_covered }}+</div>
+                <div class="metric-label">Teams Covered</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="metric-card">
+                <div class="metric-value" id="leagues">{{ leagues_supported }}+</div>
+                <div class="metric-label">Leagues Supported</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Recent Predictions Table -->
+<section class="container mt-5 mb-5">
+    <div class="recent-predictions">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3><i class="fas fa-history me-2"></i>Your Recent Predictions</h3>
+            <a href="{% url 'predictor:history' %}" class="btn btn-outline-primary">
+                <i class="fas fa-list me-2"></i>View All History
+            </a>
+        </div>
+        
+        {% if recent_predictions %}
+            <!-- Rich Prediction Cards -->
+            <div class="predictions-cards-container">
+                {% for prediction in recent_predictions %}
+                {% comment %} Determine outcome and colors {% endcomment %}
+                {% if prediction.outcome == "Home" %}
+                    {% with outcome_text=prediction.home_team|upper|add:" WIN" outcome_color="#00d4aa" outcome_icon="🏆" %}
+                {% elif prediction.outcome == "Away" %}
+                    {% with outcome_text=prediction.away_team|upper|add:" WIN" outcome_color="#ff6b35" outcome_icon="🏆" %}
+                {% elif prediction.outcome == "1X" %}
+                    {% with outcome_text=prediction.home_team|upper|add:" OR DRAW" outcome_color="#3b82f6" outcome_icon="🤝" %}
+                {% elif prediction.outcome == "X2" %}
+                    {% with outcome_text="DRAW OR "|add:prediction.away_team|upper outcome_color="#3b82f6" outcome_icon="🤝" %}
+                {% elif prediction.outcome == "12" %}
+                    {% with outcome_text=prediction.home_team|upper|add:" OR "|add:prediction.away_team|upper outcome_color="#3b82f6" outcome_icon="⚔️" %}
+                {% else %}
+                    {% with outcome_text="DRAW" outcome_color="#f59e0b" outcome_icon="🤝" %}
+                {% endif %}
+                
+                <div class="prediction-card-dashboard" style="background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%); border: 2px solid {{ outcome_color }}; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);">
+                    <!-- Header -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                        <h4 style="color: #ffffff; margin: 0; font-size: 1.3rem;">
+                            {{ outcome_icon }} <strong>{{ prediction.home_team }}</strong> vs <strong>{{ prediction.away_team }}</strong>
+                        </h4>
+                        <div style="color: #94a3b8; font-size: 0.9rem;">
+                            <i class="fas fa-clock me-1"></i>{{ prediction.prediction_date|date:"d/m/Y, H:i:s" }}
+                        </div>
+                    </div>
+                    
+                    <!-- Score and Outcome -->
+                    <div style="text-align: center; margin: 25px 0; padding: 20px; background: rgba(0, 0, 0, 0.3); border-radius: 12px;">
+                        <div style="font-size: 2.5rem; font-weight: 900; color: #ffffff; margin-bottom: 15px;">
+                            {{ prediction.home_score }} - {{ prediction.away_score }}
+                        </div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: {{ outcome_color }};">
+                            {{ outcome_text }}
+                        </div>
+                    </div>
+                    
+                    <!-- Win Probability Bars -->
+                    {% if prediction.prob_home or prediction.prob_draw or prediction.prob_away %}
+                    <div style="margin: 25px 0;">
+                        <h5 style="color: #00d4aa; margin-bottom: 15px; text-align: center; font-size: 1.1rem;">
+                            <i class="fas fa-chart-bar me-2"></i>Win Probability
+                        </h5>
+                        
+                        {% comment %} Calculate percentages - handle both decimal (0-1) and percentage (0-100) formats {% endcomment %}
+                        {% widthratio prediction.prob_home 1 100 as prob_home_pct %}
+                        {% widthratio prediction.prob_draw 1 100 as prob_draw_pct %}
+                        {% widthratio prediction.prob_away 1 100 as prob_away_pct %}
+                        
+                        {% if prob_home_pct > 100 %}
+                            {% comment %} Already in percentage format {% endcomment %}
+                            {% widthratio prediction.prob_home 1 1 as prob_home_display %}
+                            {% widthratio prediction.prob_draw 1 1 as prob_draw_display %}
+                            {% widthratio prediction.prob_away 1 1 as prob_away_display %}
+                        {% else %}
+                            {% comment %} In decimal format, use calculated percentages {% endcomment %}
+                            {% with prob_home_display=prob_home_pct prob_draw_display=prob_draw_pct prob_away_display=prob_away_pct %}
+                        {% endif %}
+                        
+                        <!-- Home -->
+                        <div style="margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <span style="color: #ffffff; font-weight: 600;">{{ prediction.home_team }}</span>
+                                <span style="color: #00d4aa; font-weight: 700;">{{ prob_home_display|default:33 }}%</span>
+                            </div>
+                            <div style="background: #333; height: 24px; border-radius: 12px; overflow: hidden;">
+                                <div style="background: linear-gradient(90deg, #00d4aa 0%, #00b894 100%); height: 100%; width: {{ prob_home_display|default:33 }}%; transition: width 0.8s ease;"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Draw -->
+                        <div style="margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <span style="color: #ffffff; font-weight: 600;">Draw</span>
+                                <span style="color: #f59e0b; font-weight: 700;">{{ prob_draw_display|default:34 }}%</span>
+                            </div>
+                            <div style="background: #333; height: 24px; border-radius: 12px; overflow: hidden;">
+                                <div style="background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%); height: 100%; width: {{ prob_draw_display|default:34 }}%; transition: width 0.8s ease;"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Away -->
+                        <div style="margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <span style="color: #ffffff; font-weight: 600;">{{ prediction.away_team }}</span>
+                                <span style="color: #ff6b35; font-weight: 700;">{{ prob_away_display|default:33 }}%</span>
+                            </div>
+                            <div style="background: #333; height: 24px; border-radius: 12px; overflow: hidden;">
+                                <div style="background: linear-gradient(90deg, #ff6b35 0%, #ff5722 100%); height: 100%; width: {{ prob_away_display|default:33 }}%; transition: width 0.8s ease;"></div>
+                            </div>
+                        </div>
+                        
+                        {% if prob_home_pct <= 100 %}
+                            {% endwith %}
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                {% endwith %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state text-center py-5">
+                <div class="empty-icon mb-3">
+                    <i class="fas fa-clipboard-list" style="font-size: 4rem; color: #cbd5e1;"></i>
+                </div>
+                <h4 class="mb-3">No Predictions Yet</h4>
+                <p class="text-muted mb-4">Start making predictions to see them here on your dashboard.</p>
+                <a href="{% url 'predictor:predict' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus me-2"></i>Make Your First Prediction
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Enterprise Features -->
+<section class="container mt-5">
+    <h2 class="text-center mb-5">Platform Features</h2>
+    
+    <div class="feature-grid">
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-brain"></i>
+            </div>
+            <h4>Advanced AI Models</h4>
+            <p>State-of-the-art machine learning algorithms with ensemble methods for maximum accuracy and reliability.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <h4>Real-time Analytics</h4>
+            <p>Live statistics, team form analysis, and head-to-head comparisons with professional insights and trends.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-globe"></i>
+            </div>
+            <h4>Global Coverage</h4>
+            <p>Comprehensive coverage of 25+ leagues worldwide with detailed team and player statistics and performance metrics.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-mobile-alt"></i>
+            </div>
+            <h4>Mobile Optimized</h4>
+            <p>Responsive design that works perfectly on all devices with intuitive user experience and fast loading times.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h4>Secure & Reliable</h4>
+            <p>Enterprise-grade security with encrypted data transmission and reliable infrastructure with 99.9% uptime.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-trending-up"></i>
+            </div>
+            <h4>Performance Tracking</h4>
+            <p>Track your prediction accuracy over time with detailed analytics and improvement insights for continuous optimization.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="cta-section">
+    <div class="container">
+        <h2 class="mb-4">Ready to Make Professional Predictions?</h2>
+        <p class="lead mb-4">Join thousands of users making informed football predictions with our advanced AI platform.</p>
+        <a href="{% url 'predictor:predict' %}" class="btn-primary">Start Predicting Now</a>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Animate statistics
+function animateStats() {
+    const stats = [
+        { element: 'total-predictions', target: {{ total_predictions|default:0 }}, suffix: '' },
+        { element: 'accuracy-rate', target: {{ accuracy_rate|default:75 }}, suffix: '%' },
+        { element: 'teams-covered', target: {{ teams_covered|default:500 }}, suffix: '+' },
+        { element: 'leagues', target: {{ leagues_supported|default:25 }}, suffix: '+' }
+    ];
+    
+    stats.forEach(stat => {
+        const element = document.getElementById(stat.element);
+        if (element) {
+            let current = 0;
+            const increment = stat.target / 50;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= stat.target) {
+                    current = stat.target;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(current) + stat.suffix;
+            }, 50);
+        }
+    });
+}
+
+// Create accuracy chart with white colors
+function createAccuracyChart() {
+    const ctx = document.getElementById('accuracyChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Prediction Accuracy',
+                data: [65, 68, 72, 75, {{ accuracy_rate|default:78 }}, 82],
+                borderColor: '#ffffff',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                tension: 0.4,
+                fill: true,
+                borderWidth: 3,
+                pointBackgroundColor: '#00d4aa',
+                pointBorderColor: '#ffffff',
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        color: '#ffffff'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        color: '#ffffff',
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Initialize everything when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    animateStats();
+});
+</script>
+{% endblock %}

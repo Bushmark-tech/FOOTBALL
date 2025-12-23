@@ -1,0 +1,600 @@
+{% extends 'predictor/base.html' %}
+{% load static %}
+
+{% block title %}Multi-Match Predictions{% endblock %}
+
+{% block extra_css %}
+<style>
+    .prediction-container {
+        background: #000000;
+        min-height: 100vh;
+        padding: 120px 0 40px;
+    }
+    
+    .match-card {
+        background: #1a1a1a;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 1px solid #333333;
+        transition: all 0.3s ease;
+    }
+    
+    .match-card:hover {
+        border-color: #00d4aa;
+        box-shadow: 0 4px 20px rgba(0, 212, 170, 0.2);
+    }
+    
+    .match-card.predicted {
+        border-color: #00d4aa;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+    }
+    
+    .prediction-result {
+        background: #0a0a0a;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+        border: 1px solid #00d4aa;
+        display: none;
+    }
+    
+    .prediction-result.show {
+        display: block;
+        animation: slideDown 0.3s ease;
+    }
+    
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .add-match-btn {
+        background: linear-gradient(135deg, #00d4aa 0%, #00b894 100%);
+        border: none;
+        color: #000;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .add-match-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 212, 170, 0.4);
+    }
+    
+    .remove-match-btn {
+        background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+        border: none;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+    
+    .spinner-border-sm {
+        width: 1rem;
+        height: 1rem;
+        border-width: 0.15em;
+    }
+    
+    .probability-bar {
+        height: 8px;
+        border-radius: 4px;
+        margin: 5px 0;
+        transition: width 0.5s ease;
+    }
+    
+    .prob-home { background: linear-gradient(90deg, #10b981, #059669); }
+    .prob-draw { background: linear-gradient(90deg, #f59e0b, #d97706); }
+    .prob-away { background: linear-gradient(90deg, #3b82f6, #2563eb); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="prediction-container">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h2 class="mb-0">
+                                <i class="fas fa-layer-group me-2"></i>Multi-Match Predictions
+                            </h2>
+                            <a href="{% url 'predictor:predict' %}" class="btn btn-outline btn-sm">
+                                <i class="fas fa-chart-bar me-1"></i>Single Match Mode
+                            </a>
+                        </div>
+                        <p class="mb-0 mt-2" style="opacity: 0.8;">Predict multiple matches without refreshing the page</p>
+                    </div>
+                    <div class="card-body">
+                        {% csrf_token %}
+                        <div id="matches-container">
+                            <!-- Match forms will be added here dynamically -->
+                        </div>
+                        <button type="button" class="add-match-btn" id="add-match-btn">
+                            <i class="fas fa-plus me-2"></i>Add Another Match
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Predictions History Card -->
+                <div class="card">
+                    <div class="card-header" style="background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%); border-bottom: 2px solid #00d4aa;">
+                        <h3 class="mb-0" style="color: #00d4aa; font-size: 1.5rem;">
+                            <i class="fas fa-trophy me-2"></i>Your Match Predictions
+                        </h3>
+                        <p class="mb-0 mt-2" style="color: #94a3b8; font-size: 0.9rem;">
+                            View all your predicted matches with detailed analysis
+                        </p>
+                    </div>
+                    <div class="card-body" style="background: #000000; padding: 30px;">
+                        <div id="predictions-list">
+                            <div style="text-align: center; padding: 60px 20px;">
+                                <div style="font-size: 4rem; color: #333; margin-bottom: 20px;">⚽</div>
+                                <p style="color: #94a3b8; font-size: 1.1rem; margin: 0;">No predictions yet</p>
+                                <p style="color: #64748b; font-size: 0.9rem; margin-top: 10px;">Add matches above and click "Predict Match" to see detailed results here</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// League data structure
+const leaguesData = {
+    'European Leagues': {
+        'Premier League': ['Arsenal', 'Aston Villa', 'Bournemouth', 'Brentford', 'Brighton', 'Chelsea', 'Crystal Palace', 'Everton', 'Fulham', 'Ipswich', 'Leicester', 'Liverpool', 'Man City', 'Man United', 'Newcastle', "Nott'm Forest", 'Southampton', 'Tottenham', 'West Ham', 'Wolves'],
+        'English Championship': ['Blackburn', 'Derby', 'Preston', 'Sheffield United', 'Cardiff', 'Sunderland', 'Hull', 'Bristol City', 'Leeds', 'Portsmouth', 'Middlesbrough', 'Swansea', 'Millwall', 'Watford', 'Oxford', 'Norwich', 'QPR', 'West Brom', 'Stoke', 'Coventry', 'Sheffield Weds', 'Plymouth', 'Luton', 'Burnley'],
+        'Serie A': ['Atalanta', 'Bologna', 'Cagliari', 'Como', 'Empoli', 'Fiorentina', 'Genoa', 'Inter', 'Juventus', 'Lazio', 'Lecce', 'Milan', 'Monza', 'Napoli', 'Parma', 'Roma', 'Torino', 'Udinese', 'Venezia', 'Verona'],
+        'Serie B': ['Bari', 'Brescia', 'Carrarese', 'Catanzaro', 'Cesena', 'Cittadella', 'Cosenza', 'Cremonese', 'Frosinone', 'Juve Stabia', 'Mantova', 'Modena', 'Palermo', 'Pisa', 'Reggiana', 'Salernitana', 'Sampdoria', 'Sassuolo', 'Spezia', 'Sudtirol'],
+        'Ligue1': ['Angers', 'Auxerre', 'Brest', 'Lens', 'Le Havre', 'Lille', 'Lyon', 'Marseille', 'Monaco', 'Montpellier', 'Nantes', 'Nice', 'Paris SG', 'Reims', 'Rennes', 'St Etienne', 'Strasbourg', 'Toulouse'],
+        'Ligue2': ['Ajaccio', 'Rodez', 'Amiens', 'Red Star', 'Clermont', 'Pau FC', 'Dunkerque', 'Annecy', 'Grenoble', 'Laval', 'Guingamp', 'Troyes', 'Caen', 'Paris FC', 'Martigues', 'Lorient', 'Metz', 'Bastia'],
+        'La Liga': ['Alaves', 'Ath Bilbao', 'Ath Madrid', 'Barcelona', 'Betis', 'Celta', 'Espanol', 'Getafe', 'Girona', 'Las Palmas', 'Leganes', 'Mallorca', 'Osasuna', 'Real Madrid', 'Sevilla', 'Sociedad', 'Valencia', 'Valladolid', 'Vallecano', 'Villarreal'],
+        'La Liga2': ['Albacete', 'Almeria', 'Burgos', 'Cadiz', 'Cartagena', 'Castellon', 'Cordoba', 'Eibar', 'Eldense', 'Elche', 'Ferrol', 'Granada', 'Huesca', 'La Coruna', 'Levante', 'Malaga', 'Mirandes', 'Oviedo', 'Santander', 'Sp Gijon', 'Tenerife', 'Zaragoza'],
+        'Eredivisie': ['Ajax', 'Almere City', 'AZ Alkmaar', 'Feyenoord', 'For Sittard', 'Go Ahead Eagles', 'Groningen', 'Heerenveen', 'Heracles', 'NAC Breda', 'Nijmegen', 'PSV Eindhoven', 'Sparta Rotterdam', 'Twente', 'Utrecht', 'Waalwijk', 'Willem II', 'Zwolle'],
+        'Bundesliga': ['Augsburg', 'Bayern Munich', 'Bochum', 'Dortmund', 'Ein Frankfurt', 'Freiburg', 'Heidenheim', 'Hoffenheim', 'Holstein Kiel', 'Leverkusen', 'M\'gladbach', 'Mainz', 'RB Leipzig', 'St Pauli', 'Stuttgart', 'Union Berlin', 'Werder Bremen', 'Wolfsburg'],
+        'Bundesliga2': ['Hamburg', 'Schalke 04', 'Hannover', 'Elversberg', 'Kaiserslautern', 'St Pauli', 'Osnabruck', 'Karlsruhe', 'Wehen', 'Magdeburg', 'Fortuna Dusseldorf', 'Hertha', 'Braunschweig', 'Holstein Kiel', 'Greuther Furth', 'Paderborn', 'Hansa Rostock', 'Nurnberg'],
+        'Scottish League': ['Aberdeen', 'Celtic', 'Dundee', 'Dundee United', 'Hearts', 'Hibernian', 'Kilmarnock', 'Motherwell', 'Rangers', 'Ross County', 'St Johnstone', 'St Mirren'],
+        'Belgium League': ['Anderlecht', 'Antwerp', 'Beerschot VA', 'Cercle Brugge', 'Charleroi', 'Club Brugge', 'Dender', 'Genk', 'Gent', 'Kortrijk', 'Mechelen', 'Oud-Heverlee Leuven', 'St Truiden', 'St. Gilloise', 'Standard', 'Westerlo'],
+        'Portuguese League': ['Arouca', 'AVS', 'Benfica', 'Boavista', 'Casa Pia', 'Estoril', 'Estrela', 'Famalicao', 'Farense', 'Gil Vicente', 'Guimaraes', 'Moreirense', 'Nacional', 'Porto', 'Rio Ave', 'Santa Clara', 'Sp Braga', 'Sp Lisbon'],
+        'Turkish League': ['Ad. Demirspor', 'Alanyaspor', 'Antalyaspor', 'Besiktas', 'Bodrumspor', 'Buyuksehyr', 'Eyupspor', 'Fenerbahce', 'Galatasaray', 'Gaziantep', 'Goztep', 'Hatayspor', 'Kasimpasa', 'Kayserispor', 'Konyaspor', 'Rizespor', 'Samsunspor', 'Sivasspor', 'Trabzonspor'],
+        'Greece League': ['AEK', 'Asteras Tripolis', 'Athens Kallithea', 'Atromitos', 'Lamia', 'Levadeiakos', 'OFI Crete', 'Olympiakos', 'PAOK', 'Panathinaikos', 'Panetolikos', 'Panserraikos', 'Volos NFC', 'Aris']
+    },
+    'Others': {
+        'Switzerland League': ['Basel', 'Grasshoppers', 'Lausanne', 'Lugano', 'Luzern', 'Servette', 'Sion', 'St. Gallen', 'Winterthur', 'Young Boys', 'Yverdon', 'Zurich'],
+        'Denmark League': ['Aarhus', 'Midtjylland', 'Nordsjaelland', 'Aalborg', 'Silkeborg', 'Sonderjyske', 'Vejle', 'Randers FC', 'Viborg', 'Brondby', 'Lyngby', 'FC Copenhagen'],
+        'Austria League': ['Grazer AK', 'Salzburg', 'Altach', 'Tirol', 'Hartberg', 'LASK', 'Wolfsberger AC', 'A. Klagenfurt', 'BW Linz', 'Austria Vienna', 'SK Rapid', 'Sturm Graz'],
+        'Mexico League': ['Puebla', 'Santos Laguna', 'Queretaro', 'Club Tijuana', 'Juarez', 'Atlas', 'Atl. San Luis', 'Club America', 'Guadalajara Chivas', 'Toluca', 'Tigres UANL', 'Necaxa', 'Cruz Azul', 'Mazatlan FC', 'UNAM Pumas', 'Club Leon', 'Pachuca', 'Monterrey'],
+        'Russia League': ['Lokomotiv Moscow', 'Akron Togliatti', 'Krylya Sovetov', 'Zenit', 'Dynamo Moscow', 'Fakel Voronezh', 'FK Rostov', 'CSKA Moscow', 'Orenburg', 'Spartak Moscow', 'Akhmat Grozny', 'Krasnodar', 'Khimki', 'Dynamo Makhachkala', 'Pari NN', 'Rubin Kazan'],
+        'Romania League': ['Farul Constanta', 'Unirea Slobozia', 'FC Hermannstadt', 'Univ. Craiova', 'Sepsi Sf. Gheorghe', 'Poli Iasi', 'UTA Arad', 'FC Rapid Bucuresti', 'FCSB', 'U. Cluj', 'CFR Cluj', 'Din. Bucuresti', 'FC Botosani', 'Otelul', 'Petrolul', 'Gloria Buzau']
+    }
+};
+
+let matchCounter = 0;
+const predictions = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Add first match form
+    addMatchForm();
+    
+    // Add match button handler
+    document.getElementById('add-match-btn').addEventListener('click', addMatchForm);
+});
+
+function addMatchForm() {
+    matchCounter++;
+    const matchId = `match-${matchCounter}`;
+    const container = document.getElementById('matches-container');
+    
+    const matchCard = document.createElement('div');
+    matchCard.className = 'match-card';
+    matchCard.id = matchId;
+    matchCard.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Match ${matchCounter}</h5>
+            <button type="button" class="remove-match-btn" onclick="removeMatch('${matchId}')">
+                <i class="fas fa-times me-1"></i>Remove
+            </button>
+        </div>
+        
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Category</label>
+                <select class="form-control category-select" data-match="${matchId}">
+                    <option value="">Select Category</option>
+                    <option value="European Leagues">European Leagues</option>
+                    <option value="Others">Other Leagues</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">League</label>
+                <select class="form-control league-select" data-match="${matchId}">
+                    <option value="">Select League</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Home Team</label>
+                <select class="form-control home-team-select" data-match="${matchId}">
+                    <option value="">Select Home Team</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Away Team</label>
+                <select class="form-control away-team-select" data-match="${matchId}">
+                    <option value="">Select Away Team</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="text-center mt-3">
+            <button type="button" class="btn btn-primary predict-btn" data-match="${matchId}" onclick="predictMatch('${matchId}')">
+                <i class="fas fa-magic me-2"></i>Predict Match
+            </button>
+        </div>
+        
+        <div class="prediction-result" id="${matchId}-result"></div>
+    `;
+    
+    container.appendChild(matchCard);
+    
+    // Setup event listeners for this match form
+    setupMatchFormListeners(matchId);
+}
+
+function setupMatchFormListeners(matchId) {
+    const categorySelect = document.querySelector(`.category-select[data-match="${matchId}"]`);
+    const leagueSelect = document.querySelector(`.league-select[data-match="${matchId}"]`);
+    const homeTeamSelect = document.querySelector(`.home-team-select[data-match="${matchId}"]`);
+    const awayTeamSelect = document.querySelector(`.away-team-select[data-match="${matchId}"]`);
+    
+    categorySelect.addEventListener('change', function() {
+        const category = this.value;
+        leagueSelect.innerHTML = '<option value="">Select League</option>';
+        homeTeamSelect.innerHTML = '<option value="">Select Home Team</option>';
+        awayTeamSelect.innerHTML = '<option value="">Select Away Team</option>';
+        
+        if (category && leaguesData[category]) {
+            Object.keys(leaguesData[category]).forEach(league => {
+                const option = document.createElement('option');
+                option.value = league;
+                option.textContent = league;
+                leagueSelect.appendChild(option);
+            });
+        }
+    });
+    
+    leagueSelect.addEventListener('change', function() {
+        const category = categorySelect.value;
+        const league = this.value;
+        homeTeamSelect.innerHTML = '<option value="">Select Home Team</option>';
+        awayTeamSelect.innerHTML = '<option value="">Select Away Team</option>';
+        
+        if (category && league && leaguesData[category] && leaguesData[category][league]) {
+            const teams = leaguesData[category][league];
+            
+            // Optimize: Use DocumentFragment to batch DOM operations
+            const homeFragment = document.createDocumentFragment();
+            const awayFragment = document.createDocumentFragment();
+            
+            teams.forEach(team => {
+                const homeOption = document.createElement('option');
+                homeOption.value = team;
+                homeOption.textContent = team;
+                homeFragment.appendChild(homeOption);
+                
+                const awayOption = document.createElement('option');
+                awayOption.value = team;
+                awayOption.textContent = team;
+                awayFragment.appendChild(awayOption);
+            });
+            
+            // Batch append to DOM (much faster)
+            homeTeamSelect.appendChild(homeFragment);
+            awayTeamSelect.appendChild(awayFragment);
+        }
+    });
+}
+
+function removeMatch(matchId) {
+    const matchCard = document.getElementById(matchId);
+    if (matchCard) {
+        matchCard.remove();
+        // Remove from predictions list if exists
+        const predictionIndex = predictions.findIndex(p => p.matchId === matchId);
+        if (predictionIndex !== -1) {
+            predictions.splice(predictionIndex, 1);
+            updatePredictionsList();
+        }
+    }
+}
+
+async function predictMatch(matchId) {
+    const categorySelect = document.querySelector(`.category-select[data-match="${matchId}"]`);
+    const leagueSelect = document.querySelector(`.league-select[data-match="${matchId}"]`);
+    const homeTeamSelect = document.querySelector(`.home-team-select[data-match="${matchId}"]`);
+    const awayTeamSelect = document.querySelector(`.away-team-select[data-match="${matchId}"]`);
+    const predictBtn = document.querySelector(`.predict-btn[data-match="${matchId}"]`);
+    const resultDiv = document.getElementById(`${matchId}-result`);
+    const matchCard = document.getElementById(matchId);
+    
+    const homeTeam = homeTeamSelect.value;
+    const awayTeam = awayTeamSelect.value;
+    const category = categorySelect.value;
+    const league = leagueSelect.value;
+    
+    if (!homeTeam || !awayTeam) {
+        alert('Please select both teams');
+        return;
+    }
+    
+    if (homeTeam === awayTeam) {
+        alert('Home team and away team must be different');
+        return;
+    }
+    
+    // Show loading state
+    predictBtn.disabled = true;
+    predictBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Predicting...';
+    resultDiv.style.display = 'none';
+    
+    try {
+        const formData = new FormData();
+        formData.append('home_team', homeTeam);
+        formData.append('away_team', awayTeam);
+        formData.append('category', category);
+        formData.append('league', league);
+        // Get CSRF token from cookie or hidden input
+        let csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (!csrfToken) {
+            // Try to get from cookie
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [name, value] = cookie.trim().split('=');
+                if (name === 'csrftoken') {
+                    formData.append('csrfmiddlewaretoken', value);
+                    break;
+                }
+            }
+        } else {
+            formData.append('csrfmiddlewaretoken', csrfToken.value);
+        }
+        
+        const response = await fetch('{% url "predictor:api_predict" %}', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        // Display result with historical probabilities
+        const probs = data.probabilities || {};
+        const probHome = (probs.Home || probs[0] || 0.33) * 100;
+        const probDraw = (probs.Draw || probs[1] || 0.34) * 100;
+        const probAway = (probs.Away || probs[2] || 0.33) * 100;
+        
+        // Determine winning team name
+        let winnerText = '';
+        if (data.outcome === 'Home') {
+            winnerText = `${homeTeam} Win`;
+        } else if (data.outcome === 'Away') {
+            winnerText = `${awayTeam} Win`;
+        } else {
+            winnerText = 'Draw';
+        }
+        
+        resultDiv.innerHTML = `
+            <div class="text-center">
+                <h5 class="text-success mb-3">
+                    <i class="fas fa-check-circle me-2"></i>Prediction Complete
+                </h5>
+                <h4 class="mb-3">${homeTeam} vs ${awayTeam}</h4>
+                <div class="mb-3" style="font-size: 2rem; font-weight: bold;">
+                    ${data.home_score} - ${data.away_score}
+                </div>
+                <div class="mb-4" style="font-size: 1.5rem; font-weight: bold; color: #00d4aa;">
+                    ${winnerText}
+                </div>
+                
+                <!-- Historical Probabilities -->
+                <div class="mt-4" style="border-top: 1px solid #333; padding-top: 15px;">
+                    <h6 class="mb-3" style="color: #00d4aa;">Historical Probabilities</h6>
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div style="color: #10b981; font-weight: 600;">${probHome.toFixed(1)}%</div>
+                            <div style="font-size: 0.85rem; color: #888;">Home Win</div>
+                            <div class="probability-bar prob-home" style="width: ${probHome}%; margin: 8px auto;"></div>
+                        </div>
+                        <div class="col-4">
+                            <div style="color: #f59e0b; font-weight: 600;">${probDraw.toFixed(1)}%</div>
+                            <div style="font-size: 0.85rem; color: #888;">Draw</div>
+                            <div class="probability-bar prob-draw" style="width: ${probDraw}%; margin: 8px auto;"></div>
+                        </div>
+                        <div class="col-4">
+                            <div style="color: #3b82f6; font-weight: 600;">${probAway.toFixed(1)}%</div>
+                            <div style="font-size: 0.85rem; color: #888;">Away Win</div>
+                            <div class="probability-bar prob-away" style="width: ${probAway}%; margin: 8px auto;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        resultDiv.classList.add('show');
+        matchCard.classList.add('predicted');
+        
+        // Add to predictions list
+        predictions.push({
+            matchId: matchId,
+            homeTeam: homeTeam,
+            awayTeam: awayTeam,
+            homeScore: data.home_score,
+            awayScore: data.away_score,
+            outcome: data.outcome,
+            probabilities: { home: probHome, draw: probDraw, away: probAway },
+            confidence: data.model1_confidence,
+            timestamp: new Date().toLocaleString()
+        });
+        
+        updatePredictionsList();
+        
+    } catch (error) {
+        console.error('Prediction error:', error);
+        resultDiv.innerHTML = `
+            <div class="alert alert-danger mb-0">
+                <i class="fas fa-exclamation-circle me-2"></i>Error: ${error.message}
+            </div>
+        `;
+        resultDiv.classList.add('show');
+    } finally {
+        predictBtn.disabled = false;
+        predictBtn.innerHTML = '<i class="fas fa-magic me-2"></i>Predict Match';
+    }
+}
+
+function updatePredictionsList() {
+    const listDiv = document.getElementById('predictions-list');
+    
+    if (predictions.length === 0) {
+        listDiv.innerHTML = '<p class="text-muted text-center">No predictions yet. Add matches and predict above.</p>';
+        return;
+    }
+    
+    let html = '';
+    
+    predictions.forEach((pred, index) => {
+        const probHome = pred.probabilities?.home || 0;
+        const probDraw = pred.probabilities?.draw || 0;
+        const probAway = pred.probabilities?.away || 0;
+        
+        // Determine outcome display text
+        let outcomeText = '';
+        let outcomeColor = '';
+        let outcomeIcon = '';
+        
+        if (pred.outcome === 'Home') {
+            outcomeText = `${pred.homeTeam} WIN`;
+            outcomeColor = '#00d4aa';
+            outcomeIcon = '🏆';
+        } else if (pred.outcome === 'Away') {
+            outcomeText = `${pred.awayTeam} WIN`;
+            outcomeColor = '#ff6b35';
+            outcomeIcon = '🏆';
+        } else if (pred.outcome === '1X') {
+            outcomeText = `${pred.homeTeam} OR DRAW`;
+            outcomeColor = '#3b82f6';
+            outcomeIcon = '🤝';
+        } else if (pred.outcome === 'X2') {
+            outcomeText = `DRAW OR ${pred.awayTeam}`;
+            outcomeColor = '#3b82f6';
+            outcomeIcon = '🤝';
+        } else if (pred.outcome === '12') {
+            outcomeText = `${pred.homeTeam} OR ${pred.awayTeam}`;
+            outcomeColor = '#3b82f6';
+            outcomeIcon = '⚔️';
+        } else {
+            outcomeText = 'DRAW';
+            outcomeColor = '#f59e0b';
+            outcomeIcon = '🤝';
+        }
+        
+        html += `
+            <div class="prediction-card" style="background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%); border: 2px solid ${outcomeColor}; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);">
+                <!-- Header -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                    <h4 style="color: #ffffff; margin: 0; font-size: 1.3rem;">
+                        ${outcomeIcon} <strong>${pred.homeTeam}</strong> vs <strong>${pred.awayTeam}</strong>
+                    </h4>
+                    <div style="color: #94a3b8; font-size: 0.9rem;">
+                        <i class="fas fa-clock me-1"></i>${pred.timestamp}
+                    </div>
+                </div>
+                
+                <!-- Score and Outcome -->
+                <div style="text-align: center; margin: 25px 0; padding: 20px; background: rgba(0, 0, 0, 0.3); border-radius: 12px;">
+                    <div style="font-size: 2.5rem; font-weight: 900; color: #ffffff; margin-bottom: 15px;">
+                        ${pred.homeScore} - ${pred.awayScore}
+                    </div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: ${outcomeColor};">
+                        ${outcomeText}
+                    </div>
+                </div>
+                
+                <!-- Win Probability Bars -->
+                <div style="margin: 25px 0;">
+                    <h5 style="color: #00d4aa; margin-bottom: 15px; text-align: center; font-size: 1.1rem;">
+                        <i class="fas fa-chart-bar me-2"></i>Win Probability
+                    </h5>
+                    
+                    <!-- Home -->
+                    <div style="margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span style="color: #ffffff; font-weight: 600;">${pred.homeTeam}</span>
+                            <span style="color: #00d4aa; font-weight: 700;">${probHome.toFixed(0)}%</span>
+                        </div>
+                        <div style="background: #333; height: 24px; border-radius: 12px; overflow: hidden;">
+                            <div style="background: linear-gradient(90deg, #00d4aa 0%, #00b894 100%); height: 100%; width: ${probHome}%; transition: width 0.8s ease;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Draw -->
+                    <div style="margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span style="color: #ffffff; font-weight: 600;">Draw</span>
+                            <span style="color: #f59e0b; font-weight: 700;">${probDraw.toFixed(0)}%</span>
+                        </div>
+                        <div style="background: #333; height: 24px; border-radius: 12px; overflow: hidden;">
+                            <div style="background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%); height: 100%; width: ${probDraw}%; transition: width 0.8s ease;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Away -->
+                    <div style="margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span style="color: #ffffff; font-weight: 600;">${pred.awayTeam}</span>
+                            <span style="color: #ff6b35; font-weight: 700;">${probAway.toFixed(0)}%</span>
+                        </div>
+                        <div style="background: #333; height: 24px; border-radius: 12px; overflow: hidden;">
+                            <div style="background: linear-gradient(90deg, #ff6b35 0%, #ff5722 100%); height: 100%; width: ${probAway}%; transition: width 0.8s ease;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Confidence Badge -->
+                ${pred.confidence ? `
+                <div style="text-align: center; margin-top: 20px;">
+                    <div style="display: inline-block; background: rgba(0, 212, 170, 0.15); padding: 10px 20px; border-radius: 20px; border: 1px solid #00d4aa;">
+                        <span style="color: #94a3b8; font-size: 0.9rem; margin-right: 8px;">Confidence:</span>
+                        <span style="color: #00d4aa; font-weight: 700; font-size: 1.1rem;">${pred.confidence}</span>
+                    </div>
+                </div>
+                ` : ''}
+            </div>
+        `;
+    });
+    
+    listDiv.innerHTML = html;
+}
+</script>
+{% endblock %}
+

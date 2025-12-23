@@ -1,0 +1,348 @@
+{% extends 'predictor/base.html' %}
+
+{% block title %}About - Football Predictor Pro{% endblock %}
+
+{% block extra_css %}
+<style>
+    .about-container {
+        background: #000000;
+        min-height: 100vh;
+        padding-bottom: var(--spacing-xl);
+    }
+    
+    .about-hero {
+        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+        color: white;
+        padding: 80px 0;
+        text-align: center;
+        border-bottom: 2px solid #333333;
+    }
+    
+    .feature-card {
+        background: #1a1a1a;
+        border-radius: var(--border-radius-lg);
+        padding: 30px;
+        box-shadow: var(--shadow-md);
+        transition: all 0.3s ease;
+        border: 1px solid #333333;
+        height: 100%;
+        color: #ffffff;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 255, 135, 0.2);
+        border-color: #00ff87;
+    }
+    
+    .feature-icon {
+        font-size: 3rem;
+        color: #00ff87;
+        margin-bottom: 20px;
+    }
+    
+    .process-step {
+        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+        border-radius: var(--border-radius-md);
+        padding: 25px;
+        text-align: center;
+        border: 1px solid #333333;
+        transition: all 0.3s ease;
+        color: #ffffff;
+    }
+    
+    .process-step:hover {
+        border-color: #00ff87;
+        box-shadow: 0 8px 25px rgba(0, 255, 135, 0.15);
+    }
+    
+    .process-icon {
+        font-size: 2.5rem;
+        color: #00ff87;
+        margin-bottom: 15px;
+    }
+    
+    .stats-section {
+        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+        border-radius: var(--border-radius-lg);
+        padding: 40px;
+        margin: 40px 0;
+        border: 1px solid #333333;
+    }
+    
+    .stat-item {
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #00ff87;
+        margin-bottom: 10px;
+    }
+    
+    .stat-label {
+        color: #cccccc;
+        font-weight: 500;
+    }
+    
+    .disclaimer-card {
+        background: #1a1a1a;
+        border-radius: var(--border-radius-md);
+        padding: 25px;
+        box-shadow: var(--shadow-md);
+        border: 1px solid #333333;
+        margin: 20px 0;
+        color: #ffffff;
+    }
+    
+    .disclaimer-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .disclaimer-icon {
+        font-size: 1.5rem;
+        margin-right: 15px;
+        color: #ffd93d;
+    }
+    
+    .demo-section {
+        background: #1a1a1a;
+        border-radius: var(--border-radius-lg);
+        padding: 30px;
+        box-shadow: var(--shadow-md);
+        border: 1px solid #333333;
+        margin: 30px 0;
+    }
+    
+    .form-control, .form-select {
+        border: 2px solid #333333;
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #0a0a0a;
+        color: #ffffff;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #00ff87;
+        box-shadow: 0 0 0 0.2rem rgba(0, 255, 135, 0.15);
+        background: #1a1a1a;
+        color: #ffffff;
+    }
+    
+    .form-select option {
+        background: #1a1a1a;
+        color: #ffffff;
+    }
+    
+    .text-muted {
+        color: #999999 !important;
+    }
+    
+    h3, h4, h5 {
+        color: #ffffff;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="about-container">
+<!-- Hero Section -->
+<section class="about-hero">
+    <div class="container">
+        <h1 class="display-4 mb-4">About Football Predictor Pro</h1>
+        <p class="lead mb-4">Enterprise-grade football analytics platform powered by advanced AI and machine learning</p>
+    </div>
+</section>
+
+<!-- Platform Overview -->
+<section class="container mt-5">
+    <div class="row">
+        <div class="col-lg-4 mb-4">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h4>Advanced AI Technology</h4>
+                <p>Our platform utilizes state-of-the-art machine learning algorithms trained on extensive historical football data to predict match outcomes with exceptional accuracy.</p>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-database"></i>
+                </div>
+                <h4>Comprehensive Data Sources</h4>
+                <p>Our models are trained on comprehensive datasets including match results, team statistics, player performance, and historical trends from multiple leagues worldwide.</p>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h4>Real-time Analytics</h4>
+                <p>Advanced prediction features including match outcome predictions, score predictions, confidence scores, and detailed historical analysis.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Platform Statistics -->
+<section class="stats-section">
+    <div class="container">
+        <h3 class="text-center mb-4">Platform Statistics</h3>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="stat-item">
+                    <div class="stat-number">78%</div>
+                    <div class="stat-label">Average Accuracy</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-item">
+                    <div class="stat-number">25+</div>
+                    <div class="stat-label">Leagues Covered</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-item">
+                    <div class="stat-number">500+</div>
+                    <div class="stat-label">Teams Analyzed</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-item">
+                    <div class="stat-number">15K+</div>
+                    <div class="stat-label">Predictions Made</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="container mt-5">
+    <h3 class="text-center mb-5">How It Works</h3>
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="process-step">
+                <div class="process-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h5>Select Teams</h5>
+                <p class="text-muted">Choose home and away teams from our comprehensive database of professional football teams</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="process-step">
+                <div class="process-icon">
+                    <i class="fas fa-cogs"></i>
+                </div>
+                <h5>AI Analysis</h5>
+                <p class="text-muted">Our advanced machine learning models analyze historical data and current form</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="process-step">
+                <div class="process-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <h5>Get Results</h5>
+                <p class="text-muted">Receive detailed predictions with confidence scores and analysis</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Demo Section -->
+<section class="demo-section">
+    <div class="container">
+        <h4 class="text-center mb-4">Platform Demo</h4>
+        <div class="row">
+            <div class="col-md-6">
+                <label for="league-select" class="form-label">Select League</label>
+                <select id="league-select" class="form-select">
+                    <option value="">Choose a League</option>
+                    {% for league in european_leagues.keys %}
+                        <option value="{{ league }}">{{ league }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label for="team-select" class="form-label">Select Team</label>
+                <select id="team-select" class="form-select">
+                    <option value="">Choose a Team</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Disclaimers -->
+<section class="container mt-5">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="disclaimer-card">
+                <div class="disclaimer-header">
+                    <i class="fas fa-exclamation-triangle disclaimer-icon"></i>
+                    <h5>Disclaimer</h5>
+                </div>
+                <p class="small text-muted">
+                    Predictions are based on statistical analysis and machine learning algorithms. 
+                    They should not be used as the sole basis for betting decisions. 
+                    Football is unpredictable and actual results may vary significantly from predictions.
+                </p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="disclaimer-card">
+                <div class="disclaimer-header">
+                    <i class="fas fa-copyright disclaimer-icon"></i>
+                    <h5>Terms of Use</h5>
+                </div>
+                <p class="small text-muted">
+                    This application is for entertainment and educational purposes only. 
+                    Users are responsible for their own decisions and actions. 
+                    We do not guarantee the accuracy of predictions.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="container mt-5 mb-5">
+    <div class="text-center">
+        <a href="{% url 'predictor:predict' %}" class="btn btn-primary btn-lg me-3">
+            <i class="fas fa-play me-2"></i>Start Predicting
+        </a>
+        <a href="{% url 'predictor:home' %}" class="btn btn-outline-primary btn-lg">
+            <i class="fas fa-home me-2"></i>Back to Dashboard
+        </a>
+    </div>
+</section>
+
+<script>
+const leagues = {{ european_leagues|safe }};
+const leagueSelect = document.getElementById('league-select');
+const teamSelect = document.getElementById('team-select');
+
+leagueSelect.addEventListener('change', function() {
+    const teams = leagues[this.value] || [];
+    teamSelect.innerHTML = '<option value="">Choose a Team</option>';
+    teams.forEach(team => {
+        const opt = document.createElement('option');
+        opt.value = team;
+        opt.textContent = team;
+        teamSelect.appendChild(opt);
+    });
+});
+</script>
+</div>
+{% endblock %}

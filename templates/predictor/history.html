@@ -1,0 +1,696 @@
+{% extends 'predictor/base.html' %}
+
+{% block title %}Prediction History - Football Predictor Pro{% endblock %}
+
+{% block extra_css %}
+<style>
+    .history-hero {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        color: white;
+        padding: 60px 0;
+        text-align: center;
+    }
+    
+    .history-card {
+        background: white;
+        border-radius: 16px;
+        padding: 40px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin: 30px 0;
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border-radius: 12px;
+        padding: 25px;
+        text-align: center;
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+        border-color: #667eea;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #1e3a8a;
+        margin-bottom: 10px;
+    }
+    
+    .stat-label {
+        color: #64748b;
+        font-weight: 500;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .table {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e2e8f0;
+    }
+    
+    .table thead th {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border: none;
+        padding: 1rem;
+        font-weight: 600;
+        color: #374151;
+    }
+    
+    .table tbody tr {
+        transition: all 0.3s ease;
+    }
+    
+    .table tbody tr:hover {
+        background: rgba(102, 126, 234, 0.05);
+        transform: scale(1.01);
+    }
+    
+    .badge {
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+    
+    .badge.bg-success {
+        background: linear-gradient(135deg, #10b981 0%, #34d399 100%) !important;
+    }
+    
+    .badge.bg-info {
+        background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%) !important;
+    }
+    
+    .badge.bg-warning {
+        background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%) !important;
+        color: #92400e !important;
+    }
+    
+    .badge.bg-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    }
+    
+    /* Beautiful Star-based Outcome Badges */
+    .outcome-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .outcome-label {
+        display: inline-flex;
+        align-items: center;
+        padding: 12px 24px;
+        border-radius: 30px;
+        font-weight: 700;
+        font-size: 1rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+        transition: all 0.3s ease;
+        animation: fadeInScale 0.5s ease-out;
+    }
+    
+    .outcome-label:hover {
+        transform: translateY(-3px) scale(1.08);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.18);
+    }
+    
+    .outcome-label.home-win {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+    
+    .outcome-label.home-win i {
+        color: #ffd700;
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+        animation: starTwinkle 2s ease-in-out infinite;
+    }
+    
+    .outcome-label.away-win {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+    }
+    
+    .outcome-label.away-win i {
+        color: #ffd700;
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+        animation: starTwinkle 2s ease-in-out infinite 0.3s;
+    }
+    
+    .outcome-label.draw {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+    }
+    
+    .outcome-label.draw i {
+        color: #ffd700;
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+        animation: starTwinkle 2s ease-in-out infinite 0.6s;
+    }
+    
+    .outcome-label i.fa-star {
+        margin-right: 3px;
+        font-size: 1rem;
+    }
+    
+    @keyframes starTwinkle {
+        0%, 100% {
+            opacity: 1;
+            transform: scale(1) rotate(0deg);
+        }
+        50% {
+            opacity: 0.7;
+            transform: scale(0.95) rotate(10deg);
+        }
+    }
+    
+    @keyframes fadeInScale {
+        from {
+            opacity: 0;
+            transform: scale(0.8) translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+    
+    .progress {
+        height: 12px;
+        border-radius: 8px;
+        background: #e2e8f0;
+        overflow: hidden;
+    }
+    
+    .progress-bar {
+        border-radius: 8px;
+        background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+        box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #64748b;
+    }
+    
+    .empty-icon {
+        font-size: 4rem;
+        color: #cbd5e1;
+        margin-bottom: 20px;
+    }
+    
+    .prediction-date {
+        color: #64748b;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .team-name {
+        font-weight: 600;
+        color: #374151;
+    }
+    
+    .confidence-text {
+        font-size: 0.8rem;
+        color: #64748b;
+        margin-top: 5px;
+    }
+    
+    /* ============================================
+       HISTORY PAGE RESPONSIVE DESIGN
+       ============================================ */
+    
+    /* Tablets and Below (768px and below) */
+    @media (max-width: 768px) {
+        .history-hero {
+            padding: 40px 20px;
+        }
+        
+        .history-hero h1 {
+            font-size: 1.75rem;
+        }
+        
+        .history-hero p {
+            font-size: 0.95rem;
+        }
+        
+        .history-card {
+            padding: 20px;
+            border-radius: 12px;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            padding: 15px;
+        }
+        
+        .stat-number {
+            font-size: 1.75rem;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+        }
+        
+        .table {
+            font-size: 0.85rem;
+        }
+        
+        .table thead th {
+            font-size: 0.75rem;
+            padding: 0.75rem 0.5rem;
+        }
+        
+        .table tbody td {
+            padding: 0.75rem 0.5rem;
+        }
+        
+        .outcome-label {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+        
+        .outcome-label i {
+            font-size: 0.8rem;
+        }
+        
+        .badge {
+            padding: 6px 10px;
+            font-size: 0.75rem;
+        }
+        
+        .empty-state {
+            padding: 40px 20px;
+        }
+        
+        .empty-icon i {
+            font-size: 3rem !important;
+        }
+        
+        .empty-state h4 {
+            font-size: 1.1rem;
+        }
+        
+        .empty-state p {
+            font-size: 0.9rem;
+        }
+        
+        .text-center.mt-5 .btn {
+            width: 100%;
+            margin: 5px 0 !important;
+        }
+        
+        .row.mt-5 {
+            margin-top: 2rem !important;
+        }
+        
+        .row.mt-5 .col-md-6 {
+            margin-bottom: 15px;
+        }
+    }
+    
+    /* Small Mobile (576px and below) */
+    @media (max-width: 576px) {
+        .history-hero {
+            padding: 30px 15px;
+        }
+        
+        .history-hero h1 {
+            font-size: 1.5rem;
+        }
+        
+        .history-card {
+            padding: 15px;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        
+        .stat-card {
+            padding: 12px;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+        }
+        
+        .table {
+            font-size: 0.8rem;
+        }
+        
+        .table thead th,
+        .table tbody td {
+            padding: 0.5rem 0.35rem;
+        }
+        
+        .outcome-label {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+        }
+        
+        .outcome-label i {
+            font-size: 0.7rem;
+            margin-right: 1px;
+        }
+        
+        .outcome-label .ms-2 {
+            margin-left: 4px !important;
+        }
+        
+        .badge {
+            padding: 4px 8px;
+            font-size: 0.7rem;
+        }
+        
+        .empty-state {
+            padding: 30px 15px;
+        }
+        
+        .empty-icon i {
+            font-size: 2.5rem !important;
+        }
+        
+        .empty-state h4 {
+            font-size: 1rem;
+        }
+        
+        .empty-state p {
+            font-size: 0.85rem;
+        }
+        
+        .empty-state .btn {
+            width: 100%;
+            padding: 12px 24px;
+        }
+        
+        .card-header h5 {
+            font-size: 1rem;
+        }
+        
+        .card-body p {
+            font-size: 0.85rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="history-hero">
+    <div class="container">
+        <h1 class="display-4 mb-3">Prediction History</h1>
+        <p class="lead mb-0">Track your prediction performance and analyze your accuracy over time</p>
+    </div>
+</section>
+
+<!-- Main Content -->
+<section class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="history-card">
+                {% if predictions %}
+                    <!-- Statistics Overview -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number">{{ total_predictions }}</div>
+                            <div class="stat-label">Total Predictions</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">{{ average_confidence|floatformat:1 }}%</div>
+                            <div class="stat-label">Average Confidence</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">
+                                {% if recent_activity %}
+                                    {{ recent_activity|timesince }}
+                                {% else %}
+                                    No activity
+                                {% endif %}
+                            </div>
+                            <div class="stat-label">Recent Activity</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Bulk Actions -->
+                    <form method="post" id="bulkForm">
+                        {% csrf_token %}
+                        <div class="mb-3 d-flex justify-content-between align-items-center">
+                            <div>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAll()">
+                                    <i class="fas fa-check-square me-1"></i>Select All
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="deselectAll()">
+                                    <i class="fas fa-square me-1"></i>Deselect All
+                                </button>
+                            </div>
+                            <div>
+                                <button type="submit" name="delete_selected" class="btn btn-sm btn-danger" onclick="return confirm('Delete selected predictions?')">
+                                    <i class="fas fa-trash me-1"></i>Delete Selected
+                                </button>
+                                <button type="submit" name="delete_all" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete ALL predictions? This cannot be undone!')">
+                                    <i class="fas fa-trash-alt me-1"></i>Delete All
+                                </button>
+                            </div>
+                        </div>
+                    
+                        <!-- Predictions Table -->
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px;"><input type="checkbox" id="selectAllCheckbox" onchange="toggleAll(this)"></th>
+                                        <th><i class="fas fa-calendar me-1"></i> Date</th>
+                                        <th><i class="fas fa-futbol me-1"></i> Match</th>
+                                        <th><i class="fas fa-star me-1"></i> Outcome</th>
+                                        <th><i class="fas fa-percent me-1"></i> Confidence</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                        {% for prediction in predictions %}
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" name="prediction_ids" value="{{ prediction.id }}" class="prediction-checkbox">
+                                        </td>
+                                        <td>
+                                            <div class="prediction-date">
+                                                {{ prediction.prediction_date|date:"M d, Y" }}
+                                            </div>
+                                            <small class="text-muted">
+                                                {{ prediction.prediction_date|date:"H:i" }}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <div class="team-name">{{ prediction.home_team }}</div>
+                                            <div class="text-muted">vs</div>
+                                            <div class="team-name">{{ prediction.away_team }}</div>
+                                        </td>
+                                        <td>
+                                            <div class="outcome-badge">
+                                                {% if prediction.home_score > prediction.away_score %}
+                                                    <div class="outcome-label home-win">
+                                                        <i class="fas fa-star"></i>
+                                                        <i class="fas fa-star"></i>
+                                                        <i class="fas fa-star"></i>
+                                                        <span class="ms-2">Home Win</span>
+                                                    </div>
+                                                {% elif prediction.away_score > prediction.home_score %}
+                                                    <div class="outcome-label away-win">
+                                                        <i class="fas fa-star"></i>
+                                                        <i class="fas fa-star"></i>
+                                                        <i class="fas fa-star"></i>
+                                                        <span class="ms-2">Away Win</span>
+                                                </div>
+                                                {% else %}
+                                                    <div class="outcome-label draw">
+                                                        <i class="fas fa-star"></i>
+                                                        <i class="fas fa-star"></i>
+                                                        <span class="ms-2">Draw</span>
+                                            </div>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar" style="width: {{ prediction.confidence }}%">
+                                                    {{ prediction.confidence|floatformat:1 }}%
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </form>
+                    
+                    <!-- Pagination -->
+                    {% if is_paginated %}
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1" aria-label="First">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            
+                            <li class="page-item active">
+                                <span class="page-link">
+                                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                                </span>
+                            </li>
+                            
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                        <p class="text-center text-muted">
+                            Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ total_predictions }} predictions
+                        </p>
+                    </nav>
+                    {% endif %}
+                    
+                    <!-- Performance Insights -->
+                    <div class="row mt-5">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-chart-line me-2"></i>Performance Trends
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="text-muted">Your prediction accuracy and confidence levels over time</p>
+                                    <div class="progress mb-3">
+                                        <div class="progress-bar bg-success" style="width: 75%"></div>
+                                    </div>
+                                    <small class="text-muted">75% average accuracy</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-trophy me-2"></i>Best Predictions
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="text-muted">Your most accurate predictions with highest confidence</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-success">95%</span>
+                                        <small class="text-muted">Man City vs Liverpool</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                {% else %}
+                    <!-- Empty State -->
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                        <h4 class="mb-3">No Predictions Yet</h4>
+                        <p class="mb-4">Start making predictions to see your history and track your performance over time.</p>
+                        <a href="{% url 'predictor:predict' %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-plus me-2"></i>Make Your First Prediction
+                        </a>
+                    </div>
+                {% endif %}
+                
+                <!-- Action Buttons -->
+                <div class="text-center mt-5">
+                    <a href="{% url 'predictor:predict' %}" class="btn btn-primary me-3">
+                        <i class="fas fa-plus me-2"></i>New Prediction
+                    </a>
+                    <a href="{% url 'predictor:home' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-home me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+// Select/Deselect all checkboxes
+function toggleAll(source) {
+    const checkboxes = document.querySelectorAll('.prediction-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = source.checked;
+    });
+}
+
+function selectAll() {
+    const checkboxes = document.querySelectorAll('.prediction-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = true;
+    });
+    document.getElementById('selectAllCheckbox').checked = true;
+}
+
+function deselectAll() {
+    const checkboxes = document.querySelectorAll('.prediction-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    document.getElementById('selectAllCheckbox').checked = false;
+}
+
+// Update "select all" checkbox based on individual selections
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('.prediction-checkbox');
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            selectAllCheckbox.checked = allChecked;
+        });
+    });
+});
+</script>
+{% endblock %} 
