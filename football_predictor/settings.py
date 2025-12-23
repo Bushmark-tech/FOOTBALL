@@ -4,17 +4,20 @@ Django settings for football_predictor project.
 
 import os
 from pathlib import Path
+from django.core.management.utils import get_random_secret_key
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-your-secret-key-here-change-in-production'
+SECRET_KEY = os.environ.get('SECRET_KEY', get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
+# Get ALLOWED_HOSTS from environment variable, fallback to defaults
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,testserver').split(',')
+ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS if host.strip()]
 
 # Application definition
 INSTALLED_APPS = [
@@ -29,6 +32,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Serve static files on Render
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -58,31 +62,46 @@ TEMPLATES = [
 WSGI_APPLICATION = 'football_predictor.wsgi.application'
 
 # Database
+# Use PostgreSQL on Render, SQLite for local development
+import dj_database_url
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 }
 
 # Redis Cache Configuration
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/1',
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        },
-        'KEY_PREFIX': 'football_predictor',
-        'TIMEOUT': 300,  # 5 minutes default timeout
-    }
-}
+# Use Redis if available (from Render Redis service), otherwise fallback to database
+REDIS_URL = os.environ.get('REDIS_URL', 'redis://127.0.0.1:6379/1')
 
-# Session storage using database (fallback since Redis may not be running)
-# Using db backend instead of cache to avoid Redis connection errors
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-# SESSION_ENGINE = 'django.contrib.sessions.backends.cache'  # Original Redis-based
-# SESSION_CACHE_ALIAS = 'default'
+if REDIS_URL and not DEBUG:
+    # Use Redis cache in production if available
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': REDIS_URL,
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+                'IGNORE_EXCEPTIONS': True,  # Don't crash if Redis is down
+            },
+            'KEY_PREFIX': 'football_predictor',
+            'TIMEOUT': 300,  # 5 minutes default timeout
+        }
+    }
+    SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+    SESSION_CACHE_ALIAS = 'default'
+else:
+    # Fallback to database cache/sessions
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+            'LOCATION': 'cache_table',
+        }
+    }
+    SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -112,6 +131,9 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
+
+# WhiteNoise configuration for serving static files on Render
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

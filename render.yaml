@@ -1,0 +1,32 @@
+services:
+  # Django Web Service
+  - type: web
+    name: football-predictor
+    env: python
+    plan: starter  # Change to 'standard' or 'pro' for production
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate
+    startCommand: gunicorn football_predictor.wsgi:application
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: False
+      - key: ALLOWED_HOSTS
+        sync: false  # Set this manually in Render dashboard
+    healthCheckPath: /
+    
+  # PostgreSQL Database (optional - uncomment if you want Render to create it)
+  # - type: pspg
+  #   name: football-predictor-db
+  #   plan: starter
+  #   databaseName: football_predictor
+  #   user: football_user
+  #   
+  # # Redis Cache (optional - uncomment if you want Redis)
+  # - type: redis
+  #   name: football-predictor-redis
+  #   plan: starter
+  #   maxmemoryPolicy: allkeys-lru
+
