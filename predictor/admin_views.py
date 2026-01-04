@@ -353,7 +353,7 @@ def admin_predictions(request):
     start = (page - 1) * per_page
     predictions_page = predictions[start:start + per_page]
     
-    # Add confidence percentage to each prediction
+    # Add confidence percentage and scale probabilities to each prediction
     for prediction in predictions_page:
         if prediction.confidence:
             # Handle both 0-1 scale (decimal) and 0-100 scale (percentage)
@@ -363,6 +363,14 @@ def admin_predictions(request):
                 prediction.confidence_percentage = int(prediction.confidence)
         else:
             prediction.confidence_percentage = 0
+
+        # Scale Probabilities (0-1 -> 0-100) for display
+        if prediction.prob_home is not None and prediction.prob_home <= 1.0:
+            prediction.prob_home *= 100
+        if prediction.prob_draw is not None and prediction.prob_draw <= 1.0:
+            prediction.prob_draw *= 100
+        if prediction.prob_away is not None and prediction.prob_away <= 1.0:
+            prediction.prob_away *= 100
     
     context = {
         'predictions': predictions_page,
