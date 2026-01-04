@@ -842,6 +842,17 @@ def get_leagues_by_category():
         pass
     
     # Build structure from database
+    # FAILSAFE: If no leagues exist, auto-seed the database
+    if not League.objects.exists():
+        try:
+            from django.core.management import call_command
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning("No leagues found in DB. Auto-seeding...")
+            call_command('seed_leagues')
+        except Exception as e:
+            logger.error(f"Auto-seeding failed: {e}")
+
     leagues_dict = {}
     for league in League.objects.select_related().prefetch_related('teams').all():
         category = league.category
