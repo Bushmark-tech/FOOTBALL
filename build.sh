@@ -7,6 +7,9 @@ echo "Starting build process..."
 
 # Install dependencies
 echo "Installing Python dependencies..."
+# Force install critical dependencies first to bypass cache/resolution issues
+pip install PyJWT>=2.8.0 cryptography>=41.0.0 requests-oauthlib>=1.3.0
+
 cat requirements.txt
 pip install -r requirements.txt
 
