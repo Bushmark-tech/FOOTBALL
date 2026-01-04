@@ -151,58 +151,54 @@ def subscription_required(view_func):
 
 
 def login_view(request):
-    """Login view with Google OAuth option."""
+    """Login view with Google OAuth option and Email support."""
     # Get the redirection target
     next_url = request.GET.get('next', 'predictor:home')
     
     if request.user.is_authenticated:
-        # If user is already logged in, respect the next parameter or go home
         if next_url and next_url != 'predictor:home':
             return redirect(next_url)
         return redirect('predictor:home')
     
     if request.method == 'POST':
-        username = request.POST.get('username', '')
+        username_or_email = request.POST.get('username', '')
         password = request.POST.get('password')
-        # Also check for next in POST data
         next_url = request.POST.get('next', next_url)
         
-        logger.info(f"Login attempt for user: '{username}' (password length: {len(password) if password else 0})")
+        logger.info(f"Login attempt for: '{username_or_email}'")
         
-        # Deep Debug
-        try:
-            from django.contrib.auth.models import User
-            test_user = User.objects.get(username=username)
-            logger.warning(f"DEBUG: Found user {username}. IsActive: {test_user.is_active}. HasPassword: {test_user.has_usable_password()}")
-            pwd_match = test_user.check_password(password)
-            logger.warning(f"DEBUG: Password match for {username}: {pwd_match}")
-        except User.DoesNotExist:
-            logger.warning(f"DEBUG: User {username} does not exist in DB.")
-            
-        user = authenticate(request, username=username, password=password)
+        # Check if input is email or username
+        user = None
+        username_to_auth = username_or_email
+        
+        # Try to find user by email if input looks like an email
+        if '@' in username_or_email:
+            try:
+                user_obj = User.objects.get(email=username_or_email)
+                username_to_auth = user_obj.username
+            except User.DoesNotExist:
+                logger.warning(f"DEBUG: Email {username_or_email} not found in DB.")
+                # Proceed with original string to let authenticate fail naturally
+        
+        user = authenticate(request, username=username_to_auth, password=password)
+        
         if user:
-            logger.warning(f"DEBUG: authenticate() SUCCESS for {username}")
-            # Use ModelBackend for regular username/password authentication
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            # Create user profile if doesn't exist
             UserProfile.objects.get_or_create(user=user)
             messages.success(request, f'Welcome back, {user.username}!')
             
-            # Redirect to next_url if safe or to home
             if next_url and next_url != 'predictor:home':
-                # Basic safety check: ensure it's a relative path to prevent open redirects
                 if next_url.startswith('/'):
                     return redirect(next_url)
             return redirect('predictor:home')
         else:
-            logger.warning(f"DEBUG: authenticate() FAILED for {username}")
-            messages.error(request, 'Invalid username or password.')
+            messages.error(request, 'Invalid email/username or password.')
     
     return render(request, 'predictor/login.html', {'next': next_url})
 
 
 def register_view(request):
-    """Registration view."""
+    """Registration view with Google Email restriction."""
     if request.user.is_authenticated:
         return redirect('predictor:home')
     
@@ -212,6 +208,16 @@ def register_view(request):
         password = request.POST.get('password')
         password_confirm = request.POST.get('password_confirm')
         
+        # Validation: Google Email Only
+        if not email or not email.strip().lower().endswith('@gmail.com'):
+             messages.error(request, 'Registration is restricted to valid Google (@gmail.com) email addresses only.')
+             return render(request, 'predictor/register.html')
+        
+        # Validation: Unique Email
+        if User.objects.filter(email=email).exists():
+             messages.error(request, 'This email address is already registered. Please login.')
+             return render(request, 'predictor/register.html')
+
         if password != password_confirm:
             messages.error(request, 'Passwords do not match.')
             return render(request, 'predictor/register.html')
@@ -220,19 +226,24 @@ def register_view(request):
             messages.error(request, 'Username already exists.')
             return render(request, 'predictor/register.html')
         
-        user = User.objects.create_user(
-            username=username,
-            email=email,
-            password=password
-        )
-        
-        # Create user profile with 3 free matches
-        UserProfile.objects.create(user=user, free_matches_limit=3)
-        
-        # Use ModelBackend for newly created users (required when multiple backends are configured)
-        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-        messages.success(request, f'Welcome, {user.username}! You have 3 free matches to try.')
-        return redirect('predictor:home')
+        try:
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password
+            )
+            
+            # Create user profile with 3 free matches
+            UserProfile.objects.create(user=user, free_matches_limit=3)
+            
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            messages.success(request, f'Welcome! Account created for {email}.')
+            return redirect('predictor:home')
+            
+        except Exception as e:
+            logger.error(f"Registration error: {e}")
+            messages.error(request, 'An error occurred during registration.')
+            return render(request, 'predictor/register.html')
     
     return render(request, 'predictor/register.html')
 
