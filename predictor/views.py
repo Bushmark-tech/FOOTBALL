@@ -798,14 +798,20 @@ def predict(request):
     # For GET requests, render the prediction form with leagues data from database
     leagues_by_category = get_leagues_by_category()
     
+    # Pre-encode as JSON for JS usage in templates
+    import json
+    leagues_json = json.dumps(leagues_by_category)
+    
     # Check if multi-match mode is requested
     if request.GET.get('multi') == 'true':
         return render(request, 'predictor/predict_multi.html', {
-            'leagues_by_category': leagues_by_category
+            'leagues_by_category': leagues_by_category,
+            'leagues_json': leagues_json
         })
     
     return render(request, 'predictor/predict.html', {
-        'leagues_by_category': leagues_by_category
+        'leagues_by_category': leagues_by_category,
+        'leagues_json': leagues_json
     })
 
 
