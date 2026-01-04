@@ -162,7 +162,7 @@ def login_view(request):
         return redirect('predictor:home')
     
     if request.method == 'POST':
-        username = request.POST.get('username', '').lower()
+        username = request.POST.get('username', '')
         password = request.POST.get('password')
         # Also check for next in POST data
         next_url = request.POST.get('next', next_url)
