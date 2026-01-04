@@ -213,11 +213,11 @@ SUBSCRIPTION_PRICE_KSH = 200.00
 SUBSCRIPTION_DURATION_DAYS = 30
 
 # M-Pesa Settings
-MPESA_CONSUMER_KEY = os.environ.get('MPESA_CONSUMER_KEY', 'r2IXj8KBeM6QbFPPQTzdmPpme1anleTRobqzsZgbAGLf3i4t')
-MPESA_CONSUMER_SECRET = os.environ.get('MPESA_CONSUMER_SECRET', 'RUerdbN3pWXGbi3fp2PDicrrTQetWwtzhpZN34xGzITJR8qDhBAZxOaLNeVkaGrz')
-MPESA_SHORTCODE = os.environ.get('MPESA_SHORTCODE', '174379')
-MPESA_PASSKEY = os.environ.get('MPESA_PASSKEY', 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919')
-MPESA_ENVIRONMENT = os.environ.get('MPESA_ENVIRONMENT', 'sandbox') 
+MPESA_CONSUMER_KEY = 'r2IXj8KBeM6QbFPPQTzdmPpme1anleTRobqzsZgbAGLf3i4t' # os.environ.get('MPESA_CONSUMER_KEY', 'r2IXj8...')
+MPESA_CONSUMER_SECRET = 'RUerdbN3pWXGbi3fp2PDicrrTQetWwtzhpZN34xGzITJR8qDhBAZxOaLNeVkaGrz' # os.environ.get('MPESA_CONSUMER_SECRET', 'RUerdb...')
+MPESA_SHORTCODE = '174379' # os.environ.get('MPESA_SHORTCODE', '174379')
+MPESA_PASSKEY = 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919' # os.environ.get('MPESA_PASSKEY', 'bfb279...')
+MPESA_ENVIRONMENT = 'sandbox' # os.environ.get('MPESA_ENVIRONMENT', 'sandbox') 
 
 if MPESA_ENVIRONMENT == 'production':
     MPESA_ACCESS_TOKEN_URL = 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'

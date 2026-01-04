@@ -1272,6 +1272,7 @@ def api_predict(request):
                     advanced_result = advanced_predict_match(home_team, away_team, model1, model2)
                     
                     if not advanced_result:
+                        advanced_result = {}  # Initialize to empty dict to prevent AttributeError later
                         # Fallback prediction if advanced_predict_match fails
                         import random
                         fallback_prediction = random.choice([0, 1, 2])

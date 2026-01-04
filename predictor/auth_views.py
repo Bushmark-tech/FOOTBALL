@@ -282,6 +282,9 @@ def initiate_mpesa_payment(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Method not allowed'}, status=405)
     
+    print(f"DEBUG PAYMENT REQUEST: Body={request.body}")
+    print(f"DEBUG PAYMENT REQUEST: Headers={request.content_type}")
+    
     try:
         mpesa_number = request.POST.get('mpesa_number')
         currency = request.POST.get('currency', 'USD')
@@ -296,16 +299,20 @@ def initiate_mpesa_payment(request):
                  pass
         
         if not mpesa_number:
+            print("DEBUG: Number is missing after extraction")
             return JsonResponse({'error': 'M-Pesa number is required'}, status=400)
         
-        # Validate M-Pesa number (Kenyan format: 254XXXXXXXXX or 07XXXXXXXXX)
+        # Validate M-Pesa number
         mpesa_number = mpesa_number.replace(' ', '').replace('-', '')
         if mpesa_number.startswith('0'):
             mpesa_number = '254' + mpesa_number[1:]
         elif not mpesa_number.startswith('254'):
             mpesa_number = '254' + mpesa_number
         
+        print(f"DEBUG: Processed number: {mpesa_number}")
+
         if len(mpesa_number) != 12:
+            print(f"DEBUG: Invalid Length {len(mpesa_number)}")
             return JsonResponse({'error': 'Invalid M-Pesa number format'}, status=400)
         
         # Determine amount based on currency
@@ -432,6 +439,9 @@ def get_mpesa_access_token():
         headers = {'Authorization': f'Basic {auth}'}
         response = requests.get(url, headers=headers)
         
+        print(f"DEBUG TOKEN RESPONSE: {response.status_code} {response.text}")
+        print(f"DEBUG KEYS USING: {settings.MPESA_CONSUMER_KEY[:5]}...")
+
         if response.status_code == 200:
             return response.json().get('access_token')
         return None
