@@ -1246,11 +1246,13 @@ def api_predict(request):
                 home_team = data.get('home_team')
                 away_team = data.get('away_team')
                 category = data.get('category')
+                league = data.get('league')
             else:
                 # Handle form data
                 home_team = request.POST.get('home_team')
                 away_team = request.POST.get('away_team')
                 category = request.POST.get('category')
+                league = request.POST.get('league')
             
             # Check subscription status before processing
             if request.user.is_authenticated:
@@ -1511,6 +1513,7 @@ def api_predict(request):
                                     away_score=away_score,
                                     confidence=confidence,
                                     category=category or '',
+                                    league=league or '',
                                     outcome=outcome,
                                     prob_home=probabilities.get('Home', 0.33),
                                     prob_draw=probabilities.get('Draw', 0.33),
