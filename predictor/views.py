@@ -1252,6 +1252,13 @@ def api_predict(request):
                 away_team = request.POST.get('away_team')
                 category = request.POST.get('category')
             
+            # Check subscription status before processing
+            if request.user.is_authenticated:
+                status = check_subscription_status(request.user)
+                if not status['has_access']:
+                    logger.warning(f"Blocked API prediction for {request.user.username}: Limit reached")
+                    return JsonResponse({'error': 'Prediction limit reached. Please subscribe.', 'redirect': '/subscribe/'}, status=403)
+            
             missing = []
             if not home_team:
                 missing.append('home_team')
