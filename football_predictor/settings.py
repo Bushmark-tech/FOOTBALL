@@ -41,18 +41,14 @@ INSTALLED_APPS = [
 ]
 
 
-# Add django-allauth if installed (for Google OAuth)
-try:
-    import allauth
-    INSTALLED_APPS.extend([
-        'django.contrib.sites',  # Required for Google OAuth
-        'allauth',
-        'allauth.account',
-        'allauth.socialaccount',
-        'allauth.socialaccount.providers.google',
-    ])
-except ImportError:
-    pass  # django-allauth not installed, skip Google OAuth
+# Add django-allauth (for Google OAuth)
+INSTALLED_APPS.extend([
+    'django.contrib.sites',  # Required for Google OAuth
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+])
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -65,12 +61,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# Add allauth middleware if installed
-try:
-    import allauth
-    MIDDLEWARE.append('allauth.account.middleware.AccountMiddleware')
-except ImportError:
-    pass
+# Add allauth middleware
+MIDDLEWARE.append('allauth.account.middleware.AccountMiddleware')
 
 ROOT_URLCONF = 'football_predictor.urls'
 
@@ -173,49 +165,38 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Django Allauth Configuration (only if installed)
-try:
-    import allauth
-    SITE_ID = 1
-    AUTHENTICATION_BACKENDS = [
-        'django.contrib.auth.backends.ModelBackend',
-        'allauth.account.auth_backends.AuthenticationBackend',
-    ]
-    
-    # Allauth Settings
-    ACCOUNT_LOGIN_METHODS = {'email', 'username'}
-    ACCOUNT_SIGNUP_FIELDS = ['email', 'username*', 'password1*', 'password2*']
-    ACCOUNT_EMAIL_VERIFICATION = 'none'
-    LOGIN_URL = '/login/'
-    LOGIN_REDIRECT_URL = '/'
-    LOGOUT_REDIRECT_URL = '/login/'
-    
-    # Google OAuth Settings
-    SOCIALACCOUNT_PROVIDERS = {
-        'google': {
-            'SCOPE': [
-                'profile',
-                'email',
-            ],
-            'AUTH_PARAMS': {
-                'access_type': 'online',
-            },
-            'APP': {
-                'client_id': os.environ.get('GOOGLE_CLIENT_ID', ''),
-                'secret': os.environ.get('GOOGLE_CLIENT_SECRET', ''),
-                'key': ''
-            }
+# Django Allauth Configuration
+SITE_ID = 1
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+# Allauth Settings
+ACCOUNT_LOGIN_METHODS = {'email', 'username'}
+ACCOUNT_SIGNUP_FIELDS = ['email', 'username*', 'password1*', 'password2*']
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/login/'
+
+# Google OAuth Settings
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        },
+        'APP': {
+            'client_id': os.environ.get('GOOGLE_CLIENT_ID', ''),
+            'secret': os.environ.get('GOOGLE_CLIENT_SECRET', ''),
+            'key': ''
         }
     }
-except ImportError:
-    # django-allauth not installed, use default authentication
-    AUTHENTICATION_BACKENDS = [
-        'django.contrib.auth.backends.ModelBackend',
-    ]
-    LOGIN_URL = '/login/'
-    LOGIN_REDIRECT_URL = '/'
-    LOGOUT_REDIRECT_URL = '/login/'
-    SITE_ID = 1
+}
 
 # Subscription Settings
 FREE_MATCHES_LIMIT = 3
