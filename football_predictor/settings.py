@@ -106,7 +106,7 @@ DATABASES = {
 
 # Redis Cache Configuration
 # Use Redis if available (from Render Redis service), otherwise fallback to database
-REDIS_URL = os.environ.get('REDIS_URL', 'redis://127.0.0.1:6379/1')
+REDIS_URL = os.environ.get('REDIS_URL')
 
 if REDIS_URL and not DEBUG:
     # Use Redis cache in production if available
