@@ -60,19 +60,19 @@
                 <div class="col-md-4">
                     <select name="status" class="form-select">
                         <option value="all">All Status</option>
-                        <option value="active" {% if status_filter=='active' %}selected{% endif %}>Active</option>
-                        <option value="inactive" {% if status_filter=='inactive' %}selected{% endif %}>Inactive</option>
-                        <option value="pending" {% if status_filter=='pending' %}selected{% endif %}>Pending</option>
-                        <option value="cancelled" {% if status_filter=='cancelled' %}selected{% endif %}>Cancelled
+                        <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                        <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+                        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled
                         </option>
                     </select>
                 </div>
                 <div class="col-md-4">
                     <select name="method" class="form-select">
                         <option value="all">All Payment Methods</option>
-                        <option value="mpesa" {% if method_filter=='mpesa' %}selected{% endif %}>M-Pesa</option>
-                        <option value="card" {% if method_filter=='card' %}selected{% endif %}>Card</option>
-                        <option value="paypal" {% if method_filter=='paypal' %}selected{% endif %}>PayPal</option>
+                        <option value="mpesa" {% if method_filter == 'mpesa' %}selected{% endif %}>M-Pesa</option>
+                        <option value="card" {% if method_filter == 'card' %}selected{% endif %}>Card</option>
+                        <option value="paypal" {% if method_filter == 'paypal' %}selected{% endif %}>PayPal</option>
                     </select>
                 </div>
                 <div class="col-md-4">
