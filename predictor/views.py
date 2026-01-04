@@ -789,8 +789,12 @@ def predict(request):
                 logger.error(f"Error in prediction: {str(e)}")
                 import traceback
                 logger.error(traceback.format_exc())
+                # Need to regenerate leagues_json for the template
+                leagues_data = get_leagues_by_category()
+                import json
                 return render(request, 'predictor/predict.html', {
-                    'leagues_by_category': get_leagues_by_category(),
+                    'leagues_by_category': leagues_data,
+                    'leagues_json': json.dumps(leagues_data),
                     'error': f'Error generating prediction: {str(e)}'
                 })
             
@@ -808,10 +812,19 @@ def predict(request):
             'leagues_by_category': leagues_by_category,
             'leagues_json': leagues_json
         })
-    
+
+    import json
+    logger.info(f"Predict View - Leagues Data Keys: {list(leagues_by_category.keys())}")
+    for cat, leagues in leagues_by_category.items():
+        logger.info(f"Category {cat}: {list(leagues.keys())}")
+        if 'Others' in cat and 'Switzerland' in leagues:
+             logger.info(f"Switzerland teams: {leagues['Switzerland']}")
+
+    leagues_json = json.dumps(leagues_by_category)
     return render(request, 'predictor/predict.html', {
         'leagues_by_category': leagues_by_category,
-        'leagues_json': leagues_json
+        'leagues_json': leagues_json,
+        'debug_info': 'Data Reloaded'
     })
 
 

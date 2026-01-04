@@ -261,6 +261,21 @@
         }
     } catch (e) {
         console.error('Error parsing leagues data:', e);
+        leaguesData = {};
+    }
+
+    // Fallback: Function to fetch teams from API
+    async function fetchTeamsFromAPI(category, league) {
+        try {
+            const response = await fetch(`/api/teams/?category=${encodeURIComponent(category)}&league=${encodeURIComponent(league)}`);
+            if (response.ok) {
+                const data = await response.json();
+                return data.teams || [];
+            }
+        } catch (e) {
+            console.error('API fetch error:', e);
+        }
+        return [];
     }
 
     let matchCounter = 0;
@@ -536,18 +551,40 @@
             }
         });
 
-        leagueSelect.addEventListener('change', function () {
+        leagueSelect.addEventListener('change', async function () {
             const category = categorySelect.value;
             const league = this.value;
-            homeTeamSelect.innerHTML = '<option value="">Select Home Team</option>';
-            awayTeamSelect.innerHTML = '<option value="">Select Away Team</option>';
 
-            if (category && league && leaguesData[category] && leaguesData[category][league]) {
-                const teams = leaguesData[category][league];
+            homeTeamSelect.innerHTML = '<option value="">Loading...</option>';
+            awayTeamSelect.innerHTML = '<option value="">Loading...</option>';
 
-                // Optimize: Use DocumentFragment to batch DOM operations
+            let teams = [];
+
+            // Try local data first - check for length > 0
+            if (category && league && leaguesData[category] && leaguesData[category][league] && leaguesData[category][league].length > 0) {
+                teams = leaguesData[category][league];
+            }
+            // Fallback
+            else if (category && league) {
+                console.log('Fetching teams from API for:', league);
+                teams = await fetchTeamsFromAPI(category, league);
+            }
+
+            if (teams && teams.length > 0) {
+                // Optimize: Use DocumentFragment
                 const homeFragment = document.createDocumentFragment();
                 const awayFragment = document.createDocumentFragment();
+
+                // Add default option
+                const defaultHome = document.createElement('option');
+                defaultHome.value = "";
+                defaultHome.textContent = "Select Home Team";
+                homeFragment.appendChild(defaultHome);
+
+                const defaultAway = document.createElement('option');
+                defaultAway.value = "";
+                defaultAway.textContent = "Select Away Team";
+                awayFragment.appendChild(defaultAway);
 
                 teams.forEach(team => {
                     const homeOption = document.createElement('option');
@@ -561,9 +598,13 @@
                     awayFragment.appendChild(awayOption);
                 });
 
-                // Batch append to DOM (much faster)
+                homeTeamSelect.innerHTML = '';
+                awayTeamSelect.innerHTML = '';
                 homeTeamSelect.appendChild(homeFragment);
                 awayTeamSelect.appendChild(awayFragment);
+            } else {
+                homeTeamSelect.innerHTML = '<option value="">Select Home Team</option>';
+                awayTeamSelect.innerHTML = '<option value="">Select Away Team</option>';
             }
         });
     }

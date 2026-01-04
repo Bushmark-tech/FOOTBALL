@@ -621,6 +621,21 @@
         }
     } catch (e) {
         console.error('Error parsing leagues data:', e);
+        leaguesData = {}; // Ensure it's an object even on error
+    }
+
+    // Fallback: Function to fetch teams from API if not in local data
+    async function fetchTeamsFromAPI(category, league) {
+        try {
+            const response = await fetch(`/api/teams/?category=${encodeURIComponent(category)}&league=${encodeURIComponent(league)}`);
+            if (response.ok) {
+                const data = await response.json();
+                return data.teams || [];
+            }
+        } catch (e) {
+            console.error('API fetch error:', e);
+        }
+        return [];
     }
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -726,7 +741,7 @@
         });
 
         // League change handler
-        leagueSelect.addEventListener('change', function () {
+        leagueSelect.addEventListener('change', async function () {
             const category = categorySelect.value;
             const league = this.value;
 
@@ -734,13 +749,24 @@
             const currentHomeTeam = homeTeamSelect.value;
             const currentAwayTeam = awayTeamSelect.value;
 
-            homeTeamSelect.innerHTML = '<option value="">Select Home Team</option>';
-            awayTeamSelect.innerHTML = '<option value="">Select Away Team</option>';
+            homeTeamSelect.innerHTML = '<option value="">Loading...</option>';
+            awayTeamSelect.innerHTML = '<option value="">Loading...</option>';
 
-            if (category && league && leaguesData[category] && leaguesData[category][league]) {
-                const teams = leaguesData[category][league];
+            let teams = [];
 
-                // Optimize: Use innerHTML for faster rendering (10x faster than DOM manipulation)
+            // Try local data first - ONLY if it has teams
+            if (category && league && leaguesData[category] && leaguesData[category][league] && leaguesData[category][league].length > 0) {
+                teams = leaguesData[category][league];
+            }
+            // Fallback to API if local data missing OR empty
+            else if (category && league) {
+                console.log('Fetching teams from API for:', league);
+                teams = await fetchTeamsFromAPI(category, league);
+            }
+
+            // Populate Check
+            if (teams && teams.length > 0) {
+                // Optimize: Use innerHTML for faster rendering
                 let homeOptions = '<option value="">Select Home Team</option>';
                 let awayOptions = '<option value="">Select Away Team</option>';
 
@@ -750,17 +776,15 @@
                     awayOptions += `<option value="${escapedTeam}">${team}</option>`;
                 });
 
-                // Single DOM update (much faster than multiple appends)
                 homeTeamSelect.innerHTML = homeOptions;
                 awayTeamSelect.innerHTML = awayOptions;
 
-                // Restore previously selected teams if they exist in the new league
-                if (currentHomeTeam && teams.includes(currentHomeTeam)) {
-                    homeTeamSelect.value = currentHomeTeam;
-                }
-                if (currentAwayTeam && teams.includes(currentAwayTeam)) {
-                    awayTeamSelect.value = currentAwayTeam;
-                }
+                // Restore team selections if they exist
+                if (currentHomeTeam) homeTeamSelect.value = currentHomeTeam;
+                if (currentAwayTeam) awayTeamSelect.value = currentAwayTeam;
+            } else {
+                homeTeamSelect.innerHTML = '<option value="">Select Home Team</option>';
+                awayTeamSelect.innerHTML = '<option value="">Select Away Team</option>';
             }
         });
 
