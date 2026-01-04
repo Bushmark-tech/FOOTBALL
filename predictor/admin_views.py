@@ -293,13 +293,13 @@ def admin_user_action(request, user_id):
             user.delete()
             messages.success(request, f'User {username} deleted successfully')
             logger.warning(f"Admin {request.user.username} deleted user {username}")
-            return redirect('admin_users')
+            return redirect('predictor:admin_users')
     
     except Exception as e:
         messages.error(request, f'Error: {str(e)}')
         logger.error(f"Error performing action {action} on user {user_id}: {str(e)}")
     
-    return redirect('admin_user_detail', user_id=user_id)
+    return redirect('predictor:admin_user_detail', user_id=user_id)
 
 
 # ============================================
@@ -413,13 +413,13 @@ def admin_prediction_action(request, prediction_id):
         elif action == 'delete':
             prediction.delete()
             messages.success(request, f'Prediction deleted')
-            return redirect('admin_predictions')
+            return redirect('predictor:admin_predictions')
     
     except Exception as e:
         messages.error(request, f'Error: {str(e)}')
         logger.error(f"Error performing action {action} on prediction {prediction_id}: {str(e)}")
     
-    return redirect('admin_predictions')
+    return redirect('predictor:admin_predictions')
 
 
 # ============================================
@@ -556,7 +556,7 @@ def admin_subscription_action(request, subscription_id):
         messages.error(request, f'Error: {str(e)}')
         logger.error(f"Error performing action {action} on subscription {subscription_id}: {str(e)}")
     
-    return redirect('admin_billing')
+    return redirect('predictor:admin_billing')
 
 
 # ============================================
@@ -702,7 +702,7 @@ def admin_system(request):
             messages.error(request, f'Error: {str(e)}')
             logger.error(f"Error performing action {action}: {str(e)}")
         
-        return redirect('admin_system')
+        return redirect('predictor:admin_system')
     
     # System stats
     total_predictions = Prediction.objects.count()
