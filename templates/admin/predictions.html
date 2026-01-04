@@ -48,16 +48,16 @@
                 <select name="league" class="form-select" style="flex: 1;">
                     <option value="">All Leagues</option>
                     {% for league in leagues %}
-                    <option value="{{ league }}" {% if selected_league==league %}selected{% endif %}>
+                    <option value="{{ league }}" {% if selected_league == league %}selected{% endif %}>
                         {{ league }}
                     </option>
                     {% endfor %}
                 </select>
                 <select name="outcome" class="form-select" style="flex: 1;">
                     <option value="">All Outcomes</option>
-                    <option value="Home" {% if selected_outcome=='Home' %}selected{% endif %}>Home Win</option>
-                    <option value="Draw" {% if selected_outcome=='Draw' %}selected{% endif %}>Draw</option>
-                    <option value="Away" {% if selected_outcome=='Away' %}selected{% endif %}>Away Win</option>
+                    <option value="Home" {% if selected_outcome == 'Home' %}selected{% endif %}>Home Win</option>
+                    <option value="Draw" {% if selected_outcome == 'Draw' %}selected{% endif %}>Draw</option>
+                    <option value="Away" {% if selected_outcome == 'Away' %}selected{% endif %}>Away Win</option>
                 </select>
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-filter"></i> Filter
