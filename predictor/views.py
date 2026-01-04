@@ -298,8 +298,8 @@ def calculate_double_chance(prob_home, prob_draw, prob_away):
     
     # Thresholds (calibrated to only suggest double chance when truly uncertain)
     # These are very conservative to avoid showing double chance for most matches
-    CLEAR_WIN_THRESHOLD = 0.40  # 40% - if any outcome is this strong, use it directly
-    UNCERTAINTY_THRESHOLD = 0.03  # 3% - outcomes must be VERY close to consider double chance
+    CLEAR_WIN_THRESHOLD = 0.38  # 38% - lowered slightly to favor single outcomes (user preference)
+    UNCERTAINTY_THRESHOLD = 0.02  # 2% - outcomes must be extremely close (REDUCED from 3%)
     DOUBLE_CHANCE_MIN_ADVANTAGE = 0.15  # 15% - double chance must be this much better to use it
     
     # Calculate double chance probabilities
@@ -2959,8 +2959,11 @@ def result(request):
                 
                 if home_matched and away_matched:
                     logger.info(f"[H2H DISPLAY] Matched teams: '{home_team}' -> '{home_matched}', '{away_team}' -> '{away_matched}'")
-                    h2h = data[(data[home_col].astype(str).str.strip() == home_matched) & 
-                               (data[away_col].astype(str).str.strip() == away_matched)]
+                    # CRITICAL: Convert to string for comparison (handles both numeric IDs and string names)
+                    home_matched_str = str(home_matched).strip()
+                    away_matched_str = str(away_matched).strip()
+                    h2h = data[(data[home_col].astype(str).str.strip() == home_matched_str) & 
+                               (data[away_col].astype(str).str.strip() == away_matched_str)]
                 else:
                     logger.warning(f"[H2H DISPLAY] Could not match teams in dataset: {home_team} -> {home_matched}, {away_team} -> {away_matched}")
                     h2h = data[(data[home_col].astype(str).str.strip() == str(home_team).strip()) & 
@@ -3072,8 +3075,9 @@ def result(request):
                 try:
                     # Use the same matched team names from H2H lookup above
                     if home_matched and away_matched:
-                        h2h_future = data[(data[home_col].astype(str).str.strip() == home_matched) & 
-                                          (data[away_col].astype(str).str.strip() == away_matched)]
+                        # Use the same string conversion as H2H query above
+                        h2h_future = data[(data[home_col].astype(str).str.strip() == home_matched_str) & 
+                                          (data[away_col].astype(str).str.strip() == away_matched_str)]
                     else:
                         h2h_future = data[(data[home_col].astype(str).str.strip() == str(home_team).strip()) & 
                                           (data[away_col].astype(str).str.strip() == str(away_team).strip())]

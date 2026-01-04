@@ -189,25 +189,53 @@ def normalize_team_name(team_name):
     
     # Common team name mappings (case-insensitive)
     name_mappings = {
-        'man city': 'manchester city',
-        'man utd': 'manchester united',
-        'man united': 'manchester united',
-        'spurs': 'tottenham hotspur',
-        'tottenham': 'tottenham hotspur',
-        'wolves': 'wolverhampton wanderers',
-        'newcastle': 'newcastle united',
-        'west ham': 'west ham united',
-        'leicester': 'leicester city',
-        'brighton': 'brighton \u0026 hove albion',
-        'brighton and hove albion': 'brighton \u0026 hove albion',
-        'nott\'m forest': 'nottingham forest',
-        'nottingham': 'nottingham forest',
-        'forest': 'nottingham forest',
-        'sheffield utd': 'sheffield united',
-        'sheffield united': 'sheffield united',
-        'sheffield wed': 'sheffield wednesday',
-        'west brom': 'west bromwich albion',
-        'wba': 'west bromwich albion',
+        'man city': 'Man City',
+        'manchester city': 'Man City',
+        'man utd': 'Man United',
+        'man united': 'Man United',
+        'man u': 'Man United',
+        'manu': 'Man United',
+        'manchester united': 'Man United',
+        'spurs': 'Tottenham',
+        'tottenham hotspur': 'Tottenham',
+        'wolves': 'Wolves',
+        'wolverhampton wanderers': 'Wolves',
+        'newcastle': 'Newcastle',
+        'newcastle united': 'Newcastle',
+        'west ham': 'West Ham',
+        'west ham united': 'West Ham',
+        'leicester': 'Leicester',
+        'leicester city': 'Leicester',
+        'brighton': 'Brighton',
+        'brighton \u0026 hove albion': 'Brighton',
+        'brighton and hove albion': 'Brighton',
+        'nott\'m forest': 'Nott\'m Forest',
+        'nottingham': 'Nott\'m Forest',
+        'nottingham forest': 'Nott\'m Forest',
+        'forest': 'Nott\'m Forest',
+        'sheffield utd': 'Sheffield United',
+        'sheffield united': 'Sheffield United',
+        'sheffield wed': 'Sheffield Weds',
+        'sheffield wednesday': 'Sheffield Weds',
+        'west brom': 'West Brom',
+        'west bromwich albion': 'West Brom',
+        'wba': 'West Brom',
+        'leeds': 'Leeds',
+        'leeds united': 'Leeds',
+        'aston villa': 'Aston Villa',
+        'villa': 'Aston Villa',
+        'st gallen': 'St. Gallen',
+        'copenhagen': 'FC Copenhagen',
+        'fc copenhagen': 'FC Copenhagen',
+        'rb salzburg': 'Salzburg',
+        'red bull salzburg': 'Salzburg',
+        'rapid vienna': 'SK Rapid',
+        'grasshopper': 'Grasshoppers',
+        'grasshoppers': 'Grasshoppers',
+        'young boys': 'Young Boys',
+        'youngboys': 'Young Boys',
+        'club america': 'Club America',
+        'america': 'Club America',
     }
     
     team_lower = team_name.lower().strip()
@@ -243,6 +271,45 @@ def find_team_in_data(team_name, data, column_name):
     if team_name in unique_teams:
         logger.debug(f"Found exact match for '{team_name}' in {column_name}")
         return team_name
+    
+    # Strategy 2: ID Mapping match (Most robust for ID-based data)
+    try:
+        team_mapping = load_team_mapping()
+        if team_mapping:
+            # Check if input team is in mapping (try original and normalized)
+            target_id = team_mapping.get(team_name.strip())
+            if target_id is None:
+                target_id = team_mapping.get(normalize_team_name(team_name))
+                
+            if target_id is not None:
+                logger.debug(f"Input team '{team_name}' has ID {target_id}")
+                
+                # Check if unique_teams contains numeric IDs (not names)
+                # If so, directly check if target_id is in the list
+                if len(unique_teams) > 0:
+                    sample = unique_teams[0]
+                    try:
+                        np = safe_import_numpy()
+                        is_numeric = isinstance(sample, (int, float, np.integer, np.floating))
+                    except:
+                        is_numeric = isinstance(sample, (int, float))
+                    
+                    if is_numeric:
+                        # Data uses IDs directly - check if target_id exists
+                        if target_id in unique_teams:
+                            logger.info(f"Matched '{team_name}' to ID {target_id} (direct ID match) in {column_name}")
+                            return target_id
+                    else:
+                        # Data uses names - try to find matching name by ID
+                        for team in unique_teams:
+                            team_str = str(team).strip()
+                            # Check if candidate team maps to same ID
+                            candidate_id = team_mapping.get(team_str)
+                            if candidate_id == target_id:
+                                logger.info(f"Matched '{team_name}' to '{team}' (ID {target_id}) in {column_name}")
+                                return team
+    except Exception as e:
+        logger.warning(f"Error in ID matching strategy: {e}")
     
     # Strategy 2: Case-insensitive match
     team_lower = team_name.lower().strip()
@@ -971,6 +1038,39 @@ def calculate_recent_form_features(df, idx, team_name, team_type='home', version
         # Convert team_name to string for comparison
         team_name_str = str(team_name).strip()
         
+        # ID-AWARE UPDATE: Check if data uses IDs (numeric) and convert name to ID if needed
+        # We check the first row of home column to detect type
+        sample_val = df[home_col].iloc[0] if not df.empty else None
+        
+        # Helper to check for numeric type (compatible with pandas/numpy types)
+        def is_numeric_type(val):
+            try:
+                return isinstance(val, (int, float, np.integer, np.floating)) and not isinstance(val, bool)
+            except:
+                return isinstance(val, (int, float))
+                
+        data_uses_ids = is_numeric_type(sample_val) if sample_val is not None else False
+        
+        if data_uses_ids:
+            # Load mapping to convert Name -> ID
+            try:
+                mapping = load_team_mapping()
+                # Try exact match first
+                tid = mapping.get(team_name_str)
+                if tid is None:
+                    # Try normalized match
+                    norm = normalize_team_name(team_name_str)
+                    tid = mapping.get(norm)
+                
+                if tid is not None:
+                    # Found ID! Use it for filtering (converted to string to match astype(str) below)
+                    team_name_str = str(tid)
+                    logger.debug(f"Converted team '{team_name}' to ID '{team_name_str}' for form calculation")
+                else:
+                    logger.warning(f"Could not find ID for team '{team_name}' in mapping - form calculation may fail")
+            except Exception as e:
+                logger.warning(f"Failed to load mapping for ID conversion: {e}")
+        
         # OPTIMIZED: Filter more efficiently and avoid iterrows() which is slow
         team_name_str_lower = team_name_str.lower()
         
@@ -1038,6 +1138,44 @@ def get_team_recent_form_original(team_name, data, version="v1"):
             version = "v1"
         
         team_name_clean = str(team_name).strip()
+        
+        # ID-AWARE UPDATE: Check for ID-based data
+        # If columns exist and data is not empty, check data type
+        use_ids = False
+        if hasattr(data, 'columns') and 'HomeTeam' in data.columns and not data.empty:
+             val = data['HomeTeam'].iloc[0]
+             try:
+                 use_ids = isinstance(val, (int, float, np.integer, np.floating))
+             except:
+                 use_ids = isinstance(val, (int, float))
+        elif hasattr(data, 'columns') and 'Home' in data.columns and not data.empty:
+             val = data['Home'].iloc[0]
+             try:
+                 use_ids = isinstance(val, (int, float, np.integer, np.floating))
+             except:
+                 use_ids = isinstance(val, (int, float))
+                 
+        if use_ids:
+            try:
+                mapping = load_team_mapping()
+                tid = mapping.get(team_name_clean)
+                if tid is None:
+                    norm = normalize_team_name(team_name_clean)
+                    tid = mapping.get(norm)
+                
+                if tid is not None:
+                    team_ID_str = str(tid)
+                    logger.info(f"✓ ID CONVERSION: '{team_name_clean}' → ID '{team_ID_str}' (use_ids={use_ids})")
+                    # We will use this ID for matching, but keep original name for display if needed
+                    # Actually, the matching logic below compares column value to 'team_name_clean'
+                    # So we update team_name_clean to be the ID string
+                    team_name_clean = team_ID_str
+                else:
+                    logger.warning(f"✗ ID NOT FOUND: '{team_name_clean}' not in mapping (use_ids={use_ids})")
+            except Exception as e:
+                logger.warning(f"Mapping lookup failed: {e}")
+        else:
+            logger.info(f"ℹ NO ID CONVERSION: use_ids={use_ids} for '{team_name_clean}'")
         
         # Try to get form from real data first
         # Only use manual lookup if no data is available (fallback)
@@ -1115,9 +1253,19 @@ def get_team_recent_form_original(team_name, data, version="v1"):
             df = data[[home_col, away_col, result_col]].copy()
         
         # Convert team columns to string to ensure proper matching
-        df[home_col] = df[home_col].astype(str)
-        df[away_col] = df[away_col].astype(str)
-        team_name_clean = str(team_name).strip()
+        df[home_col] = df[home_col].astype(str).str.strip()
+        df[away_col] = df[away_col].astype(str).str.strip()
+        
+        # CRITICAL: Don't overwrite team_name_clean if it was already converted to ID
+        # Save original name for fallback matching
+        original_team_name = str(team_name).strip()
+        # team_name_clean may already be an ID (from lines 1140-1154)
+        # Only reset if it wasn't converted
+        if not use_ids:
+            logger.info(f"ℹ RESETTING team_name_clean: '{team_name_clean}' → '{original_team_name}' (use_ids={use_ids})")
+            team_name_clean = original_team_name
+        else:
+            logger.info(f"✓ PRESERVING ID: team_name_clean='{team_name_clean}' (use_ids={use_ids})")
         team_name_lower = team_name_clean.lower()
         
         # Create variations of team name for better matching
@@ -1136,18 +1284,25 @@ def get_team_recent_form_original(team_name, data, version="v1"):
         
         # Filter matches where team played (as home or away) - try exact match first
         # Convert to string for comparison (handles both v1 and v2 formats)
+        logger.info(f"🔍 SEARCHING for team_name_clean='{team_name_clean}' in {len(df)} rows")
+        logger.info(f"   Sample {home_col} values: {df[home_col].head(3).tolist()}")
+        logger.info(f"   Sample {away_col} values: {df[away_col].head(3).tolist()}")
+        
         recent_matches = df[
             (df[home_col].astype(str).str.strip() == team_name_clean) | 
             (df[away_col].astype(str).str.strip() == team_name_clean)
         ]
         
+        logger.info(f"   Found {len(recent_matches)} matches for '{team_name_clean}'")
+        
         # Try variations
         if recent_matches.empty:
+            logger.info(f"   No exact matches, trying {len(team_variations)-1} variations...")
             for variation in team_variations[1:]:  # Skip first (already tried)
                 if variation and len(variation) > 2:
                     recent_matches = df[(df[home_col] == variation) | (df[away_col] == variation)]
                     if not recent_matches.empty:
-                        logger.info(f"Found matches using variation '{variation}' for team '{team_name_clean}'")
+                        logger.info(f"✓ Found {len(recent_matches)} matches using variation '{variation}' for team '{team_name_clean}'")
                         break
         
         # If no exact match, try case-insensitive
@@ -1206,20 +1361,44 @@ def get_team_recent_form_original(team_name, data, version="v1"):
         # ORIGINAL LOGIC FROM lGIC/analytics.py - EXACT MATCH
         # Sort by Date descending (most recent first) and get last 5 matches
         # This ensures we get the MOST RECENT matches
+        logger.info(f"📊 Before sort: {len(recent_matches)} matches, has Date column: {'Date' in recent_matches.columns}")
+        if 'Date' in recent_matches.columns:
+            logger.info(f"   Date column sample: {recent_matches['Date'].head(3).tolist()}")
+        
         recent_matches = recent_matches.sort_values("Date", ascending=False).head(5)
+        
+        logger.info(f"📊 After sort: {len(recent_matches)} matches")
 
         form = []
-        for _, row in recent_matches.iterrows():
+        logger.info(f"🔄 Processing {len(recent_matches)} matches to calculate form...")
+        for idx, row in recent_matches.iterrows():
             result = row[result_col]
             is_home = row[home_col] == team_name_clean
             
+            logger.info(f"   Match {len(form)+1}: result='{result}', is_home={is_home}, home={row[home_col]}, away={row[away_col]}, team='{team_name_clean}'")
+            
+            # CRITICAL FIX: Handle both numeric (0,1,2) and letter (H,D,A) result formats
+            # Numeric encoding: 0=Away, 1=Draw, 2=Home
+            result_str = str(result).strip()
+            
+            # Convert numeric to letter format if needed
+            if result_str in ['0', '1', '2']:
+                result_map = {'0': 'A', '1': 'D', '2': 'H'}
+                result_letter = result_map[result_str]
+                logger.info(f"      Converted numeric result '{result_str}' → '{result_letter}'")
+            else:
+                result_letter = result_str
+            
             # EXACT as original lGIC/analytics.py logic (line 72-77)
-            if result == "D":
+            if result_letter == "D":
                 form.append("D")
-            elif (result == "H" and is_home) or (result == "A" and not is_home):
+                logger.info(f"      → D (draw)")
+            elif (result_letter == "H" and is_home) or (result_letter == "A" and not is_home):
                 form.append("W")
+                logger.info(f"      → W (win)")
             else:
                 form.append("L")
+                logger.info(f"      → L (loss)")
         
         # ORIGINAL LOGIC FROM lGIC/analytics.py - Use exactly the matches found
         # (Removed 'D' padding as requested by user to use only available information)
@@ -1397,8 +1576,8 @@ def determine_final_prediction(pred, probs):
         max_prob = max(probs.values())
         highest_outcomes = [k for k, v in probs.items() if v == max_prob]
         
-        # Also check for "close ties" - outcomes within 5% of the maximum
-        close_ties = [k for k, v in probs.items() if abs(v - max_prob) <= 5.0 and k not in highest_outcomes]
+        # Also check for "close ties" - outcomes within 2% of the maximum (REDUCED from 5% to avoid excessive double chance)
+        close_ties = [k for k, v in probs.items() if abs(v - max_prob) <= 2.0 and k not in highest_outcomes]
         all_close_outcomes = highest_outcomes + close_ties
 
         # PRIORITY: Use model prediction as primary - model predictions take precedence over historical probabilities
@@ -1646,7 +1825,15 @@ def get_enhanced_features(home_team, away_team):
         }
 
 def load_team_mapping():
-    """Load team ID mapping from CSV."""
+    """Load team ID mapping from CSV with caching."""
+    global _data_cache
+    
+    if _data_cache is None:
+        _data_cache = {}
+        
+    if 'team_mapping' in _data_cache:
+        return _data_cache['team_mapping']
+        
     try:
         import os
         import csv
@@ -1670,10 +1857,15 @@ def load_team_mapping():
                 for row in reader:
                     if 'Team' in row and 'ID' in row:
                         mapping[row['Team'].strip()] = int(row['ID'])
+            
+            # Cache the mapping
+            _data_cache['team_mapping'] = mapping
+            logger.info(f"Loaded team mapping with {len(mapping)} teams")
         else:
             logger.warning("team_mapping.csv not found")
+            _data_cache['team_mapping'] = {}
             
-        return mapping
+        return _data_cache['team_mapping']
     except Exception as e:
         logger.error(f"Error loading team mapping: {e}")
         return {}
