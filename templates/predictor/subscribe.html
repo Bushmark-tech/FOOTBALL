@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -61,25 +62,25 @@
             padding: 0 2rem;
             width: 100%;
         }
-        
+
         @media (min-width: 768px) {
             .container-main {
                 max-width: 700px;
             }
         }
-        
+
         @media (min-width: 992px) {
             .container-main {
                 max-width: 850px;
             }
         }
-        
+
         @media (min-width: 1200px) {
             .container-main {
                 max-width: 1000px;
             }
         }
-        
+
         @media (min-width: 1400px) {
             .container-main {
                 max-width: 1200px;
@@ -134,13 +135,13 @@
             margin-bottom: 2rem;
             width: 100%;
         }
-        
+
         @media (min-width: 768px) {
             .pricing-section {
                 padding: 2.5rem;
             }
         }
-        
+
         @media (min-width: 992px) {
             .pricing-section {
                 padding: 3rem;
@@ -157,7 +158,7 @@
             gap: 1rem;
             width: 100%;
         }
-        
+
         @media (min-width: 768px) {
             .price-display {
                 flex-direction: row;
@@ -165,25 +166,25 @@
                 align-items: center;
                 gap: 2rem;
             }
-            
+
             .divider-text {
                 margin: 0;
             }
         }
-        
+
         .price-amount {
             font-size: 2.5rem;
             font-weight: 700;
             color: #00d9a3;
             white-space: nowrap;
         }
-        
+
         @media (min-width: 768px) {
             .price-amount {
                 font-size: 3rem;
             }
         }
-        
+
         @media (min-width: 992px) {
             .price-amount {
                 font-size: 3.5rem;
@@ -218,7 +219,7 @@
             margin: 2rem 0;
             width: 100%;
         }
-        
+
         @media (min-width: 768px) {
             .features-list {
                 display: grid;
@@ -226,7 +227,7 @@
                 gap: 1rem;
             }
         }
-        
+
         @media (min-width: 992px) {
             .features-list {
                 grid-template-columns: repeat(2, 1fr);
@@ -252,20 +253,20 @@
             margin-top: 2rem;
             width: 100%;
         }
-        
+
         .form-row {
             display: flex;
             flex-direction: column;
             gap: 2rem;
             width: 100%;
         }
-        
+
         @media (min-width: 768px) {
             .form-row {
                 flex-direction: row;
                 gap: 2rem;
             }
-            
+
             .form-row .form-section {
                 flex: 1;
             }
@@ -364,32 +365,33 @@
             .crown-icon {
                 font-size: 2rem;
             }
-            
+
             .container-main {
                 padding: 0 1.5rem;
             }
-            
+
             .pricing-section {
                 padding: 2rem 1.5rem;
             }
         }
-        
+
         @media (max-width: 576px) {
             .container-main {
                 padding: 0 1rem;
                 margin: 2rem auto;
             }
-            
+
             .pricing-section {
                 padding: 1.5rem 1rem;
             }
-            
+
             .page-header {
                 margin-bottom: 1.5rem;
             }
         }
     </style>
 </head>
+
 <body>
     <!-- Navigation -->
     <nav class="navbar">
@@ -400,9 +402,11 @@
             <div class="d-flex gap-3">
                 <a href="{% url 'predictor:home' %}" class="nav-link"><i class="fas fa-home"></i> DASHBOARD</a>
                 <a href="{% url 'predictor:predict' %}" class="nav-link"><i class="fas fa-list"></i> PREDICTIONS</a>
-                <a href="{% url 'predictor:predict' %}?multi=true" class="nav-link"><i class="fas fa-layer-group"></i> MULTI-MATCH</a>
+                <a href="{% url 'predictor:predict' %}?multi=true" class="nav-link"><i class="fas fa-layer-group"></i>
+                    MULTI-MATCH</a>
                 <a href="{% url 'predictor:history' %}" class="nav-link"><i class="fas fa-history"></i> HISTORY</a>
-                <a href="{% url 'predictor:subscribe' %}" class="nav-link active"><i class="fas fa-crown"></i> SUBSCRIBE</a>
+                <a href="{% url 'predictor:subscribe' %}" class="nav-link active"><i class="fas fa-crown"></i>
+                    SUBSCRIBE</a>
             </div>
         </div>
     </nav>
@@ -420,11 +424,11 @@
             <i class="fas fa-gift"></i>
             <span class="free-matches-text">
                 {% if status.has_access and status.reason == 'free_matches' %}
-                    You have {{ status.remaining }} free matches remaining
+                You have {{ status.remaining }} free matches remaining
                 {% elif status.has_access and status.reason == 'subscription' %}
-                    You have an active subscription!
+                You have an active subscription!
                 {% else %}
-                    You have used all your free matches
+                You have used all your free matches
                 {% endif %}
             </span>
         </div>
@@ -460,37 +464,31 @@
             </ul>
 
             {% if not status.has_access or status.reason != 'subscription' %}
-                <form method="post" id="subscribeForm" action="{% url 'predictor:mpesa_payment' %}">
-                    {% csrf_token %}
-                    <!-- Currency Selection -->
-                    <div class="form-section">
-                        <label class="form-label">SELECT CURRENCY</label>
-                        <select class="currency-select" id="currencySelect" name="currency" required>
-                            <option value="USD">USD (${{ price_usd }})</option>
-                            <option value="KSH" selected>KSH ({{ price_ksh }}.0)</option>
-                        </select>
-                    </div>
+            <form method="post" id="subscribeForm" action="{% url 'predictor:mpesa_payment' %}">
+                {% csrf_token %}
+                <!-- Currency Selection -->
+                <div class="form-section">
+                    <label class="form-label">SELECT CURRENCY</label>
+                    <select class="currency-select" id="currencySelect" name="currency" required>
+                        <option value="USD">USD (${{ price_usd }})</option>
+                        <option value="KSH" selected>KSH ({{ price_ksh }}.0)</option>
+                    </select>
+                </div>
 
-                    <!-- M-PESA Phone Number -->
-                    <div class="form-section">
-                        <label class="form-label">M-PESA PHONE NUMBER</label>
-                        <input 
-                            type="tel" 
-                            class="phone-input" 
-                            id="phoneNumber"
-                            name="mpesa_number"
-                            placeholder="254712345678 or 0712345678"
-                            value="{{ profile.mpesa_number|default_if_none:'' }}"
-                            required
-                        >
-                        <div class="helper-text">Enter your M-Pesa registered phone number</div>
-                    </div>
+                <!-- M-PESA Phone Number -->
+                <div class="form-section">
+                    <label class="form-label">M-PESA PHONE NUMBER</label>
+                    <input type="tel" class="phone-input" id="phoneNumber" name="mpesa_number"
+                        placeholder="254712345678 or 0712345678" value="{{ profile.mpesa_number|default_if_none:'' }}"
+                        required>
+                    <div class="helper-text">Enter your M-Pesa registered phone number</div>
+                </div>
 
-                    <!-- Subscribe Button -->
-                    <button type="submit" class="subscribe-btn" id="subscribeBtn">
-                        <i class="fas fa-crown"></i> Subscribe Now
-                    </button>
-                </form>
+                <!-- Subscribe Button -->
+                <button type="submit" class="subscribe-btn" id="subscribeBtn">
+                    <i class="fas fa-crown"></i> Subscribe Now
+                </button>
+            </form>
             {% endif %}
         </div>
 
@@ -504,9 +502,9 @@
     <script>
         // Phone number validation
         const phoneInput = document.getElementById('phoneNumber');
-        
+
         if (phoneInput) {
-            phoneInput.addEventListener('input', function(e) {
+            phoneInput.addEventListener('input', function (e) {
                 // Remove non-numeric characters
                 let value = e.target.value.replace(/\D/g, '');
                 e.target.value = value;
@@ -516,13 +514,13 @@
         // Subscribe form handler
         const subscribeForm = document.getElementById('subscribeForm');
         if (subscribeForm) {
-            subscribeForm.addEventListener('submit', function(e) {
+            subscribeForm.addEventListener('submit', function (e) {
                 e.preventDefault();
-                
+
                 const phoneNumber = phoneInput.value;
                 const currency = document.getElementById('currencySelect').value;
                 const subscribeBtn = document.getElementById('subscribeBtn');
-                
+
                 if (!phoneNumber) {
                     alert('Please enter your M-Pesa phone number');
                     return;
@@ -551,45 +549,50 @@
                 subscribeBtn.disabled = true;
                 subscribeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
 
-                // Submit form via AJAX
-                const formData = new FormData(this);
-                
+                // Create JSON payload
+                const payload = {
+                    mpesa_number: formattedPhone,
+                    currency: currency
+                };
+
                 fetch(this.action, {
                     method: 'POST',
-                    body: formData,
+                    body: JSON.stringify(payload),
                     headers: {
-                        'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': new FormData(this).get('csrfmiddlewaretoken')
                     }
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert(data.message || 'Payment request sent to your phone. Please complete the payment.');
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 2000);
-                    } else {
-                        alert(data.error || 'Payment initiation failed. Please try again.');
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(data.message || 'Payment request sent to your phone. Please complete the payment.');
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 2000);
+                        } else {
+                            alert(data.error || 'Payment initiation failed. Please try again.');
+                            subscribeBtn.disabled = false;
+                            subscribeBtn.innerHTML = originalText;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred. Please try again.');
                         subscribeBtn.disabled = false;
                         subscribeBtn.innerHTML = originalText;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred. Please try again.');
-                    subscribeBtn.disabled = false;
-                    subscribeBtn.innerHTML = originalText;
-                });
+                    });
             });
         }
 
         // Currency change handler
         const currencySelect = document.getElementById('currencySelect');
         if (currencySelect) {
-            currencySelect.addEventListener('change', function(e) {
+            currencySelect.addEventListener('change', function (e) {
                 console.log('Currency changed to:', e.target.value);
             });
         }
     </script>
 </body>
+
 </html>
