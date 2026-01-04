@@ -533,7 +533,6 @@
                     </div>
 
                     <form id="prediction-form" method="post" autocomplete="off">
-                        {{ leagues_by_category|json_script:"leagues-data-script" }}
                         {% csrf_token %}
 
                         <!-- Clear Form Button -->
@@ -614,18 +613,17 @@
     // League data structure - Dynamically populated from server
     let leaguesData = {};
 
-    document.addEventListener('DOMContentLoaded', function () {
-        try {
-            const scriptTag = document.getElementById('leagues-data-script');
-            if (scriptTag) {
-                leaguesData = JSON.parse(scriptTag.textContent);
-                console.log('Leagues data loaded successfully', Object.keys(leaguesData));
-            } else {
-                console.error('Leagues data script tag not found!');
-            }
-        } catch (e) {
-            console.error('Error parsing leagues data:', e);
+    try {
+        const rawData = '{{ leagues_json|escapejs }}';
+        if (rawData) {
+            leaguesData = JSON.parse(rawData);
+            console.log('Leagues data loaded successfully via escapejs', Object.keys(leaguesData));
         }
+    } catch (e) {
+        console.error('Error parsing leagues data:', e);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
         // Optimize: Defer non-critical operations
         const form = document.getElementById('prediction-form');
         const predictBtn = document.getElementById('predict-btn');

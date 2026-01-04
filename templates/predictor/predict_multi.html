@@ -197,7 +197,6 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        {{ leagues_by_category|json_script:"leagues-data-script" }}
                         {% csrf_token %}
                         <div id="matches-container">
                             <!-- Match forms will be added here dynamically -->
@@ -254,6 +253,15 @@
     // League data structure - Dynamically populated from server
     let leaguesData = {};
 
+    try {
+        const rawData = '{{ leagues_json|escapejs }}';
+        if (rawData) {
+            leaguesData = JSON.parse(rawData);
+            console.log('Leagues data loaded successfully via escapejs', Object.keys(leaguesData));
+        }
+    } catch (e) {
+        console.error('Error parsing leagues data:', e);
+    }
 
     let matchCounter = 0;
     // Load predictions from database API instead of localStorage
@@ -421,19 +429,6 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        // Load leagues data first
-        try {
-            const scriptTag = document.getElementById('leagues-data-script');
-            if (scriptTag) {
-                leaguesData = JSON.parse(scriptTag.textContent);
-                console.log('Leagues data loaded successfully', Object.keys(leaguesData));
-            } else {
-                console.error('Leagues data script tag not found!');
-            }
-        } catch (e) {
-            console.error('Error parsing leagues data:', e);
-        }
-
         // Add first match form (single form for simplicity)
         addMatchForm();
 
