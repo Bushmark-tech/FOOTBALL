@@ -7,6 +7,7 @@ echo "Starting build process..."
 
 # Install dependencies
 echo "Installing Python dependencies..."
+cat requirements.txt
 pip install -r requirements.txt
 
 # Collect static files
