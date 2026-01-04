@@ -285,6 +285,15 @@ def initiate_mpesa_payment(request):
     try:
         mpesa_number = request.POST.get('mpesa_number')
         currency = request.POST.get('currency', 'USD')
+
+        if not mpesa_number and request.body:
+             try:
+                 import json
+                 data = json.loads(request.body)
+                 mpesa_number = data.get('mpesa_number')
+                 currency = data.get('currency', 'USD')
+             except json.JSONDecodeError:
+                 pass
         
         if not mpesa_number:
             return JsonResponse({'error': 'M-Pesa number is required'}, status=400)
