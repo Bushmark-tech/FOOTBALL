@@ -836,7 +836,8 @@ def get_leagues_by_category():
     # Try to get from cache first
     try:
         cached = cache.get(cache_key)
-        if cached is not None:
+        # Only return if cached data is NOT empty
+        if cached:
             return cached
     except Exception:
         pass
