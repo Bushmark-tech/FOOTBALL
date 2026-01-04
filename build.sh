@@ -17,9 +17,12 @@ pip install -r requirements.txt
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
-# Run migrations
 echo "Running database migrations..."
 python manage.py migrate --noinput
+
+# Seed database with leagues and teams
+echo "Seeding database with leagues and teams..."
+python manage.py seed_leagues
 
 echo "Build completed successfully!"
 
