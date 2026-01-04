@@ -1,0 +1,47 @@
+﻿python : WARNING:predictor.an
+alytics:Neither 
+data/football_data2.csv nor 
+lGIC/football_data2.csv found
+At line:1 char:1
++ python 
+check_arsenal_everton.py 
+2>&1 | Out-File -FilePath 
+diagnostic_ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~
+    + CategoryInfo           
+   : NotSpecified: (WARNING  
+  :predict...data2.csv fou   
+ nd:String) [], RemoteExc    
+eption
+    + FullyQualifiedErrorId  
+   : NativeCommandError
+ 
+
+================================================================================
+ARSENAL VS EVERTON - DATASET DIAGNOSTIC
+================================================================================
+
+================================================================================
+CHECKING DATASET 1: Arsenal vs Everton
+================================================================================
+Γ¥î Dataset 1 is empty or None
+
+================================================================================
+CHECKING DATASET 2: Arsenal vs Everton
+================================================================================
+Γ¥î Dataset 2 is empty or None
+
+================================================================================
+SUMMARY
+================================================================================
+Dataset 1: Γ¥î No H2H data
+Dataset 2: Γ¥î No H2H data
+
+ΓÜá∩╕Å WARNING: Arsenal vs Everton not found in either dataset!
+This is unexpected for a major Premier League fixture.
+
+Possible reasons:
+1. Team names in dataset are different (e.g., 'Arsenal FC')
+2. Datasets don't include this fixture
+3. Data loading issue

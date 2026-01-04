@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Predictor Pro - Register</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #0a0e1a;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .register-container {
+            max-width: 100%;
+            margin: 2rem auto;
+            width: 100%;
+            padding: 0 2rem;
+        }
+        
+        @media (min-width: 768px) {
+            .register-container {
+                max-width: 600px;
+            }
+        }
+        
+        @media (min-width: 992px) {
+            .register-container {
+                max-width: 700px;
+            }
+        }
+        
+        @media (min-width: 1200px) {
+            .register-container {
+                max-width: 800px;
+            }
+        }
+        
+        @media (min-width: 1400px) {
+            .register-container {
+                max-width: 900px;
+            }
+        }
+        
+        .register-card {
+            background: #1a1f2e;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            border: 1px solid #2a3142;
+            width: 100%;
+        }
+        
+        .register-header {
+            background: linear-gradient(135deg, #00d9a3 0%, #00b388 100%);
+            color: white;
+            padding: 2.5rem 2rem;
+            text-align: center;
+        }
+        
+        @media (min-width: 768px) {
+            .register-header {
+                padding: 3rem 2.5rem;
+            }
+        }
+        
+        @media (min-width: 992px) {
+            .register-header {
+                padding: 3.5rem 3rem;
+            }
+        }
+        
+        .register-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        @media (min-width: 768px) {
+            .register-header h1 {
+                font-size: 2.25rem;
+            }
+        }
+        
+        @media (min-width: 992px) {
+            .register-header h1 {
+                font-size: 2.5rem;
+            }
+        }
+        
+        .register-header p {
+            margin: 0;
+            opacity: 0.95;
+        }
+        
+        .register-body {
+            padding: 2.5rem 2rem;
+            width: 100%;
+        }
+        
+        @media (min-width: 768px) {
+            .register-body {
+                padding: 3rem 2.5rem;
+            }
+        }
+        
+        @media (min-width: 992px) {
+            .register-body {
+                padding: 3.5rem 3rem;
+            }
+        }
+        
+        .promo-badge {
+            background: linear-gradient(135deg, #00d9a3 0%, #00b388 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 15px rgba(0, 217, 163, 0.3);
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #e5e7eb;
+            margin-bottom: 0.5rem;
+            width: 100%;
+        }
+        
+        .mb-3 {
+            width: 100%;
+        }
+        
+        .form-control {
+            background: #0f1419;
+            border: 2px solid #2a3142;
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            color: #e5e7eb;
+        }
+        
+        .form-control:focus {
+            background: #0f1419;
+            border-color: #00d9a3;
+            box-shadow: 0 0 0 0.2rem rgba(0, 217, 163, 0.25);
+            color: #e5e7eb;
+        }
+        
+        .form-control::placeholder {
+            color: #6b7280;
+        }
+        
+        .input-group-text {
+            background: #0f1419;
+            border: 2px solid #2a3142;
+            border-right: none;
+            border-radius: 10px 0 0 10px;
+            color: #00d9a3;
+        }
+        
+        .input-group .form-control {
+            border-left: none;
+            border-radius: 0 10px 10px 0;
+        }
+        
+        .input-group:focus-within .input-group-text {
+            border-color: #00d9a3;
+        }
+        
+        .btn-register {
+            background: linear-gradient(135deg, #00d9a3 0%, #00b388 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 0.875rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            box-shadow: 0 4px 15px rgba(0, 217, 163, 0.3);
+        }
+        
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 217, 163, 0.4);
+            background: linear-gradient(135deg, #00e6b0 0%, #00c695 100%);
+        }
+        
+        .btn-google {
+            background: #0f1419;
+            border: 2px solid #2a3142;
+            border-radius: 10px;
+            padding: 0.75rem;
+            font-weight: 600;
+            color: #e5e7eb;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-google:hover {
+            background: #1a1f2e;
+            border-color: #00d9a3;
+            color: #e5e7eb;
+        }
+        
+        .divider {
+            text-align: center;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+        
+        .divider::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            height: 1px;
+            background: #2a3142;
+        }
+        
+        .divider span {
+            background: #1a1f2e;
+            padding: 0 1rem;
+            position: relative;
+            color: #6b7280;
+            font-weight: 600;
+        }
+        
+        .login-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #9ca3af;
+        }
+        
+        .login-link a {
+            color: #00d9a3;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        
+        .login-link a:hover {
+            color: #00e6b0;
+            text-decoration: underline;
+        }
+        
+        .password-strength {
+            height: 4px;
+            border-radius: 2px;
+            margin-top: 0.5rem;
+            background: #2a3142;
+            overflow: hidden;
+        }
+        
+        .password-strength-bar {
+            height: 100%;
+            width: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .strength-weak { background: #ef4444; width: 33%; }
+        .strength-medium { background: #f59e0b; width: 66%; }
+        .strength-strong { background: #00d9a3; width: 100%; }
+        
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #6b7280;
+            z-index: 10;
+        }
+        
+        .password-toggle:hover {
+            color: #00d9a3;
+        }
+        
+        .position-relative {
+            position: relative;
+        }
+        
+        .text-muted {
+            color: #6b7280 !important;
+        }
+
+        .alert {
+            border-radius: 10px;
+            padding: 0.875rem 1rem;
+            margin-bottom: 1.5rem;
+            border: none;
+        }
+
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border-left: 3px solid #ef4444;
+        }
+
+        .alert-success {
+            background: rgba(0, 217, 163, 0.15);
+            color: #00d9a3;
+            border-left: 3px solid #00d9a3;
+        }
+        
+        .input-group {
+            width: 100%;
+            display: flex;
+        }
+        
+        .input-group .form-control {
+            flex: 1;
+            width: 100%;
+        }
+        
+        .input-group-text {
+            flex-shrink: 0;
+        }
+        
+        @media (max-width: 768px) {
+            .register-container {
+                padding: 0 1.5rem;
+            }
+            
+            .register-header {
+                padding: 2rem 1.5rem;
+            }
+            
+            .register-body {
+                padding: 2rem 1.5rem;
+            }
+            
+            .register-header h1 {
+                font-size: 1.75rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .register-container {
+                padding: 0 1rem;
+                margin: 1.5rem auto;
+            }
+            
+            .register-header {
+                padding: 1.5rem 1rem;
+            }
+            
+            .register-body {
+                padding: 1.5rem 1rem;
+            }
+            
+            .register-header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="register-container">
+            <div class="register-card">
+                <div class="register-header">
+                    <h1><i class="fas fa-chart-line"></i> FOOTBALL PREDICTOR PRO</h1>
+                    <p>Join thousands of winning predictors</p>
+                </div>
+                
+                <div class="register-body">
+                    <div class="text-center">
+                        <span class="promo-badge">
+                            <i class="fas fa-gift"></i> 3 Free Matches Included
+                        </span>
+                    </div>
+                    
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                <i class="fas fa-{% if message.tags == 'error' %}exclamation-circle{% else %}check-circle{% endif %} me-2"></i>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <form method="post" id="registerForm">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input type="text" class="form-control" id="username" name="username" placeholder="Choose a username" required autofocus>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email <span class="text-muted">(Optional)</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                <input type="email" class="form-control" id="email" name="email" placeholder="your.email@example.com">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <div class="position-relative">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    <input type="password" class="form-control" id="password" name="password" placeholder="Create a strong password" required>
+                                </div>
+                                <i class="fas fa-eye password-toggle" id="togglePassword"></i>
+                            </div>
+                            <div class="password-strength">
+                                <div class="password-strength-bar" id="strengthBar"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Confirm Password</label>
+                            <div class="position-relative">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    <input type="password" class="form-control" id="confirmPassword" name="password_confirm" placeholder="Confirm your password" required>
+                                </div>
+                                <i class="fas fa-eye password-toggle" id="toggleConfirmPassword"></i>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-register">
+                            <i class="fas fa-user-plus"></i> Create Account
+                        </button>
+                    </form>
+                    
+                    <div class="divider">
+                        <span>OR</span>
+                    </div>
+                    
+                    <a href="/accounts/google/login/?process=signup" class="btn btn-google">
+                        <i class="fab fa-google"></i> Continue with Google
+                    </a>
+                    
+                    <div class="login-link">
+                        Already have an account? <a href="{% url 'predictor:login' %}">Login here</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Password visibility toggle
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const password = document.getElementById('password');
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+        
+        document.getElementById('toggleConfirmPassword').addEventListener('click', function() {
+            const password = document.getElementById('confirmPassword');
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+        
+        // Password strength indicator
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const strengthBar = document.getElementById('strengthBar');
+            
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^a-zA-Z0-9]/.test(password)) strength++;
+            
+            strengthBar.className = 'password-strength-bar';
+            if (strength <= 2) {
+                strengthBar.classList.add('strength-weak');
+            } else if (strength === 3) {
+                strengthBar.classList.add('strength-medium');
+            } else {
+                strengthBar.classList.add('strength-strong');
+            }
+        });
+        
+        // Form validation
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Passwords do not match!');
+                return false;
+            }
+            
+            if (password.length < 8) {
+                e.preventDefault();
+                alert('Password must be at least 8 characters long!');
+                return false;
+            }
+        });
+    </script>
+</body>
+</html>

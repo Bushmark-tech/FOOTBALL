@@ -1,0 +1,185 @@
+{% extends 'admin/dashboard_base.html' %}
+
+{% block title %}Advanced Analytics - Football Pro Admin{% endblock %}
+{% block page_title %}Analytics & Intelligence{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Time Range & Strategy -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body py-3">
+                    <form method="GET" class="row align-items-center g-3">
+                        <div class="col-auto">
+                            <span class="text-muted fw-bold small uppercase">Analysis Window:</span>
+                        </div>
+                        <div class="col-md-3">
+                            <select name="days" class="form-select form-select-sm border-0 bg-light fw-bold"
+                                onchange="this.form.submit()">
+                                <option value="7" {% if days == 7 %}selected{% endif %}>Last 7 Days (Short Term)</option>
+                                <option value="14" {% if days == 14 %}selected{% endif %}>Last 14 Days (Staging)</option>
+                                <option value="30" {% if days == 30 %}selected{% endif %}>Last 30 Days (Standard)</option>
+                                <option value="90" {% if days == 90 %}selected{% endif %}>Last 90 Days (Quarterly)
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col text-end">
+                            <span class="badge bg-primary-soft text-primary">Data Refreshed: Real-time</span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3 border-0">
+                    <h6 class="m-0 fw-bold">User Acquisition Velocity</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="usersChart" style="height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3 border-0">
+                    <h6 class="m-0 fw-bold">Prediction Engine Volume</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="predictionsChart" style="height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Market Interests -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3 border-0">
+                    <h6 class="m-0 fw-bold">League Popularity Heatmap</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr class="bg-light">
+                                    <th class="ps-3">League</th>
+                                    <th>Share</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for league in top_leagues %}
+                                <tr>
+                                    <td class="ps-3 fw-bold">{{ league.league|default:"Global Miscellaneous" }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress flex-grow-1" style="height: 6px;">
+                                                <div class="progress-bar bg-primary" style="width: {{ league.count }}%">
+                                                </div>
+                                            </div>
+                                            <span class="ms-2 small fw-bold">{{ league.count }}</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="2" class="text-center py-4">Insufficient data for heatmap</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-primary-soft {
+        background-color: rgba(37, 99, 235, 0.1);
+    }
+
+    .bg-light {
+        background-color: #f8fafc;
+    }
+
+    canvas {
+        width: 100% !important;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Users Chart
+        const usersCtx = document.getElementById('usersChart').getContext('2d');
+        const userGradient = usersCtx.createLinearGradient(0, 0, 0, 300);
+        userGradient.addColorStop(0, 'rgba(37, 99, 235, 0.2)');
+        userGradient.addColorStop(1, 'rgba(37, 99, 235, 0)');
+
+        new Chart(usersCtx, {
+            type: 'line',
+            data: {
+                labels: {{ chart_labels| safe }},
+        datasets: [{
+            label: 'New Acquisition',
+            data: {{ users_data| safe }},
+        borderColor: '#2563eb',
+        backgroundColor: userGradient,
+        borderWidth: 2,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 3,
+        pointBackgroundColor: '#2563eb'
+                }]
+            },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: { borderDash: [5, 5] },
+                ticks: { stepSize: 1 }
+            },
+            x: { grid: { display: false } }
+        }
+    }
+        });
+
+    // Predictions Chart
+    const predCtx = document.getElementById('predictionsChart').getContext('2d');
+    new Chart(predCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ chart_labels| safe }},
+        datasets: [{
+            label: 'Predictions Generated',
+            data: {{ predictions_data| safe }},
+        backgroundColor: '#0f172a',
+        borderRadius: 4,
+        barPercentage: 0.6
+                }]
+            },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
+            x: { grid: { display: false } }
+        }
+    }
+        });
+    });
+</script>
+{% endblock %}

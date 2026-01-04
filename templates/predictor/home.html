@@ -1,0 +1,2607 @@
+{% extends 'predictor/base.html' %}
+{% load static %}
+
+{% block title %}Football Predictor Pro - Enterprise Analytics Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Global fixes to prevent squishing */
+    * {
+        box-sizing: border-box;
+    }
+    
+    html, body {
+        width: 100%;
+        max-width: 100vw;
+        overflow-x: hidden;
+        position: relative;
+        margin: 0;
+        padding: 0;
+    }
+    
+    /* Proper container spacing - don't push to edges */
+    .container {
+        max-width: 1400px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        padding-left: 30px !important;
+        padding-right: 30px !important;
+        width: 100% !important;
+    }
+    
+    @media (max-width: 1200px) {
+        .container {
+            max-width: 1140px !important;
+            padding-left: 25px !important;
+            padding-right: 25px !important;
+        }
+    }
+    
+    @media (max-width: 992px) {
+        .container {
+            max-width: 960px !important;
+            padding-left: 20px !important;
+            padding-right: 20px !important;
+        }
+    }
+    
+    @media (max-width: 1200px) {
+        .container {
+            max-width: 1140px !important;
+            padding-left: 25px !important;
+            padding-right: 25px !important;
+        }
+    }
+    
+    @media (max-width: 992px) {
+        .container {
+            max-width: 960px !important;
+            padding-left: 20px !important;
+            padding-right: 20px !important;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .container {
+            max-width: 720px !important;
+            padding-left: 15px !important;
+            padding-right: 15px !important;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .container {
+            max-width: 100% !important;
+            padding-left: 15px !important;
+            padding-right: 15px !important;
+        }
+    }
+    
+    /* Ensure sections have proper spacing */
+    section {
+        padding: 40px 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    section.container {
+        max-width: 1400px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        padding-left: 30px !important;
+        padding-right: 30px !important;
+    }
+    
+    @media (max-width: 1200px) {
+        section.container {
+            max-width: 1140px !important;
+            padding-left: 25px !important;
+            padding-right: 25px !important;
+        }
+    }
+    
+    @media (max-width: 992px) {
+        section.container {
+            max-width: 960px !important;
+            padding-left: 20px !important;
+            padding-right: 20px !important;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        section {
+            padding: 30px 0 !important;
+        }
+        
+        section.container {
+            max-width: 720px !important;
+            padding-left: 15px !important;
+            padding-right: 15px !important;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        section.container {
+            max-width: 100% !important;
+            padding-left: 15px !important;
+            padding-right: 15px !important;
+        }
+    }
+    
+    /* FORCE HORIZONTAL STACKING ON ALL SCREEN SIZES */
+    /* Ensure all sections stack horizontally - ALWAYS */
+    main {
+        display: block !important;
+        width: 100%;
+    }
+    
+    main > section {
+        width: 100% !important;
+        display: block !important;
+        margin-bottom: 30px;
+        order: 0;
+    }
+    
+    /* Force all rows to stack horizontally */
+    .row {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        width: 100% !important;
+        gap: 20px;
+    }
+    
+    /* Force all columns to be side by side */
+    [class*="col-"] {
+        flex: 1 1 auto !important;
+        min-width: 250px;
+        margin-bottom: 20px;
+    }
+    
+    [class*="col-"]:last-child {
+        margin-bottom: 0;
+    }
+    
+    /* Stats grid - always horizontal on ALL screens */
+    .stats-grid {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+        gap: 30px !important;
+        width: 100% !important;
+        margin: 40px 0 !important;
+        padding: 0 !important;
+    }
+    
+    .stat-card {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 40px 30px !important;
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    /* On large screens, ensure more columns */
+    @media (min-width: 1200px) {
+        .stats-grid {
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: 30px !important;
+        }
+    }
+    
+    @media (min-width: 992px) and (max-width: 1199px) {
+        .stats-grid {
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: 25px !important;
+        }
+    }
+    
+    @media (min-width: 768px) and (max-width: 991px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 25px !important;
+        }
+        
+        .stat-card {
+            padding: 35px 25px !important;
+            min-height: 200px;
+        }
+        
+        .stat-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        
+        .stat-number {
+            font-size: 2.8rem;
+        }
+    }
+    
+    @media (max-width: 767px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 20px !important;
+        }
+        
+        .stat-card {
+            padding: 30px 20px !important;
+            min-height: 180px;
+        }
+        
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 18px;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+        
+        .stat-label {
+            font-size: 0.95rem;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .stats-grid {
+            grid-template-columns: 1fr !important;
+            gap: 20px !important;
+        }
+        
+        .stat-card {
+            padding: 35px 25px !important;
+            min-height: 200px;
+        }
+        
+        .stat-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        
+        .stat-number {
+            font-size: 2.8rem;
+        }
+    }
+    
+    /* Feature grid - always horizontal */
+    .feature-grid {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+        gap: 20px !important;
+    }
+    
+    /* Quick action cards - always horizontal */
+    .quick-action-card {
+        width: 100% !important;
+        height: 100% !important;
+        margin-bottom: 0;
+    }
+    
+    /* Ensure quick action cards are side by side */
+    .row.g-4 {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+    }
+    
+    .row.g-4 > .col-md-6 {
+        flex: 1 1 48% !important;
+        max-width: 48% !important;
+    }
+    
+    @media (min-width: 992px) {
+        .row.g-4 > .col-md-6 {
+            flex: 1 1 48% !important;
+            max-width: 48% !important;
+        }
+    }
+    
+    @media (max-width: 991px) {
+        .row.g-4 > .col-md-6 {
+            flex: 1 1 100% !important;
+            max-width: 100% !important;
+        }
+    }
+    
+    /* Hero CTA buttons - always horizontal */
+    .cta-buttons {
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 25px !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
+        flex-wrap: wrap !important;
+        margin: 40px 0 !important;
+        padding: 0 !important;
+    }
+    
+    .btn-hero, .btn-secondary-hero {
+        flex: 0 1 auto !important;
+        min-width: 200px;
+        max-width: none !important;
+        white-space: nowrap;
+        margin: 0 !important;
+    }
+    
+    @media (max-width: 768px) {
+        .cta-buttons {
+            gap: 15px !important;
+            margin: 30px 0 !important;
+        }
+        
+        .btn-hero, .btn-secondary-hero {
+            min-width: 180px;
+        }
+    }
+    
+    /* Navbar - always horizontal */
+    .navbar-nav {
+        display: flex !important;
+        flex-direction: row !important;
+        width: auto !important;
+        flex-wrap: nowrap !important;
+        gap: 5px;
+        align-items: center;
+    }
+    
+    .navbar-nav .nav-item {
+        width: auto !important;
+        margin-bottom: 0;
+        flex-shrink: 0;
+    }
+    
+    .navbar-nav .nav-link {
+        width: auto !important;
+        text-align: center !important;
+        display: inline-block !important;
+        white-space: nowrap;
+        padding: 0.5rem 1rem !important;
+    }
+    
+    /* Ensure proper spacing between elements */
+    section + section {
+        margin-top: 0;
+    }
+    
+    .container {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        width: 100%;
+        gap: 20px;
+    }
+    
+    .container > * {
+        flex: 1 1 auto;
+        min-width: 250px;
+        margin-bottom: 0;
+    }
+    
+    /* Ensure proper stacking on mobile */
+    @media (max-width: 768px) {
+        html {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+        
+        body {
+            width: 100vw;
+            overflow-x: hidden;
+        }
+    }
+    .hero-section {
+        background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f1419 100%);
+        background-image: 
+            radial-gradient(circle at 20% 50%, rgba(0, 212, 170, 0.15) 0%, transparent 60%),
+            radial-gradient(circle at 80% 80%, rgba(220, 38, 38, 0.15) 0%, transparent 60%),
+            radial-gradient(circle at 50% 20%, rgba(0, 212, 170, 0.08) 0%, transparent 50%);
+        color: white;
+        padding: 100px 0 80px;
+        text-align: center;
+        border-bottom: 4px solid #00d4aa;
+        position: relative;
+        overflow: hidden;
+        min-height: 500px;
+        display: flex;
+        align-items: center;
+        width: 100%;
+        box-sizing: border-box;
+        margin: 0;
+    }
+    
+    .hero-section > .container {
+        width: 100%;
+        max-width: 1400px;
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: 30px;
+        padding-right: 30px;
+        box-sizing: border-box;
+    }
+    
+    @media (max-width: 768px) {
+        .hero-section {
+            padding: 70px 0 50px;
+        }
+        
+        .hero-section > .container {
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+    }
+    
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        opacity: 0.05;
+        top: -50px;
+        right: -50px;
+        background: radial-gradient(circle, rgba(0, 212, 170, 0.3) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float 20s ease-in-out infinite;
+    }
+    
+    .stats-grid {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--spacing-md);
+        margin: var(--spacing-lg) 0;
+        width: 100%;
+        max-width: 100%;
+        transition: gap 0.3s ease;
+        box-sizing: border-box;
+    }
+    
+    /* Responsive grid - horizontal on all screens */
+    @media (min-width: 1200px) {
+        .stats-grid {
+            grid-template-columns: repeat(4, 1fr) !important;
+        }
+    }
+    
+    @media (min-width: 992px) and (max-width: 1199px) {
+        .stats-grid {
+            grid-template-columns: repeat(3, 1fr) !important;
+        }
+    }
+    
+    @media (min-width: 768px) and (max-width: 991px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+    }
+    
+    @media (max-width: 767px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .stats-grid {
+            grid-template-columns: 1fr !important;
+        }
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, rgba(26, 26, 26, 0.95) 0%, rgba(45, 45, 45, 0.95) 100%);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 40px 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 
+                    0 0 0 1px rgba(0, 212, 170, 0.1),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        text-align: center;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 2px solid rgba(0, 212, 170, 0.2);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 220px;
+        color: #ffffff;
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        box-sizing: border-box;
+        min-width: 0;
+        flex-shrink: 0;
+    }
+    
+    .stat-card::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(0, 212, 170, 0.1) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+    
+    .stat-card:hover::after {
+        opacity: 1;
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #00d4aa, #00b894);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 20px 50px rgba(0, 212, 170, 0.5),
+                    0 0 0 1px rgba(0, 212, 170, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        border-color: #00d4aa;
+        background: linear-gradient(135deg, rgba(26, 26, 26, 1) 0%, rgba(45, 45, 45, 1) 100%);
+    }
+    
+    .stat-card:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .stat-icon {
+        font-size: 3.5rem;
+        margin-bottom: 25px;
+        display: block;
+        background: linear-gradient(135deg, #00d4aa 0%, #00b894 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        filter: drop-shadow(0 4px 12px rgba(0, 212, 170, 0.4));
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: iconFloat 3s ease-in-out infinite;
+        line-height: 1;
+        width: 100%;
+        text-align: center;
+    }
+    
+    @keyframes iconFloat {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-8px); }
+    }
+    
+    .stat-card:hover .stat-icon {
+        transform: scale(1.25) rotate(10deg) translateY(-5px);
+        filter: drop-shadow(0 8px 20px rgba(0, 212, 170, 0.6));
+    }
+    
+    .stat-number {
+        font-size: 3.2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #00d4aa 0%, #00b894 50%, #00d4aa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 15px;
+        line-height: 1.2;
+        text-shadow: 0 2px 15px rgba(0, 212, 170, 0.6);
+        background-size: 200% auto;
+        animation: shimmer 3s linear infinite;
+        width: 100%;
+        text-align: center;
+    }
+    
+    @keyframes shimmer {
+        0% { background-position: 0% center; }
+        100% { background-position: 200% center; }
+    }
+    
+    .stat-label {
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-top: 0;
+        word-break: break-word;
+        hyphens: auto;
+        width: 100%;
+        text-align: center;
+    }
+    
+    .chart-container {
+        background: #1a1a1a;
+        border-radius: var(--border-radius-lg);
+        padding: var(--spacing-lg);
+        border: calc(1px * var(--phi-inverse)) solid #333333;
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    .chart-container h3 {
+        color: #ffffff;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .feature-grid {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: var(--spacing-lg);
+        margin: var(--spacing-lg) 0;
+        width: 100%;
+        max-width: 100%;
+        transition: gap 0.3s ease;
+    }
+    
+    /* Always horizontal stacking */
+    .feature-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+    }
+    
+    .quick-action-card {
+        background: linear-gradient(135deg, rgba(26, 26, 26, 0.95) 0%, rgba(45, 45, 45, 0.95) 100%);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 45px 35px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 
+                    0 0 0 1px rgba(0, 212, 170, 0.1),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 2px solid rgba(0, 212, 170, 0.2);
+        color: #ffffff;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        box-sizing: border-box;
+        min-width: 0;
+        flex-shrink: 0;
+        margin: 0;
+    }
+    
+    .row.g-4 {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        gap: 25px !important;
+    }
+    
+    @media (max-width: 768px) {
+        .quick-action-card {
+            padding: 35px 25px;
+        }
+        
+        .row.g-4 {
+            gap: 20px !important;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .quick-action-card {
+            height: auto;
+            min-height: 200px;
+        }
+    }
+    
+    .quick-action-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #00d4aa, #00b894);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+    
+    .quick-action-card:hover {
+        transform: translateY(-12px) scale(1.03);
+        box-shadow: 0 25px 60px rgba(0, 212, 170, 0.5),
+                    0 0 0 1px rgba(0, 212, 170, 0.4),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        border-color: #00d4aa;
+        text-decoration: none;
+        color: #ffffff;
+        background: linear-gradient(135deg, rgba(26, 26, 26, 1) 0%, rgba(45, 45, 45, 1) 100%);
+    }
+    
+    .quick-action-card:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .quick-action-icon {
+        font-size: 4.5rem;
+        margin-bottom: 25px;
+        display: block;
+        background: linear-gradient(135deg, #00d4aa 0%, #00b894 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        filter: drop-shadow(0 4px 12px rgba(0, 212, 170, 0.4));
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: iconFloat 3s ease-in-out infinite;
+    }
+    
+    .quick-action-card:hover .quick-action-icon {
+        transform: scale(1.3) rotate(15deg) translateY(-5px);
+        filter: drop-shadow(0 8px 20px rgba(0, 212, 170, 0.6));
+    }
+    
+    .quick-action-card h4 {
+        color: #ffffff;
+        font-weight: 700;
+        margin-bottom: 10px;
+        font-size: 1.5rem;
+        word-break: break-word;
+    }
+    
+    .quick-action-card p {
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 0;
+        font-size: 1rem;
+        line-height: 1.6;
+        word-break: break-word;
+    }
+    
+    .quick-action-arrow {
+        position: absolute;
+        bottom: 20px;
+        right: 30px;
+        font-size: 1.5rem;
+        color: #00d4aa;
+        transition: transform 0.3s ease;
+    }
+    
+    .quick-action-card:hover .quick-action-arrow {
+        transform: translateX(10px);
+    }
+    
+    .feature-icon {
+        font-size: var(--font-xl);
+        margin-bottom: var(--spacing-md);
+        color: #92400e;
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+    
+    .feature-icon i {
+        transition: all 0.3s ease;
+        filter: drop-shadow(0 4px 8px rgba(146, 64, 14, 0.3));
+    }
+    
+    .feature-card:hover .feature-icon i {
+        transform: scale(1.15) rotate(5deg);
+        filter: drop-shadow(0 6px 12px rgba(146, 64, 14, 0.5));
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.1);
+            opacity: 0.8;
+        }
+    }
+    
+    @keyframes iconPulse {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.15);
+            opacity: 0.85;
+        }
+    }
+    
+    @keyframes iconRotate {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+    
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+    
+    @keyframes rotate {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+    
+    .feature-icon i.fa-brain {
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    .feature-icon i.fa-chart-line {
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
+    .feature-icon i.fa-globe {
+        animation: rotate 20s linear infinite;
+    }
+    
+    .feature-icon i.fa-mobile-alt {
+        animation: pulse 2.5s ease-in-out infinite;
+    }
+    
+    .feature-icon i.fa-shield-alt {
+        animation: float 2.5s ease-in-out infinite;
+    }
+    
+    .feature-icon i.fa-trending-up {
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
+    .cta-section {
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        color: white;
+        padding: var(--spacing-xl) 0;
+        text-align: center;
+        margin-top: var(--spacing-xl);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+        border: none;
+        padding: 15px 40px;
+        border-radius: 8px;
+        color: white;
+        font-size: 1.1rem;
+        font-weight: bold;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-block;
+        box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(220, 38, 38, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .chart-container {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        margin: 30px 0;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .prediction-accuracy {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 16px;
+        margin: 30px 0;
+    }
+    
+    .dashboard-header {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        color: white;
+        padding: 40px 0;
+        margin-bottom: 40px;
+    }
+    
+    .metric-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        border-left: 4px solid #667eea;
+        transition: all 0.3s ease;
+    }
+    
+    .metric-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    }
+    
+    .metric-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1e3a8a;
+    }
+    
+    .metric-label {
+        color: #64748b;
+        font-weight: 500;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .recent-predictions {
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        border-radius: 16px;
+        padding: 35px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+        border: 2px solid #333333;
+        width: 100%;
+        box-sizing: border-box;
+        min-width: 0;
+        overflow-x: hidden;
+        margin: 40px 0;
+    }
+    
+    @media (max-width: 768px) {
+        .recent-predictions {
+            padding: 25px 20px;
+            margin: 30px 0;
+        }
+    }
+    
+    .prediction-item {
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        background: #f8fafc;
+        border-left: 4px solid #667eea;
+        transition: all 0.3s ease;
+    }
+    
+    .prediction-item:hover {
+        background: #f1f5f9;
+        transform: translateX(5px);
+    }
+    
+    .accuracy-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .accuracy-high { background: #dcfce7; color: #166534; }
+    .accuracy-medium { background: #fef3c7; color: #92400e; }
+    .accuracy-low { background: #fee2e2; color: #991b1b; }
+
+    .table {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e2e8f0;
+    }
+    
+    .table thead th {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border: none;
+        padding: 1rem;
+        font-weight: 600;
+        color: #374151;
+        white-space: nowrap;
+    }
+    
+    .table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    
+    .table tbody tr:hover {
+        background: rgba(102, 126, 234, 0.05);
+        transform: scale(1.01);
+    }
+    
+    .table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+    
+    .prediction-date {
+        color: #1e3a8a;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    
+    .team-name {
+        font-weight: 600;
+        color: #374151;
+        font-size: 0.95rem;
+    }
+    
+    /* Beautiful Star-based Outcome Badges */
+    .outcome-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .outcome-label {
+        display: inline-flex;
+        align-items: center;
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        animation: fadeInScale 0.5s ease-out;
+    }
+    
+    .outcome-label:hover {
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+    
+    .outcome-label.home-win {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+    
+    .outcome-label.home-win i {
+        color: #ffd700;
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        animation: starTwinkle 2s ease-in-out infinite;
+    }
+    
+    .outcome-label.away-win {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+    }
+    
+    .outcome-label.away-win i {
+        color: #ffd700;
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        animation: starTwinkle 2s ease-in-out infinite 0.3s;
+    }
+    
+    .outcome-label.draw {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+    }
+    
+    .outcome-label.draw i {
+        color: #ffd700;
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        animation: starTwinkle 2s ease-in-out infinite 0.6s;
+    }
+    
+    .outcome-label i.fa-star {
+        margin-right: 2px;
+        font-size: 0.85rem;
+    }
+    
+    @keyframes starTwinkle {
+        0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 0.6;
+            transform: scale(0.9);
+        }
+    }
+    
+    @keyframes fadeInScale {
+        from {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    
+    .empty-state {
+        color: #64748b;
+    }
+    
+    .empty-icon {
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .cta-buttons {
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 25px !important;
+        justify-content: center !important;
+        margin-top: 40px !important;
+        margin-bottom: 0 !important;
+        align-items: center !important;
+        width: 100% !important;
+        flex-wrap: wrap !important;
+        padding: 0 !important;
+    }
+    
+    @media (max-width: 768px) {
+        .cta-buttons {
+            gap: 15px !important;
+            margin-top: 30px !important;
+        }
+    }
+    
+    .btn-hero {
+        background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+        color: white;
+        padding: 18px 40px;
+        border-radius: 16px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 8px 25px rgba(220, 38, 38, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .btn-hero:hover::before {
+        left: 100%;
+    }
+    
+    .btn-hero:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 35px rgba(220, 38, 38, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-hero:active {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(220, 38, 38, 0.3);
+    }
+    
+    .btn-secondary-hero {
+        background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+        color: white;
+        padding: 18px 40px;
+        border-radius: 16px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 8px 25px rgba(100, 116, 139, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-secondary-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .btn-secondary-hero:hover::before {
+        left: 100%;
+    }
+    
+    .btn-secondary-hero:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 35px rgba(100, 116, 139, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-secondary-hero:active {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(100, 116, 139, 0.3);
+    }
+    
+    /* ============================================
+       HOME/DASHBOARD RESPONSIVE ENHANCEMENTS
+       ============================================ */
+    
+    /* Tablets and Below (768px and below) */
+    @media (max-width: 768px) {
+        .hero-section {
+            padding: 70px 15px 50px;
+            min-height: 400px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .hero-section > .container {
+            width: 100%;
+            max-width: 100%;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+        
+        .hero-section .display-4 {
+            font-size: 2rem !important;
+            margin-bottom: 20px;
+            padding: 0 10px;
+            word-break: break-word;
+            line-height: 1.2;
+        }
+        
+        .hero-section .display-4 i {
+            font-size: 1.8rem !important;
+        }
+        
+        .hero-section .lead {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            padding: 0 10px;
+            line-height: 1.5;
+        }
+        
+        .cta-buttons {
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 25px;
+            width: 100%;
+        }
+        
+        .btn-hero, .btn-secondary-hero {
+            width: 100%;
+            max-width: 100%;
+            padding: 16px 32px;
+            font-size: 1.05rem;
+            border-radius: 14px;
+            justify-content: center;
+        }
+        
+        .btn-hero i, .btn-secondary-hero i {
+            font-size: 1.1rem;
+        }
+        
+        /* Stats grid - ALWAYS horizontal */
+        .stats-grid {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+            gap: 15px;
+        }
+        
+        .stat-card {
+            padding: 25px 15px;
+        }
+        
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .stat-number {
+            font-size: 2.2rem;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+        }
+        
+        /* Quick action cards */
+        .quick-action-card {
+            padding: 35px 25px;
+            margin-bottom: 20px;
+        }
+        
+        .quick-action-icon {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+        }
+        
+        .quick-action-card h4 {
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+        }
+        
+        .quick-action-card p {
+            font-size: 1rem;
+        }
+        
+        /* Recent predictions */
+        .recent-predictions {
+            padding: 25px 20px;
+        }
+        
+        .recent-predictions h3 {
+            font-size: 1.4rem;
+        }
+        
+        .prediction-card-dashboard {
+            padding: 20px !important;
+        }
+        
+        .prediction-card-dashboard h4 {
+            font-size: 1.1rem !important;
+        }
+        
+        /* Dashboard header */
+        .dashboard-header {
+            padding: 25px 0;
+            margin-bottom: 25px;
+        }
+        
+        .dashboard-header .row {
+            flex-direction: column;
+        }
+        
+        .dashboard-header .col-md-8,
+        .dashboard-header .col-md-4 {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .dashboard-header h2 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .dashboard-header p {
+            font-size: 0.9rem;
+        }
+        
+        .dashboard-header .d-flex {
+            justify-content: center !important;
+        }
+        
+        .dashboard-header .h4 {
+            font-size: 1.25rem;
+        }
+        
+        /* Metrics */
+        .metric-card {
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .metric-value {
+            font-size: 1.5rem;
+        }
+        
+        .metric-label {
+            font-size: 0.8rem;
+        }
+        
+        /* Recent predictions */
+        .recent-predictions {
+            padding: 20px;
+        }
+        
+        .recent-predictions h3 {
+            font-size: 1.25rem;
+        }
+        
+        .recent-predictions .d-flex {
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .recent-predictions .btn {
+            width: 100%;
+        }
+        
+        /* Table */
+        .table {
+            font-size: 0.85rem;
+        }
+        
+        .table thead th {
+            font-size: 0.75rem;
+            padding: 0.75rem 0.5rem;
+        }
+        
+        .table tbody td {
+            padding: 0.75rem 0.5rem;
+        }
+        
+        .prediction-date {
+            font-size: 0.85rem;
+        }
+        
+        .team-name {
+            font-size: 0.85rem;
+        }
+        
+        .outcome-label {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+        
+        .outcome-label i {
+            font-size: 0.7rem;
+            margin-right: 1px;
+        }
+        
+        /* Empty state */
+        .empty-state .empty-icon i {
+            font-size: 3rem !important;
+        }
+        
+        .empty-state h4 {
+            font-size: 1.1rem;
+        }
+        
+        .empty-state p {
+            font-size: 0.9rem;
+        }
+        
+        /* Quick action cards */
+        .quick-action-card {
+            padding: 30px 20px;
+        }
+        
+        .quick-action-icon {
+            font-size: 3rem;
+        }
+        
+        .quick-action-card h4 {
+            font-size: 1.2rem;
+        }
+        
+        /* Stats grid */
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .stat-card {
+            padding: 20px 15px;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+        }
+        
+        .stat-icon {
+            font-size: 2rem;
+        }
+        
+        /* Feature cards */
+        .feature-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .feature-card {
+            padding: 20px;
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+        }
+        
+        .feature-card h4 {
+            font-size: 1.1rem;
+        }
+        
+        .feature-card p {
+            font-size: 0.9rem;
+        }
+        
+        /* CTA section */
+        .cta-section {
+            padding: 40px 20px;
+            margin-top: 40px;
+        }
+        
+        .cta-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .cta-section .lead {
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+        }
+        
+        .cta-section .btn-primary {
+            padding: 14px 32px;
+            font-size: 1rem;
+        }
+        
+        /* Stats grid */
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .stat-card {
+            padding: 15px;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+        }
+    }
+    
+    /* Small Mobile (576px and below) */
+    @media (max-width: 576px) {
+        .hero-section {
+            padding: 60px 15px 40px;
+            min-height: 350px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .hero-section > .container {
+            width: 100%;
+            max-width: 100%;
+            padding-left: 15px;
+            padding-right: 15px;
+            box-sizing: border-box;
+        }
+        
+        .hero-section .display-4 {
+            font-size: 1.75rem !important;
+            margin-bottom: 20px;
+            line-height: 1.3;
+            word-break: break-word;
+            padding: 0;
+            width: 100%;
+        }
+        
+        .hero-section .display-4 i {
+            font-size: 1.5rem !important;
+            margin-right: 8px !important;
+        }
+        
+        .hero-section .lead {
+            font-size: 1rem;
+            margin-bottom: 25px;
+            padding: 0;
+            line-height: 1.5;
+            width: 100%;
+        }
+        
+        .cta-buttons {
+            gap: 12px;
+            margin-top: 20px;
+            padding: 0;
+            width: 100%;
+            max-width: 100%;
+            flex-direction: row !important;
+            flex-wrap: wrap;
+        }
+        
+        .btn-hero, .btn-secondary-hero {
+            padding: 14px 28px;
+            font-size: 1rem;
+            border-radius: 12px;
+            flex: 1 1 auto;
+            min-width: 150px;
+            max-width: none;
+            box-sizing: border-box;
+        }
+        
+        .btn-hero i, .btn-secondary-hero i {
+            font-size: 1rem;
+        }
+        
+        /* Stats grid - single column on small mobile */
+        .stats-grid {
+            grid-template-columns: 1fr !important;
+            gap: 15px;
+            margin: 30px 0;
+            width: 100%;
+            padding: 0;
+            box-sizing: border-box;
+            display: grid !important;
+        }
+        
+        .stat-card {
+            padding: 25px 20px;
+            width: 100%;
+            min-width: 0;
+            margin: 0 0 15px 0;
+            box-sizing: border-box;
+            display: block;
+        }
+        
+        .stat-card:last-child {
+            margin-bottom: 0;
+        }
+        
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            word-break: break-word;
+        }
+        
+        .stat-label {
+            font-size: 0.95rem;
+            word-break: break-word;
+        }
+        
+        /* Quick action cards - horizontal on mobile */
+        .quick-action-card {
+            padding: 30px 20px;
+            margin-bottom: 0;
+            flex: 1 1 auto;
+            min-width: 200px;
+            max-width: none;
+            display: block;
+        }
+        
+        .row.g-4 {
+            margin-left: 0;
+            margin-right: 0;
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .row.g-4 > [class*="col-"] {
+            padding-left: 0;
+            padding-right: 0;
+            margin-bottom: 0;
+            flex: 1 1 auto;
+            min-width: 200px;
+            max-width: none;
+        }
+        
+        .quick-action-icon {
+            font-size: 3rem;
+            margin-bottom: 18px;
+        }
+        
+        .quick-action-card h4 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .quick-action-card p {
+            font-size: 0.95rem;
+        }
+        
+        .quick-action-arrow {
+            bottom: 15px;
+            right: 20px;
+            font-size: 1.2rem;
+        }
+        
+        /* Recent predictions */
+        .recent-predictions {
+            padding: 20px 15px;
+            margin-top: 30px;
+            margin-bottom: 30px;
+            width: 100%;
+            box-sizing: border-box;
+            display: block;
+            clear: both;
+        }
+        
+        .recent-predictions h3 {
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+            word-break: break-word;
+        }
+        
+        .recent-predictions .d-flex {
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            display: flex;
+        }
+        
+        .recent-predictions .btn {
+            width: 100%;
+            padding: 10px 20px;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            display: block;
+        }
+        
+        /* Prediction cards container */
+        .predictions-cards-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+        }
+        
+        .prediction-card-dashboard {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        
+        .prediction-card-dashboard:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* Prediction cards */
+        .prediction-card-dashboard {
+            padding: 18px !important;
+            margin-bottom: 15px !important;
+            border-radius: 12px !important;
+        }
+        
+        .prediction-card-dashboard > div {
+            flex-direction: column !important;
+            gap: 12px !important;
+        }
+        
+        .prediction-card-dashboard h4 {
+            font-size: 1rem !important;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+        
+        .prediction-card-dashboard > div > div:last-child {
+            text-align: left !important;
+            width: 100%;
+        }
+        
+        /* Ensure buttons are touch-friendly */
+        .btn-hero, .btn-secondary-hero, .btn {
+            min-height: 44px;
+            min-width: 44px;
+            touch-action: manipulation;
+        }
+        
+        /* Prevent horizontal scroll and squishing */
+        body {
+            overflow-x: hidden;
+            width: 100%;
+            position: relative;
+        }
+        
+        html {
+            overflow-x: hidden;
+            width: 100%;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 100%;
+            padding-left: 15px;
+            padding-right: 15px;
+            box-sizing: border-box;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        section {
+            width: 100%;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+        
+        * {
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        
+        img, video, iframe {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        /* Fix flex items from squishing */
+        .row {
+            margin-left: -15px;
+            margin-right: -15px;
+            width: calc(100% + 30px);
+            box-sizing: border-box;
+        }
+        
+        [class*="col-"] {
+            padding-left: 15px;
+            padding-right: 15px;
+            box-sizing: border-box;
+            min-width: 0;
+        }
+        
+        /* Ensure proper spacing */
+        .col-md-6 {
+            width: 100%;
+            max-width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .row {
+                margin-left: -10px;
+                margin-right: -10px;
+                width: calc(100% + 20px);
+            }
+            
+            [class*="col-"] {
+                padding-left: 10px;
+                padding-right: 10px;
+                width: 100% !important;
+                max-width: 100% !important;
+                flex: 0 0 100% !important;
+            }
+        }
+        
+        /* Dashboard header */
+        .dashboard-header {
+            padding: 20px 15px;
+            margin-bottom: 20px;
+        }
+        
+        .dashboard-header h2 {
+            font-size: 1.25rem;
+        }
+        
+        .dashboard-header p {
+            font-size: 0.85rem;
+        }
+        
+        .dashboard-header .h4 {
+            font-size: 1.1rem;
+        }
+        
+        .dashboard-header small {
+            font-size: 0.75rem;
+        }
+        
+        /* Metrics - stack vertically on small screens */
+        .container > .row {
+            margin: 0 -10px;
+        }
+        
+        .container > .row > [class*="col-"] {
+            padding: 0 10px;
+        }
+        
+        .metric-card {
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .metric-value {
+            font-size: 1.25rem;
+        }
+        
+        .metric-label {
+            font-size: 0.75rem;
+        }
+        
+        /* Recent predictions */
+        .recent-predictions {
+            padding: 15px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .recent-predictions h3 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+        
+        /* Table - very compact on small screens */
+        .table-responsive {
+            margin: 0 -15px;
+            padding: 0 15px;
+        }
+        
+        .table {
+            font-size: 0.8rem;
+        }
+        
+        .table thead th {
+            font-size: 0.7rem;
+            padding: 0.6rem 0.4rem;
+            white-space: nowrap;
+        }
+        
+        .table tbody td {
+            padding: 0.6rem 0.4rem;
+        }
+        
+        .prediction-date {
+            font-size: 0.75rem;
+        }
+        
+        .prediction-date + small {
+            font-size: 0.65rem;
+        }
+        
+        .team-name {
+            font-size: 0.8rem;
+        }
+        
+        .text-muted[style*="font-size: 0.8rem"] {
+            font-size: 0.7rem !important;
+        }
+        
+        .outcome-label {
+            padding: 4px 8px;
+            font-size: 0.7rem;
+            border-radius: 8px;
+        }
+        
+        .outcome-label i {
+            font-size: 0.6rem;
+            margin-right: 0;
+        }
+        
+        .outcome-label .ms-2 {
+            margin-left: 4px !important;
+        }
+        
+        /* Empty state */
+        .empty-state {
+            padding: 30px 15px;
+        }
+        
+        .empty-state .empty-icon i {
+            font-size: 2.5rem !important;
+        }
+        
+        .empty-state h4 {
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+        
+        .empty-state p {
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+        }
+        
+        .empty-state .btn {
+            padding: 12px 24px;
+            font-size: 0.95rem;
+        }
+        
+        /* Feature cards */
+        .feature-grid {
+            gap: 15px;
+        }
+        
+        .feature-card {
+            padding: 15px;
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+        
+        .feature-icon i {
+            font-size: 2rem;
+        }
+        
+        .feature-card h4 {
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+        
+        .feature-card p {
+            font-size: 0.85rem;
+            margin-bottom: 0;
+        }
+        
+        /* CTA section */
+        .cta-section {
+            padding: 30px 15px;
+            margin-top: 30px;
+        }
+        
+        .cta-section h2 {
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+        }
+        
+        .cta-section .lead {
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+        }
+        
+        .cta-section .btn-primary {
+            padding: 12px 28px;
+            font-size: 0.95rem;
+        }
+        
+        /* Container spacing - prevent squishing */
+        .container {
+            padding-left: 15px;
+            padding-right: 15px;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            display: block;
+        }
+        
+        section.container {
+            margin-top: 30px;
+            margin-bottom: 30px;
+            width: 100%;
+            padding-left: 15px;
+            padding-right: 15px;
+            box-sizing: border-box;
+            display: block;
+            clear: both;
+        }
+        
+        /* Fix hero section on mobile */
+        .hero-section .container {
+            width: 100%;
+            max-width: 100%;
+            padding-left: 15px;
+            padding-right: 15px;
+            display: block;
+        }
+        
+        /* Ensure buttons don't overflow */
+        .cta-buttons {
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .btn-hero, .btn-secondary-hero {
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            display: block;
+        }
+        
+        /* Ensure proper stacking order */
+        section {
+            display: block;
+            width: 100%;
+            clear: both;
+        }
+        
+        /* Prevent any floating elements */
+        * {
+            float: none !important;
+        }
+        
+        @media (max-width: 576px) {
+            * {
+                float: none !important;
+            }
+        }
+        
+        /* Platform features section */
+        .container.mt-5 {
+            margin-top: 2rem !important;
+        }
+        
+        .container h2 {
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+        }
+    }
+    
+    /* Landscape phones */
+    @media (max-height: 500px) and (orientation: landscape) {
+        .hero-section {
+            padding: 40px 20px 30px;
+            min-height: 300px;
+        }
+        
+        .hero-section .display-4 {
+            font-size: 1.5rem !important;
+        }
+        
+        .hero-section .lead {
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+        
+        .btn-hero, .btn-secondary-hero {
+            padding: 12px 24px;
+            font-size: 0.95rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        
+        .stat-card {
+            padding: 15px 10px;
+        }
+        
+        .stat-icon {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+        }
+    }
+    
+    /* Extra small devices (320px and below) */
+    @media (max-width: 320px) {
+        .hero-section {
+            padding: 50px 10px 30px;
+        }
+        
+        .hero-section .display-4 {
+            font-size: 1.5rem !important;
+        }
+        
+        .hero-section .display-4 i {
+            font-size: 1.3rem !important;
+        }
+        
+        .hero-section .lead {
+            font-size: 0.9rem;
+        }
+        
+        .btn-hero, .btn-secondary-hero {
+            padding: 12px 20px;
+            font-size: 0.9rem;
+        }
+        
+        .stat-card {
+            padding: 20px 15px;
+        }
+        
+        .stat-icon {
+            font-size: 2rem;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+        }
+        
+        .quick-action-card {
+            padding: 25px 15px;
+        }
+        
+        .quick-action-icon {
+            font-size: 2.5rem;
+        }
+        
+        .quick-action-card h4 {
+            font-size: 1.1rem;
+        }
+        
+        .recent-predictions {
+            padding: 15px 10px;
+        }
+        
+        .recent-predictions h3 {
+            font-size: 1.1rem;
+        }
+    }
+    
+    /* Two column grid for medium tablets - REMOVED - Always vertical */
+    /* All elements stay vertical on all screen sizes */
+    
+    /* FORCE HORIZONTAL STACKING ON ALL SCREEN SIZES - OVERRIDE ANY MEDIA QUERIES */
+    @media (min-width: 577px) {
+        .stats-grid {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+        }
+        
+        .feature-grid {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+        }
+        
+        .row {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+        }
+        
+        [class*="col-"] {
+            flex: 1 1 auto !important;
+            min-width: 250px;
+            max-width: none !important;
+        }
+    }
+    
+    @media (min-width: 768px) {
+        .stats-grid {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+        }
+        
+        .feature-grid {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+        }
+        
+        .row {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+        }
+        
+        [class*="col-"] {
+            flex: 1 1 auto !important;
+            min-width: 300px;
+            max-width: none !important;
+        }
+        
+        .quick-action-card {
+            flex: 1 1 auto !important;
+            min-width: 300px;
+        }
+    }
+    
+    @media (min-width: 992px) {
+        .stats-grid {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+        }
+        
+        .feature-grid {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+        }
+        
+        .row {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+        }
+        
+        [class*="col-"] {
+            flex: 1 1 auto !important;
+            min-width: 300px;
+            max-width: none !important;
+        }
+    }
+    
+    @media (min-width: 1200px) {
+        .stats-grid {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+        }
+        
+        .feature-grid {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+        }
+        
+        .row {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+        }
+        
+        [class*="col-"] {
+            flex: 1 1 auto !important;
+            min-width: 300px;
+            max-width: none !important;
+        }
+    }
+    
+    /* Ensure proper container max-width on all screens */
+    @media (max-width: 1200px) {
+        .container {
+            max-width: 100%;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .container {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .container {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <h1 class="display-4 mb-4" style="font-weight: 800; text-shadow: 0 4px 20px rgba(0, 212, 170, 0.4); font-size: 3.5rem;" data-aos="fade-down">
+            <i class="fas fa-futbol me-3" style="color: #00d4aa; animation: float 3s ease-in-out infinite;"></i>Football Predictor
+        </h1>
+        <p class="lead mb-5" style="font-size: 1.4rem; color: rgba(255, 255, 255, 0.95); font-weight: 500;" data-aos="fade-up" data-aos-delay="100">
+            AI-Powered Match Predictions with Advanced Analytics
+        </p>
+        <div class="cta-buttons">
+            <a href="{% url 'predictor:predict' %}" class="btn-hero">
+                <i class="fas fa-futbol"></i>
+                Make Prediction
+            </a>
+            <a href="{% url 'predictor:history' %}" class="btn-secondary-hero">
+                <i class="fas fa-history"></i>
+                View History
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Dashboard -->
+<section class="container mt-5 mb-5" style="width: 100%; max-width: 1400px; margin-left: auto; margin-right: auto; padding-left: 30px; padding-right: 30px; box-sizing: border-box;">
+    <div class="stats-grid" style="width: 100%; max-width: 100%;">
+        <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+            <div class="stat-icon"><i class="fas fa-futbol"></i></div>
+            <div class="stat-number" id="total-predictions">{{ total_predictions|floatformat:0 }}</div>
+            <div class="stat-label">My Predictions</div>
+        </div>
+        <div class="stat-card" data-aos="fade-up" data-aos-delay="200">
+            <div class="stat-icon"><i class="fas fa-bullseye"></i></div>
+            <div class="stat-number" id="accuracy-rate">{{ accuracy_rate }}%</div>
+            <div class="stat-label">Accuracy</div>
+        </div>
+        <div class="stat-card" data-aos="fade-up" data-aos-delay="300">
+            <div class="stat-icon"><i class="fas fa-trophy"></i></div>
+            <div class="stat-number" id="teams-covered">{% if teams_covered > 0 %}{{ teams_covered }}{% if teams_covered >= 100 %}+{% endif %}{% else %}0{% endif %}</div>
+            <div class="stat-label">Teams</div>
+        </div>
+        <div class="stat-card" data-aos="fade-up" data-aos-delay="400">
+            <div class="stat-icon"><i class="fas fa-globe"></i></div>
+            <div class="stat-number" id="leagues">{% if leagues_supported > 0 %}{{ leagues_supported }}{% if leagues_supported >= 10 %}+{% endif %}{% else %}0{% endif %}</div>
+            <div class="stat-label">Leagues</div>
+        </div>
+    </div>
+</section>
+
+<!-- Recent Predictions -->
+<section class="container mt-5 mb-5" style="width: 100%; max-width: 1400px; margin-left: auto; margin-right: auto; padding-left: 30px; padding-right: 30px; box-sizing: border-box;">
+    <div class="recent-predictions" data-aos="fade-up" data-aos-delay="400" style="width: 100%; max-width: 100%; box-sizing: border-box;">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+            <h3 style="color: #ffffff; font-weight: 700; margin: 0; font-size: 1.75rem;">
+                <i class="fas fa-futbol me-2" style="color: #00d4aa;"></i>Recent Predictions
+            </h3>
+            <a href="{% url 'predictor:history' %}" class="btn btn-outline-primary" style="border-color: #00d4aa; color: #00d4aa; border-width: 2px; padding: 10px 20px; font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.background='#00d4aa'; this.style.color='#000';" onmouseout="this.style.background='transparent'; this.style.color='#00d4aa';">
+                <i class="fas fa-list me-2"></i>View All
+            </a>
+        </div>
+        
+        {% if recent_predictions %}
+            <!-- Rich Prediction Cards -->
+            <div class="predictions-cards-container">
+                {% for prediction in recent_predictions %}
+                {% comment %} Outcome display values are calculated in the view {% endcomment %}
+                {% with outcome_text=prediction.outcome_text outcome_color=prediction.outcome_color outcome_icon=prediction.outcome_icon %}
+                
+                <div class="prediction-card-dashboard" style="background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%); border: 2px solid {{ outcome_color }}; border-radius: 16px; padding: 25px; margin-bottom: 20px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6); transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 40px rgba(0, 0, 0, 0.8)'; this.style.borderColor='{{ outcome_color }}';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 30px rgba(0, 0, 0, 0.6)';">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <h4 style="color: #ffffff; margin: 0 0 5px 0; font-size: 1.2rem; font-weight: 700;">
+                                <strong>{{ prediction.home_team }}</strong> vs <strong>{{ prediction.away_team }}</strong>
+                            </h4>
+                            <div style="color: #94a3b8; font-size: 0.9rem;">
+                                <i class="fas fa-calendar me-1" style="color: #00d4aa;"></i>{{ prediction.prediction_date|date:"d M Y, H:i" }}
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="color: {{ outcome_color }}; font-weight: 700; font-size: 1.1rem;">
+                                {{ outcome_text }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% endwith %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state text-center py-5">
+                <div class="empty-icon mb-3">
+                    <i class="fas fa-futbol" style="font-size: 5rem; color: #00d4aa; filter: drop-shadow(0 4px 8px rgba(0, 212, 170, 0.3));"></i>
+                </div>
+                <h4 class="mb-3" style="color: #ffffff; font-weight: 700;">No Predictions Yet</h4>
+                <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 30px; font-size: 1.1rem;">Start making predictions to track your performance</p>
+                <a href="{% url 'predictor:predict' %}" class="btn-hero" style="display: inline-block;">
+                    <i class="fas fa-futbol me-2"></i>Make Your First Prediction
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Quick Actions -->
+<section class="container mt-5 mb-5" style="width: 100%; max-width: 1400px; margin-left: auto; margin-right: auto; padding-left: 30px; padding-right: 30px; box-sizing: border-box;">
+    <div class="row g-4" style="width: 100%; max-width: 100%; margin-left: 0; margin-right: 0; display: flex; flex-direction: row; flex-wrap: wrap; gap: 25px;">
+        <div class="col-md-6" style="flex: 1 1 auto; min-width: 300px; max-width: none;">
+            <a href="{% url 'predictor:predict' %}" class="quick-action-card" style="display: block; text-decoration: none;" data-aos="fade-right" data-aos-delay="200">
+                <div class="quick-action-icon"><i class="fas fa-futbol"></i></div>
+                <h4>Make Prediction</h4>
+                <p>Predict match outcomes with AI-powered analysis</p>
+                <span class="quick-action-arrow"><i class="fas fa-arrow-right"></i></span>
+            </a>
+        </div>
+        <div class="col-md-6" style="flex: 1 1 auto; min-width: 300px; max-width: none;">
+            <a href="{% url 'predictor:predict' %}?multi=true" class="quick-action-card" style="display: block; text-decoration: none;" data-aos="fade-left" data-aos-delay="300">
+                <div class="quick-action-icon"><i class="fas fa-layer-group"></i></div>
+                <h4>Multi-Match Mode</h4>
+                <p>Predict multiple matches at once</p>
+                <span class="quick-action-arrow"><i class="fas fa-arrow-right"></i></span>
+            </a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Animate statistics
+function animateStats() {
+    const teamsCount = {{ teams_covered|default:0 }};
+    const leaguesCount = {{ leagues_supported|default:0 }};
+    const stats = [
+        { element: 'total-predictions', target: {{ total_predictions|default:0 }}, suffix: '' },
+        { element: 'accuracy-rate', target: {{ accuracy_rate|default:75 }}, suffix: '%' },
+        { element: 'teams-covered', target: teamsCount, suffix: teamsCount >= 100 ? '+' : '' },
+        { element: 'leagues', target: leaguesCount, suffix: leaguesCount >= 10 ? '+' : '' }
+    ];
+    
+    stats.forEach(stat => {
+        const element = document.getElementById(stat.element);
+        if (element) {
+            let current = 0;
+            const increment = stat.target / 50;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= stat.target) {
+                    current = stat.target;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(current) + stat.suffix;
+            }, 50);
+        }
+    });
+}
+
+// Create accuracy chart with white colors
+function createAccuracyChart() {
+    const ctx = document.getElementById('accuracyChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Prediction Accuracy',
+                data: [65, 68, 72, 75, {{ accuracy_rate|default:78 }}, 82],
+                borderColor: '#ffffff',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                tension: 0.4,
+                fill: true,
+                borderWidth: 3,
+                pointBackgroundColor: '#00d4aa',
+                pointBorderColor: '#ffffff',
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        color: '#ffffff'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        color: '#ffffff',
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Initialize everything when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    animateStats();
+    
+    // Initialize AOS animations
+    if (typeof AOS !== 'undefined') {
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true,
+            offset: 100
+        });
+    }
+});
+</script>
+{% endblock %}

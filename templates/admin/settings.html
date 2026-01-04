@@ -1,0 +1,209 @@
+{% extends 'admin/dashboard_base.html' %}
+
+{% block title %}System Settings - Admin Dashboard{% endblock %}
+{% block page_title %}System Settings{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- System Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-number">{{ total_users }}</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-crystal-ball"></i>
+                </div>
+                <div class="stat-number">{{ total_predictions|stringformat:"d" }}</div>
+                <div class="stat-label">Total Predictions</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-database"></i>
+                </div>
+                <div class="stat-number">{{ db_size_info|default:"Available" }}</div>
+                <div class="stat-label">Database Size</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cache Management -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-memory"></i> Cache Management
+            </h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted">Clear application cache to free up memory and reset cached data.</p>
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="clear_cache">
+                <button type="submit" class="btn btn-warning"
+                    onclick="return confirm('Are you sure? This will clear all cached data.')">
+                    <i class="fas fa-broom"></i> Clear Cache
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Data Cleanup -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-trash-alt"></i> Data Cleanup
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <h6>Remove Old Predictions</h6>
+                <p class="text-muted">Delete draft predictions older than 1 year to free up database space.</p>
+                <form method="POST" class="mb-3">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="cleanup_old_predictions">
+                    <button type="submit" class="btn btn-danger"
+                        onclick="return confirm('This will permanently delete old draft predictions. Continue?')">
+                        <i class="fas fa-trash"></i> Delete Old Draft Predictions
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Management -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-sync-alt"></i> Reset User Free Quota
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Reset a user's free prediction limit back to 0 used.</p>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="reset_user_free_quota">
+                        <div class="mb-3">
+                            <label for="userSelect1" class="form-label">Select User</label>
+                            <select name="user_id" id="userSelect1" class="form-select" required>
+                                <option value="">Choose a user...</option>
+                                <!-- This would need to be populated dynamically -->
+                                <option value="">No users available</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary" disabled title="Select a user first">
+                            <i class="fas fa-redo"></i> Reset Quota
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-gift"></i> Grant Free Access
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Give a user free premium access for a specified number of days.</p>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="grant_free_access">
+                        <div class="mb-3">
+                            <label for="userSelect2" class="form-label">Select User</label>
+                            <select name="user_id" id="userSelect2" class="form-select" required>
+                                <option value="">Choose a user...</option>
+                                <!-- This would need to be populated dynamically -->
+                                <option value="">No users available</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="daysInput" class="form-label">Days of Free Access</label>
+                            <input type="number" name="days" id="daysInput" class="form-control" value="7" min="1"
+                                max="365" required>
+                        </div>
+                        <button type="submit" class="btn btn-success" disabled title="Select a user first">
+                            <i class="fas fa-star"></i> Grant Access
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Information -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-info-circle"></i> System Information
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Application Status</strong></label>
+                        <p>
+                            <span class="badge badge-active">
+                                <i class="fas fa-circle"></i> Running
+                            </span>
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Database Connection</strong></label>
+                        <p>
+                            <span class="badge badge-active">
+                                <i class="fas fa-circle"></i> Connected
+                            </span>
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Cache Status</strong></label>
+                        <p>
+                            <span class="badge badge-active">
+                                <i class="fas fa-circle"></i> Active
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Total Users</strong></label>
+                        <p>{{ total_users }} registered users</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Total Predictions</strong></label>
+                        <p>{{ total_predictions|stringformat:"d" }} predictions in database</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Last System Check</strong></label>
+                        <p>Just now</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Enable/disable submit buttons based on selection
+    document.getElementById('userSelect1').addEventListener('change', function () {
+        this.closest('form').querySelector('button[type="submit"]').disabled = !this.value;
+    });
+    document.getElementById('userSelect2').addEventListener('change', function () {
+        this.closest('form').querySelector('button[type="submit"]').disabled = !this.value;
+    });
+</script>
+{% endblock %}

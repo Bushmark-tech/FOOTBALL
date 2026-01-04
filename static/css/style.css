@@ -1,0 +1,1453 @@
+/* Football Predictor Pro - Advanced Professional Styles */
+
+/* CSS Variables for consistent theming with Golden Ratio */
+:root {
+    /* Golden Ratio constant */
+    --phi: 1.618033988749;
+    --phi-inverse: 0.618033988749;
+    
+    /* Golden Ratio based spacing (base: 16px) */
+    --spacing-xs: calc(16px / var(--phi));      /* ~10px */
+    --spacing-sm: 16px;                         /* Base */
+    --spacing-md: calc(16px * var(--phi));      /* ~26px */
+    --spacing-lg: calc(16px * var(--phi) * var(--phi)); /* ~42px */
+    --spacing-xl: calc(16px * var(--phi) * var(--phi) * var(--phi)); /* ~68px */
+    
+    /* Golden Ratio based typography (base: 16px) */
+    --font-xs: calc(16px / var(--phi) / var(--phi));  /* ~6px */
+    --font-sm: calc(16px / var(--phi));               /* ~10px */
+    --font-base: 16px;                                 /* Base */
+    --font-md: calc(16px * var(--phi));                /* ~26px */
+    --font-lg: calc(16px * var(--phi) * var(--phi));   /* ~42px */
+    --font-xl: calc(16px * var(--phi) * var(--phi) * var(--phi)); /* ~68px */
+    --font-xxl: calc(16px * var(--phi) * var(--phi) * var(--phi) * var(--phi)); /* ~110px */
+    
+    /* Golden Ratio layout proportions */
+    --width-primary: 61.8%;    /* Golden ratio major */
+    --width-secondary: 38.2%;  /* Golden ratio minor */
+    
+    --primary-gradient: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    --secondary-gradient: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
+    --accent-gradient: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+    --success-gradient: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+    --warning-gradient: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+    --info-gradient: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    --dark-gradient: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+    
+    --primary-color: #1e40af;
+    --secondary-color: #3b82f6;
+    --success-color: #56ab2f;
+    --warning-color: #f59e0b;
+    --info-color: #3b82f6;
+    --danger-color: #f5576c;
+    
+    /* Golden Ratio based border radius */
+    --border-radius: calc(15px * var(--phi-inverse));  /* ~9px */
+    --border-radius-md: 15px;                          /* Base */
+    --border-radius-lg: calc(15px * var(--phi));       /* ~24px */
+    --border-radius-xl: calc(15px * var(--phi) * var(--phi)); /* ~39px */
+    
+    /* Golden Ratio based shadows */
+    --shadow-sm: 0 calc(2px * var(--phi)) calc(10px * var(--phi)) rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 calc(10px * var(--phi)) calc(30px * var(--phi)) rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 calc(20px * var(--phi)) calc(60px * var(--phi)) rgba(0, 0, 0, 0.2);
+    --shadow-xl: 0 calc(30px * var(--phi)) calc(80px * var(--phi)) rgba(0, 0, 0, 0.25);
+}
+
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #000000;
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+    color: #ffffff;
+}
+
+/* Professional Typography */
+.display-1, .display-2, .display-3, .display-4, .display-5, .display-6 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+/* Typography with Golden Ratio */
+h1 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: var(--font-xxl);
+    line-height: calc(var(--font-xxl) * var(--phi));
+    margin-bottom: var(--spacing-md);
+}
+
+h2 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: var(--font-xl);
+    line-height: calc(var(--font-xl) * var(--phi));
+    margin-bottom: var(--spacing-md);
+}
+
+h3 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: var(--font-lg);
+    line-height: calc(var(--font-lg) * var(--phi));
+    margin-bottom: calc(var(--spacing-md) * var(--phi-inverse));
+}
+
+h4, h5, h6 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: var(--font-md);
+    line-height: calc(var(--font-md) * var(--phi));
+    margin-bottom: calc(var(--spacing-md) * var(--phi-inverse));
+}
+
+p {
+    font-size: var(--font-base);
+    line-height: calc(var(--font-base) * var(--phi));
+    margin-bottom: var(--spacing-sm);
+}
+
+/* Advanced Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200px 0;
+    }
+    100% {
+        background-position: calc(200px + 100%) 0;
+    }
+}
+
+/* Golden Ratio Container with Smooth Scaling */
+.container {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
+    transition: padding 0.3s ease;
+}
+
+/* Prevent stretching on very large screens */
+@media (min-width: 1400px) {
+    .container {
+        max-width: 1320px;
+        padding-left: calc(var(--spacing-md) * 1.5);
+        padding-right: calc(var(--spacing-md) * 1.5);
+    }
+}
+
+@media (min-width: 1600px) {
+    .container {
+        max-width: 1400px;
+    }
+}
+
+@media (min-width: 1920px) {
+    .container {
+        max-width: 1500px;
+    }
+}
+
+/* Fluid container for full-width sections */
+.container-fluid {
+    width: 100%;
+    max-width: 100%;
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
+    margin: 0 auto;
+}
+
+/* Golden Ratio Grid System with Responsive Behavior */
+.golden-grid {
+    display: grid;
+    grid-template-columns: var(--width-primary) var(--width-secondary);
+    gap: var(--spacing-md);
+    width: 100%;
+    max-width: 100%;
+    transition: gap 0.3s ease;
+}
+
+.golden-grid-reverse {
+    display: grid;
+    grid-template-columns: var(--width-secondary) var(--width-primary);
+    gap: var(--spacing-md);
+    width: 100%;
+    max-width: 100%;
+    transition: gap 0.3s ease;
+}
+
+/* Responsive Grid - Auto-fit with minimum size */
+.responsive-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+    gap: var(--spacing-md);
+    width: 100%;
+    transition: gap 0.3s ease;
+}
+
+/* Flexible Grid - Auto-fill for better adaptation */
+.flexible-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%), 1fr));
+    gap: var(--spacing-md);
+    width: 100%;
+}
+
+/* Professional Cards with Golden Ratio */
+.card {
+    background: #1a1a1a;
+    backdrop-filter: blur(20px);
+    border: 1px solid #333333;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+    position: relative;
+    color: #ffffff;
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.6s;
+}
+
+.card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: var(--shadow-xl);
+}
+
+.card:hover::before {
+    left: 100%;
+}
+
+/* Glass Morphism */
+.glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--border-radius-lg);
+}
+
+.glass-dark {
+    background: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-lg);
+}
+
+/* Professional Buttons with Golden Ratio */
+.btn {
+    border-radius: calc(50px * var(--phi-inverse)); /* ~31px */
+    font-weight: 600;
+    padding: var(--spacing-sm) calc(var(--spacing-md) * var(--phi)); /* Golden ratio padding */
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+    text-transform: none;
+    letter-spacing: calc(0.5px * var(--phi-inverse));
+    font-size: var(--font-base);
+    min-width: calc(var(--spacing-md) * var(--phi) * var(--phi)); /* Golden ratio min-width */
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.btn-primary {
+    background: var(--primary-gradient);
+    border: none;
+    color: white;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 35px rgba(102, 126, 234, 0.6);
+    color: white;
+}
+
+.btn-success {
+    background: var(--success-gradient);
+    border: none;
+    color: white;
+    box-shadow: 0 8px 25px rgba(86, 171, 47, 0.4);
+}
+
+.btn-success:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 35px rgba(86, 171, 47, 0.6);
+    color: white;
+}
+
+.btn-outline-light {
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    color: white;
+    background: transparent;
+}
+
+.btn-outline-light:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: white;
+    transform: translateY(-2px);
+}
+
+/* Advanced Progress Bars */
+.progress {
+    height: 12px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar {
+    border-radius: 10px;
+    background: var(--success-gradient);
+    box-shadow: 0 2px 10px rgba(86, 171, 47, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 2s infinite;
+}
+
+/* Professional Forms with Golden Ratio */
+.form-control, .form-select {
+    border-radius: var(--border-radius-md);
+    border: calc(2px * var(--phi-inverse)) solid #e9ecef; /* Golden ratio border */
+    transition: all calc(0.3s * var(--phi-inverse)) ease;
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-base);
+    min-height: calc(var(--spacing-md) * var(--phi)); /* Golden ratio height */
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    transform: translateY(-2px);
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+/* Advanced Badges */
+.badge {
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.badge.bg-primary {
+    background: var(--primary-gradient) !important;
+}
+
+.badge.bg-success {
+    background: var(--success-gradient) !important;
+}
+
+.badge.bg-warning {
+    background: var(--warning-gradient) !important;
+}
+
+.badge.bg-info {
+    background: var(--info-gradient) !important;
+}
+
+/* Professional Tables */
+.table {
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.table thead th {
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+}
+
+.table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.table tbody tr:hover {
+    background: rgba(102, 126, 234, 0.05);
+    transform: scale(1.01);
+}
+
+/* Advanced Alerts */
+.alert {
+    border-radius: var(--border-radius);
+    border: none;
+    padding: 1rem 1.5rem;
+    font-weight: 500;
+    box-shadow: var(--shadow-sm);
+}
+
+.alert-primary {
+    background: var(--primary-gradient);
+    color: white;
+}
+
+.alert-success {
+    background: var(--success-gradient);
+    color: white;
+}
+
+.alert-warning {
+    background: var(--warning-gradient);
+    color: white;
+}
+
+.alert-info {
+    background: var(--info-gradient);
+    color: white;
+}
+
+/* Professional Navigation with Golden Ratio */
+.navbar {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(20px);
+    border-bottom: calc(1px * var(--phi-inverse)) solid rgba(255, 255, 255, 0.2);
+    padding: var(--spacing-sm) 0;
+    transition: all calc(0.3s * var(--phi-inverse)) ease;
+    min-height: calc(var(--spacing-md) * var(--phi));
+}
+
+.navbar-brand {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: var(--font-md);
+    color: white !important;
+    text-shadow: 0 calc(2px * var(--phi-inverse)) calc(4px * var(--phi-inverse)) rgba(0, 0, 0, 0.3);
+    line-height: calc(var(--font-md) * var(--phi));
+}
+
+.navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 500;
+    margin: 0 calc(var(--spacing-sm) * var(--phi-inverse));
+    padding: calc(var(--spacing-sm) * var(--phi-inverse)) var(--spacing-sm) !important;
+    border-radius: calc(25px * var(--phi-inverse));
+    transition: all calc(0.3s * var(--phi-inverse)) ease;
+    font-size: calc(var(--font-base) * var(--phi-inverse));
+}
+
+.navbar-nav .nav-link:hover {
+    color: white !important;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Hero Section Enhancements with Golden Ratio */
+.hero-section {
+    padding: calc(var(--spacing-xl) * var(--phi) * var(--phi)) var(--spacing-md) calc(var(--spacing-xl) * var(--phi)); /* ~178px sides ~110px */
+    text-align: center;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.hero-section .container {
+    max-width: 100%;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0;
+}
+
+/* Constrain hero content width */
+.hero-section h1,
+.hero-section p,
+.hero-section .lead,
+.hero-section .btn,
+.hero-section .cta-buttons {
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--primary-gradient);
+    z-index: -1;
+}
+
+.hero-section::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="rgba(255,255,255,0.1)" points="0,1000 1000,0 1000,1000"/></svg>');
+    z-index: -1;
+}
+
+/* Text Gradients */
+.text-gradient {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.text-gradient-success {
+    background: var(--success-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Loading Animations */
+.loading-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-gradient);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary-gradient);
+}
+
+/* Golden Ratio Grid Layouts */
+.golden-two-col {
+    display: grid;
+    grid-template-columns: var(--width-primary) var(--width-secondary);
+    gap: var(--spacing-md);
+}
+
+.golden-three-col {
+    display: grid;
+    grid-template-columns: var(--width-primary) var(--width-secondary);
+    gap: var(--spacing-md);
+}
+
+.golden-three-col > *:first-child {
+    grid-column: span 1;
+}
+
+.golden-three-col > *:not(:first-child) {
+    grid-column: span 1;
+}
+
+/* Golden Ratio Aspect Ratios */
+.aspect-golden {
+    aspect-ratio: var(--phi);
+}
+
+.aspect-golden-portrait {
+    aspect-ratio: calc(1 / var(--phi));
+}
+
+/* Golden Ratio Widths */
+.w-golden-primary { width: var(--width-primary); }
+.w-golden-secondary { width: var(--width-secondary); }
+
+/* ============================================
+   COMPREHENSIVE RESPONSIVE DESIGN
+   Mobile-First, Golden Ratio Preserved
+   ============================================ */
+
+/* Tablets and Below (768px and below) */
+@media (max-width: 768px) {
+    /* Container adjustments */
+    .container {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+    
+    /* Hero section */
+    .hero-section {
+        padding: calc(var(--spacing-xl) * var(--phi-inverse)) 20px calc(var(--spacing-lg) * var(--phi-inverse));
+        max-width: 100%;
+    }
+    
+    .hero-section .container {
+        max-width: 100%;
+    }
+    
+    .display-4 {
+        font-size: var(--font-lg);
+        line-height: 1.3;
+    }
+    
+    /* Cards */
+    .card {
+        margin-bottom: var(--spacing-md);
+        padding: var(--spacing-sm);
+    }
+    
+    .card-header {
+        padding: var(--spacing-sm);
+    }
+    
+    .card-body {
+        padding: var(--spacing-sm);
+    }
+    
+    /* Buttons */
+    .btn {
+        padding: calc(var(--spacing-sm) * var(--phi-inverse)) calc(var(--spacing-md) * var(--phi-inverse));
+        font-size: calc(var(--font-base) * var(--phi-inverse));
+        min-height: 44px; /* Touch target */
+    }
+    
+    .btn-lg {
+        padding: 14px 28px;
+        font-size: 1rem;
+    }
+    
+    .btn-sm {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+    
+    /* Grid layouts */
+    .golden-grid,
+    .golden-grid-reverse,
+    .golden-two-col {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+    }
+    
+    .balanced-card-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+    }
+    
+    /* Forms */
+    .form-control, .form-select {
+        font-size: 16px; /* Prevent iOS zoom */
+        padding: 12px 16px;
+        min-height: 44px;
+    }
+    
+    .form-label {
+        font-size: 0.85rem;
+    }
+    
+    /* Tables */
+    .table {
+        font-size: 0.85rem;
+    }
+    
+    .table thead th {
+        font-size: 0.75rem;
+        padding: 0.75rem 0.5rem;
+        white-space: nowrap;
+    }
+    
+    .table tbody td {
+        padding: 0.75rem 0.5rem;
+    }
+    
+    /* Navbar */
+    .navbar {
+        padding: var(--spacing-xs) 0;
+    }
+    
+    .navbar-brand {
+        font-size: calc(var(--font-md) * var(--phi-inverse));
+    }
+    
+    .navbar-nav .nav-link {
+        padding: 0.75rem 1rem !important;
+        margin: 0.25rem 0;
+        font-size: 0.9rem;
+    }
+    
+    /* Progress bars */
+    .progress {
+        height: 10px;
+    }
+    
+    /* Adjust spacing variables for mobile */
+    :root {
+        --spacing-md: calc(16px * var(--phi-inverse));
+        --spacing-lg: calc(16px * var(--phi));
+        --spacing-xl: calc(16px * var(--phi) * var(--phi));
+    }
+    
+    /* Typography */
+    h1 {
+        font-size: calc(var(--font-xxl) * var(--phi-inverse));
+    }
+    
+    h2 {
+        font-size: calc(var(--font-xl) * var(--phi-inverse));
+    }
+    
+    h3 {
+        font-size: var(--font-lg);
+    }
+}
+
+/* Small Mobile Devices (576px and below) */
+@media (max-width: 576px) {
+    /* Container */
+    .container {
+        padding-left: var(--spacing-sm);
+        padding-right: var(--spacing-sm);
+    }
+    
+    .balanced-container {
+        padding: var(--spacing-sm);
+    }
+    
+    /* Cards */
+    .card {
+        padding: calc(var(--spacing-sm) * var(--phi-inverse));
+    }
+    
+    .card-body {
+        padding: var(--spacing-sm);
+    }
+    
+    /* Typography */
+    h1 { font-size: var(--font-xl); }
+    h2 { font-size: var(--font-lg); }
+    h3 { font-size: var(--font-md); }
+    h4, h5, h6 { font-size: var(--font-base); }
+    
+    p {
+        font-size: 0.95rem;
+    }
+    
+    /* Buttons */
+    .btn {
+        font-size: 0.9rem;
+        padding: 10px 20px;
+    }
+    
+    .btn-lg {
+        padding: 12px 24px;
+        font-size: 0.95rem;
+    }
+    
+    .btn-icon {
+        width: 40px;
+        height: 40px;
+    }
+    
+    /* Forms */
+    .form-control, .form-select {
+        font-size: 16px;
+        padding: 0.65rem 0.85rem;
+    }
+    
+    /* Tables - more compact */
+    .table {
+        font-size: 0.8rem;
+    }
+    
+    .table thead th,
+    .table tbody td {
+        padding: 0.5rem 0.35rem;
+    }
+    
+    /* Badges */
+    .badge {
+        font-size: 0.75rem;
+        padding: 6px 12px;
+    }
+    
+    /* Alerts */
+    .alert {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Navbar */
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
+    
+    /* Icons */
+    .icon-large {
+        font-size: 2.5rem;
+    }
+    
+    .icon-medium {
+        font-size: 1.75rem;
+    }
+    
+    .icon-small {
+        font-size: 1.25rem;
+    }
+}
+
+/* Medium Tablets (577px to 768px) */
+@media (min-width: 577px) and (max-width: 768px) {
+    .balanced-card-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Large Tablets (769px to 991px) */
+@media (min-width: 769px) and (max-width: 991px) {
+    .container {
+        max-width: 720px;
+    }
+    
+    .balanced-card-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Small Desktops (992px to 1199px) */
+@media (min-width: 992px) and (max-width: 1199px) {
+    .container {
+        max-width: 960px;
+        padding-left: 25px;
+        padding-right: 25px;
+        transition: padding 0.3s ease;
+    }
+    
+    .balanced-card-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    /* Adaptive grids for this range */
+    .stats-grid,
+    .feature-grid,
+    .analytics-grid {
+        grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+        gap: 20px;
+    }
+}
+
+/* Medium Laptops (1024px to 1365px) - Common screen size */
+@media (min-width: 1024px) and (max-width: 1365px) {
+    .container {
+        max-width: calc(100% - 80px);
+        padding-left: 40px;
+        padding-right: 40px;
+    }
+    
+    .hero-section {
+        padding: 80px 40px 60px;
+    }
+    
+    .prediction-card,
+    .result-card,
+    .history-card {
+        max-width: 900px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    /* Better grid spacing */
+    .responsive-grid,
+    .flexible-grid {
+        gap: 25px;
+    }
+}
+
+/* Standard Desktops (1200px to 1399px) */
+@media (min-width: 1200px) and (max-width: 1399px) {
+    .container {
+        max-width: 1140px;
+    }
+}
+
+/* Large Desktops (1400px and above) */
+@media (min-width: 1400px) {
+    .container {
+        max-width: 1320px;
+    }
+}
+
+/* Landscape Orientation Optimizations */
+@media (max-height: 600px) and (orientation: landscape) {
+    .hero-section {
+        padding: 30px 20px 20px;
+    }
+    
+    .btn-lg {
+        padding: 10px 24px;
+    }
+    
+    .card {
+        margin-bottom: var(--spacing-sm);
+    }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+    /* Increase all touch targets */
+    .btn, .nav-link, .form-control, .form-select, a {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    /* Remove hover effects */
+    .card:hover,
+    .btn:hover,
+    .hover-lift:hover,
+    .hover-scale:hover {
+        transform: none;
+    }
+    
+    /* Enable smooth scrolling */
+    * {
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+    }
+    
+    /* Larger tap areas for mobile */
+    .table tbody tr {
+        cursor: pointer;
+    }
+}
+
+/* High DPI / Retina Displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    /* Enhance borders for sharpness */
+    .card,
+    .btn,
+    .form-control {
+        border-width: 0.5px;
+    }
+}
+
+/* Print Styles */
+@media print {
+    /* Hide navigation and interactive elements */
+    .navbar,
+    footer,
+    .btn,
+    .action-buttons,
+    .cta-buttons,
+    .navbar-toggler {
+        display: none !important;
+    }
+    
+    /* Adjust layout for print */
+    .container {
+        max-width: 100%;
+    }
+    
+    .card,
+    .result-card,
+    .prediction-card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+        page-break-inside: avoid;
+    }
+    
+    /* Ensure readability */
+    body {
+        font-size: 12pt;
+        color: #000;
+        background: #fff;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        color: #000;
+    }
+    
+    /* Remove animations */
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* Prevent Stretching - Global Box Model */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+/* Smooth Resizing for All Elements */
+body, .container, .card, .hero-section, 
+.prediction-card, .result-card, .history-card,
+.feature-card, .stat-card, .analytics-card {
+    transition: all 0.3s ease;
+}
+
+/* Image Responsive Constraints */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Table Responsive */
+table {
+    width: 100%;
+    max-width: 100%;
+    table-layout: auto;
+}
+
+/* Prevent Text Overflow */
+p, h1, h2, h3, h4, h5, h6, span, div {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+}
+
+/* Utility Classes */
+.floating {
+    animation: float 3s ease-in-out infinite;
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.fade-in-left {
+    animation: fadeInLeft 0.6s ease-out;
+}
+
+.fade-in-right {
+    animation: fadeInRight 0.6s ease-out;
+}
+
+.scale-in {
+    animation: scaleIn 0.6s ease-out;
+}
+
+/* Advanced Hover Effects */
+.hover-lift {
+    transition: transform 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-5px);
+}
+
+.hover-scale {
+    transition: transform 0.3s ease;
+}
+
+.hover-scale:hover {
+    transform: scale(1.05);
+}
+
+.hover-glow {
+    transition: box-shadow 0.3s ease;
+}
+
+.hover-glow:hover {
+    box-shadow: 0 0 30px rgba(102, 126, 234, 0.5);
+}
+
+/* Professional Footer */
+footer {
+    background: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Toast Notifications */
+.toast {
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Advanced Form Styling */
+.form-floating > .form-control,
+.form-floating > .form-select {
+    height: calc(3.5rem + 2px);
+    line-height: 1.25;
+}
+
+.form-floating > label {
+    padding: 1rem 0.75rem;
+}
+
+/* Professional Icons */
+.icon-large {
+    font-size: 3rem;
+}
+
+.icon-medium {
+    font-size: 2rem;
+}
+
+.icon-small {
+    font-size: 1.5rem;
+}
+
+/* Gradient Text Effects */
+.gradient-text-primary {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.gradient-text-success {
+    background: var(--success-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Advanced Card Variations */
+.card-hover {
+    transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+    transform: translateY(-10px);
+    box-shadow: var(--shadow-xl);
+}
+
+.card-gradient {
+    background: var(--primary-gradient);
+    color: white;
+}
+
+.card-gradient-success {
+    background: var(--success-gradient);
+    color: white;
+}
+
+/* Professional Spacing with Golden Ratio */
+.section-padding {
+    padding: calc(var(--spacing-xl) * var(--phi)) 0; /* ~110px */
+}
+
+.section-padding-sm {
+    padding: var(--spacing-xl) 0; /* ~68px */
+}
+
+.section-padding-lg {
+    padding: calc(var(--spacing-xl) * var(--phi) * var(--phi)) 0; /* ~178px */
+}
+
+/* Golden Ratio Margins */
+.mt-golden-sm { margin-top: var(--spacing-md); }
+.mt-golden-md { margin-top: var(--spacing-lg); }
+.mt-golden-lg { margin-top: var(--spacing-xl); }
+.mb-golden-sm { margin-bottom: var(--spacing-md); }
+.mb-golden-md { margin-bottom: var(--spacing-lg); }
+.mb-golden-lg { margin-bottom: var(--spacing-xl); }
+.p-golden-sm { padding: var(--spacing-md); }
+.p-golden-md { padding: var(--spacing-lg); }
+.p-golden-lg { padding: var(--spacing-xl); }
+
+/* Advanced Border Effects */
+.border-gradient {
+    border: 2px solid;
+    border-image: var(--primary-gradient) 1;
+}
+
+.border-glow {
+    border: 2px solid transparent;
+    background: linear-gradient(white, white) padding-box,
+                var(--primary-gradient) border-box;
+}
+
+/* Professional Shadows */
+.shadow-soft {
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-medium {
+    box-shadow: 0 5px 30px rgba(0, 0, 0, 0.15);
+}
+
+.shadow-strong {
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Advanced Background Patterns */
+.bg-pattern {
+    background-image: 
+        radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(255,255,255,0.1) 0%, transparent 50%);
+}
+
+/* Professional Transitions */
+.transition-fast {
+    transition: all 0.2s ease;
+}
+
+.transition-normal {
+    transition: all 0.3s ease;
+}
+
+.transition-slow {
+    transition: all 0.5s ease;
+}
+
+/* Advanced Focus States */
+.focus-ring {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.25);
+}
+
+/* Professional Loading States */
+.loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: shimmer 1.5s infinite;
+} 
+
+/* League filtering styles */
+.form-select[data-filtered="true"] {
+    background-color: rgba(102, 126, 234, 0.1);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.1rem rgba(102, 126, 234, 0.25);
+}
+
+.form-select[data-filtered="false"] {
+    opacity: 0.7;
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.league-filter-active {
+    background: var(--primary-gradient) !important;
+    color: white !important;
+    border-color: var(--primary-color) !important;
+}
+
+.team-select-disabled {
+    opacity: 0.5;
+    pointer-events: none;
+} 
+
+.form-circle {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  line-height: 22px;
+  border-radius: 50%;
+  text-align: center;
+  margin: 0 2px;
+  color: #fff;
+  font-weight: bold;
+  font-family: monospace;
+  font-size: 1rem;
+}
+.form-circle.w { background: #4caf50; }   /* Win - green */
+.form-circle.d { background: #ffc107; color: #333; }   /* Draw - yellow */
+.form-circle.l { background: #f44336; }   /* Loss - red */
+
+/* Balanced Layout Utilities */
+.balanced-container {
+    max-width: calc(1200px * var(--phi-inverse));
+    margin: 0 auto;
+    padding: var(--spacing-md);
+}
+
+.balanced-section {
+    padding: var(--spacing-xl) 0;
+    margin: var(--spacing-lg) 0;
+}
+
+.balanced-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(calc(280px * var(--phi-inverse)), 1fr));
+    gap: var(--spacing-md);
+    margin: var(--spacing-md) 0;
+}
+
+.balanced-text {
+    line-height: calc(var(--font-base) * var(--phi));
+    margin-bottom: var(--spacing-sm);
+}
+
+.balanced-spacing > * + * {
+    margin-top: var(--spacing-md);
+}
+
+/* Visual Balance Helpers */
+.visual-weight-primary {
+    width: var(--width-primary);
+}
+
+.visual-weight-secondary {
+    width: var(--width-secondary);
+}
+
+/* ============================================
+   GOLDEN RATIO UI BALANCE SYSTEM
+   ============================================
+   
+   This stylesheet implements the Golden Ratio (φ = 1.618) 
+   throughout the UI for balanced, harmonious proportions.
+   
+   Key Applications:
+   - Spacing: Multiples of 16px × φ^n
+   - Typography: Font sizes follow φ progression
+   - Layout: 61.8% / 38.2% column splits
+   - Borders: Radius based on φ
+   - Shadows: Offset and blur use φ
+   
+   Usage:
+   - Use .golden-grid for 61.8/38.2 layouts
+   - Use spacing variables (--spacing-*) for margins/padding
+   - Use font variables (--font-*) for typography
+   - Use .w-golden-primary/.w-golden-secondary for widths
+   - Use .balanced-* classes for consistent spacing
+   
+   ============================================ */ 

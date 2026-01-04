@@ -1,0 +1,918 @@
+{% extends 'predictor/base.html' %}
+{% load static %}
+
+{% block title %}Professional Match Predictions{% endblock %}
+
+{% block extra_css %}
+<style>
+    .prediction-container {
+        background: #000000;
+        min-height: 100vh;
+        padding: var(--spacing-lg) var(--spacing-md);
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .prediction-card {
+        background: #1a1a1a;
+        border-radius: var(--border-radius-lg);
+        padding: var(--spacing-lg);
+        box-shadow: var(--shadow-md);
+        margin-bottom: var(--spacing-lg);
+        border: calc(1px * var(--phi-inverse)) solid #333333;
+        color: #ffffff;
+        width: 100%;
+        max-width: 900px;
+        margin-left: auto;
+        margin-right: auto;
+        box-sizing: border-box;
+        transition: all 0.3s ease;
+    }
+    
+    .team-selector {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: var(--spacing-md);
+        align-items: center;
+        margin-bottom: var(--spacing-lg);
+        width: 100%;
+        max-width: 100%;
+        transition: gap 0.3s ease;
+    }
+    
+    /* Better spacing for VS badge */
+    .vs-badge {
+        min-width: 60px;
+        flex-shrink: 0;
+    }
+    
+    .team-card {
+        background: #1a1a1a;
+        color: #ffffff;
+        padding: var(--spacing-md);
+        border-radius: var(--border-radius-lg);
+        text-align: center;
+        border: calc(1px * var(--phi-inverse)) solid #333333;
+        transition: all calc(0.3s * var(--phi-inverse)) ease;
+        cursor: pointer;
+    }
+    
+    .team-card:hover {
+        border-color: #00d4aa;
+        box-shadow: var(--shadow-md);
+        transform: translateY(calc(-2px * var(--phi-inverse)));
+    }
+    
+    .team-card.selected {
+        border-color: #00d4aa;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .vs-badge {
+        background: linear-gradient(135deg, #00d4aa 0%, #00b894 100%);
+        color: #000000;
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--border-radius-md);
+        font-weight: bold;
+        font-size: var(--font-base);
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .form-control, .form-select {
+        border: 2px solid #333333;
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #1a1a1a;
+        color: #ffffff;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #00d4aa;
+        box-shadow: 0 0 0 0.2rem rgba(0, 212, 170, 0.25);
+        background: #1a1a1a;
+        color: #ffffff;
+        outline: none;
+    }
+    
+    .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #ffffff;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .btn-predict {
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        border: none;
+        padding: 20px 45px;
+        border-radius: 20px;
+        color: white;
+        font-size: 1.3rem;
+        font-weight: 700;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 10px 30px rgba(5, 150, 105, 0.4), 0 0 20px rgba(5, 150, 105, 0.2);
+        position: relative;
+        overflow: hidden;
+        display: inline-flex;
+        align-items: center;
+        gap: 15px;
+        text-decoration: none;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        min-width: 300px;
+        justify-content: center;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .btn-predict::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.6s;
+    }
+    
+    .btn-predict:hover::before {
+        left: 100%;
+    }
+    
+    .btn-predict:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 15px 40px rgba(5, 150, 105, 0.5), 0 0 30px rgba(5, 150, 105, 0.3);
+        color: white;
+        text-decoration: none;
+        background: linear-gradient(135deg, #047857 0%, #059669 100%);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .btn-predict:active {
+        transform: translateY(-2px) scale(0.98);
+        box-shadow: 0 8px 25px rgba(5, 150, 105, 0.4);
+    }
+    
+    .btn-predict i {
+        font-size: 1.4rem;
+        animation: pulse 2s infinite;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+    
+    .btn-predict:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+        animation: none;
+    }
+    
+    .btn-predict:disabled:hover {
+        transform: none;
+        box-shadow: 0 10px 30px rgba(5, 150, 105, 0.4);
+    }
+    
+    /* Glowing effect for the button */
+    .btn-predict::after {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(45deg, #10b981, #059669, #047857, #10b981);
+        border-radius: 22px;
+        z-index: -1;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .btn-predict:hover::after {
+        opacity: 0.3;
+    }
+    
+    .btn-clear {
+        background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+        border: none;
+        padding: 12px 24px;
+        border-radius: 12px;
+        color: white;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 15px rgba(100, 116, 139, 0.3);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .btn-clear:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(100, 116, 139, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-clear:active {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(100, 116, 139, 0.3);
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+    }
+    
+    .stat-item {
+        background: #fff7ed;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(146, 64, 14, 0.15);
+        border: 2px solid #fed7aa;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .stat-label {
+        color: #92400e;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .loading-spinner {
+        display: none;
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .team-form {
+        background: #fff7ed;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(146, 64, 14, 0.15);
+        border: 2px solid #fed7aa;
+    }
+    
+    .form-indicator {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 5px;
+    }
+    
+    .form-win {
+        background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+        color: #166534;
+        border: 1px solid #22c55e;
+    }
+    
+    .form-draw {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        color: #92400e;
+        border: 1px solid #f59e0b;
+    }
+    
+    .form-loss {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        color: #991b1b;
+        border: 1px solid #ef4444;
+    }
+    
+    .analytics-card {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border-radius: 12px;
+        padding: 25px;
+        margin-top: 20px;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .prediction-header {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 16px 16px 0 0;
+        margin: -40px -40px 30px -40px;
+    }
+    
+    .category-selector {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e2e8f0;
+    }
+    
+    /* ============================================
+       PREDICT PAGE RESPONSIVE ENHANCEMENTS
+       ============================================ */
+    
+    /* Mobile Tablets (768px and below) */
+    @media (max-width: 768px) {
+        .prediction-container {
+            padding: 1rem 0;
+        }
+        
+        .prediction-card {
+            padding: 1rem;
+        }
+        
+        .prediction-header {
+            padding: 1.5rem 1rem;
+            margin: -1rem -1rem 1rem -1rem;
+        }
+        
+        .prediction-header h2 {
+            font-size: 1.25rem;
+        }
+        
+        .prediction-header p {
+            font-size: 0.85rem;
+        }
+        
+        .category-selector {
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .team-selector {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+        
+        .team-card {
+            padding: 1rem;
+        }
+        
+        .team-card h4 {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .vs-badge {
+            display: none;
+        }
+        
+        .btn-predict {
+            width: 100%;
+            min-width: auto;
+            padding: 16px 24px;
+            font-size: 1rem;
+        }
+        
+        .btn-predict i {
+            font-size: 1.1rem;
+        }
+        
+        .form-label {
+            font-size: 0.8rem;
+        }
+        
+        .form-control, .form-select {
+            font-size: 16px; /* Prevent iOS zoom */
+            padding: 0.75rem;
+        }
+        
+        #clear-form-btn {
+            font-size: 0.8rem;
+            padding: 6px 12px;
+        }
+    }
+    
+    /* Small Mobile (576px and below) */
+    @media (max-width: 576px) {
+        .prediction-container {
+            padding: 0.5rem 0;
+        }
+        
+        .prediction-card {
+            padding: 0.75rem;
+            border-radius: 12px;
+        }
+        
+        .prediction-header {
+            padding: 1rem 0.75rem;
+            margin: -0.75rem -0.75rem 0.75rem -0.75rem;
+        }
+        
+        .prediction-header h2 {
+            font-size: 1.1rem;
+        }
+        
+        .prediction-header p {
+            font-size: 0.8rem;
+            margin-bottom: 0;
+        }
+        
+        .prediction-header .d-flex {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .prediction-header .btn {
+            width: 100%;
+            font-size: 0.85rem;
+            padding: 8px 16px;
+        }
+        
+        .category-selector {
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .team-selector {
+            gap: 0.5rem;
+        }
+        
+        .team-card {
+            padding: 0.75rem;
+        }
+        
+        .team-card h4 {
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .btn-predict {
+            padding: 14px 20px;
+            font-size: 0.95rem;
+            letter-spacing: 0.3px;
+        }
+        
+        .btn-predict i {
+            font-size: 1rem;
+        }
+        
+        .text-muted.small {
+            font-size: 0.8rem;
+        }
+    }
+    
+    /* Landscape phones */
+    @media (max-height: 500px) and (orientation: landscape) {
+        .prediction-header {
+            padding: 1rem;
+        }
+        
+        .btn-predict {
+            padding: 12px 24px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="prediction-container">
+    <div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+                <div class="prediction-card">
+                    <div class="prediction-header">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h2 class="text-center mb-0 flex-grow-1">Professional Match Prediction</h2>
+                            <a href="{% url 'predictor:predict' %}?multi=true" class="btn btn-outline btn-sm">
+                                <i class="fas fa-layer-group me-1"></i>Multi-Match Mode
+                            </a>
+                        </div>
+                        <p class="text-center mb-0">Advanced AI-powered predictions with comprehensive analytics</p>
+                    </div>
+                    
+                    <form id="prediction-form" method="post" autocomplete="off">
+                        {% csrf_token %}
+                        
+                        <!-- Clear Form Button -->
+                        <div class="d-flex justify-content-end mb-2">
+                            <button type="button" id="clear-form-btn" class="btn btn-sm btn-outline-secondary" style="font-size: 0.85rem;">
+                                <i class="fas fa-eraser me-1"></i>Clear Form
+                            </button>
+                        </div>
+                        
+                        <!-- Category Selection -->
+                        <div class="category-selector">
+                            <label for="category" class="form-label">League Category</label>
+                            <select name="category" id="category" class="form-control" required>
+                                <option value="">Select Category</option>
+                                <option value="European Leagues">European Leagues</option>
+                                <option value="Others">Other Leagues</option>
+                            </select>
+                        </div>
+                        
+                        <!-- League Selection -->
+                        <div class="category-selector">
+                            <label for="league" class="form-label">League</label>
+                            <select name="league" id="league" class="form-control" required>
+                                <option value="">Select League</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Team Selection -->
+                        <div class="team-selector">
+                            <div class="team-card">
+                                <h4>Home Team</h4>
+                                <select name="home_team" id="home_team" class="form-control" required>
+                                    <option value="">Select Home Team</option>
+                                    </select>
+                            </div>
+                            
+                            <div class="vs-badge">VS</div>
+                            
+                            <div class="team-card">
+                                <h4>Away Team</h4>
+                                <select name="away_team" id="away_team" class="form-control" required>
+                                    <option value="">Select Away Team</option>
+                                    </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Prediction Button with Bootstrap -->
+                        <div class="text-center mt-5 mb-4">
+                            <button type="submit" class="btn btn-lg btn-primary btn-predict-modern" id="predict-btn">
+                                <span class="btn-content">
+                                    <i class="fas fa-chart-line me-2"></i>
+                                    <span class="btn-text">Generate Prediction</span>
+                                </span>
+                                <span class="btn-loading d-none">
+                                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    <span>Analyzing...</span>
+                                </span>
+                            </button>
+                            <p class="text-muted mt-3 small">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Using AI-powered analytics for accurate predictions
+                            </p>
+                        </div>
+                    </form>
+</div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// League data structure
+const leaguesData = {
+    'European Leagues': {
+        'Premier League': ['Arsenal', 'Aston Villa', 'Bournemouth', 'Brentford', 'Brighton', 'Chelsea', 'Crystal Palace', 'Everton', 'Fulham', 'Ipswich', 'Leicester', 'Liverpool', 'Man City', 'Man United', 'Newcastle', "Nott'm Forest", 'Southampton', 'Tottenham', 'West Ham', 'Wolves'],
+        'English Championship': ['Blackburn', 'Derby', 'Preston', 'Sheffield United', 'Cardiff', 'Sunderland', 'Hull', 'Bristol City', 'Leeds', 'Portsmouth', 'Middlesbrough', 'Swansea', 'Millwall', 'Watford', 'Oxford', 'Norwich', 'QPR', 'West Brom', 'Stoke', 'Coventry', 'Sheffield Weds', 'Plymouth', 'Luton', 'Burnley'],
+        'Serie A': ['Atalanta', 'Bologna', 'Cagliari', 'Como', 'Empoli', 'Fiorentina', 'Genoa', 'Inter', 'Juventus', 'Lazio', 'Lecce', 'Milan', 'Monza', 'Napoli', 'Parma', 'Roma', 'Torino', 'Udinese', 'Venezia', 'Verona'],
+        'Serie B': ['Bari', 'Brescia', 'Carrarese', 'Catanzaro', 'Cesena', 'Cittadella', 'Cosenza', 'Cremonese', 'Frosinone', 'Juve Stabia', 'Mantova', 'Modena', 'Palermo', 'Pisa', 'Reggiana', 'Salernitana', 'Sampdoria', 'Sassuolo', 'Spezia', 'Sudtirol'],
+        'Ligue1': ['Angers', 'Auxerre', 'Brest', 'Lens', 'Le Havre', 'Lille', 'Lyon', 'Marseille', 'Monaco', 'Montpellier', 'Nantes', 'Nice', 'Paris SG', 'Reims', 'Rennes', 'St Etienne', 'Strasbourg', 'Toulouse'],
+        'Ligue2': ['Ajaccio', 'Rodez', 'Amiens', 'Red Star', 'Clermont', 'Pau FC', 'Dunkerque', 'Annecy', 'Grenoble', 'Laval', 'Guingamp', 'Troyes', 'Caen', 'Paris FC', 'Martigues', 'Lorient', 'Metz', 'Bastia'],
+        'La Liga': ['Alaves', 'Ath Bilbao', 'Ath Madrid', 'Barcelona', 'Betis', 'Celta', 'Espanol', 'Getafe', 'Girona', 'Las Palmas', 'Leganes', 'Mallorca', 'Osasuna', 'Real Madrid', 'Sevilla', 'Sociedad', 'Valencia', 'Valladolid', 'Vallecano', 'Villarreal'],
+        'La Liga2': ['Albacete', 'Almeria', 'Burgos', 'Cadiz', 'Cartagena', 'Castellon', 'Cordoba', 'Eibar', 'Eldense', 'Elche', 'Ferrol', 'Granada', 'Huesca', 'La Coruna', 'Levante', 'Malaga', 'Mirandes', 'Oviedo', 'Santander', 'Sp Gijon', 'Tenerife', 'Zaragoza'],
+        'Eredivisie': ['Ajax', 'Almere City', 'AZ Alkmaar', 'Feyenoord', 'For Sittard', 'Go Ahead Eagles', 'Groningen', 'Heerenveen', 'Heracles', 'NAC Breda', 'Nijmegen', 'PSV Eindhoven', 'Sparta Rotterdam', 'Twente', 'Utrecht', 'Waalwijk', 'Willem II', 'Zwolle'],
+        'Bundesliga': ['Augsburg', 'Bayern Munich', 'Bochum', 'Dortmund', 'Ein Frankfurt', 'Freiburg', 'Heidenheim', 'Hoffenheim', 'Holstein Kiel', 'Leverkusen', 'M\'gladbach', 'Mainz', 'RB Leipzig', 'St Pauli', 'Stuttgart', 'Union Berlin', 'Werder Bremen', 'Wolfsburg'],
+        'Bundesliga2': ['Hamburg', 'Schalke 04', 'Hannover', 'Elversberg', 'Kaiserslautern', 'St Pauli', 'Osnabruck', 'Karlsruhe', 'Wehen', 'Magdeburg', 'Fortuna Dusseldorf', 'Hertha', 'Braunschweig', 'Holstein Kiel', 'Greuther Furth', 'Paderborn', 'Hansa Rostock', 'Nurnberg'],
+        'Scottish League': ['Aberdeen', 'Celtic', 'Dundee', 'Dundee United', 'Hearts', 'Hibernian', 'Kilmarnock', 'Motherwell', 'Rangers', 'Ross County', 'St Johnstone', 'St Mirren'],
+        'Belgium League': ['Anderlecht', 'Antwerp', 'Beerschot VA', 'Cercle Brugge', 'Charleroi', 'Club Brugge', 'Dender', 'Genk', 'Gent', 'Kortrijk', 'Mechelen', 'Oud-Heverlee Leuven', 'St Truiden', 'St. Gilloise', 'Standard', 'Westerlo'],
+        'Portuguese League': ['Arouca', 'AVS', 'Benfica', 'Boavista', 'Casa Pia', 'Estoril', 'Estrela', 'Famalicao', 'Farense', 'Gil Vicente', 'Guimaraes', 'Moreirense', 'Nacional', 'Porto', 'Rio Ave', 'Santa Clara', 'Sp Braga', 'Sp Lisbon'],
+        'Turkish League': ['Ad. Demirspor', 'Alanyaspor', 'Antalyaspor', 'Besiktas', 'Bodrumspor', 'Buyuksehyr', 'Eyupspor', 'Fenerbahce', 'Galatasaray', 'Gaziantep', 'Goztep', 'Hatayspor', 'Kasimpasa', 'Kayserispor', 'Konyaspor', 'Rizespor', 'Samsunspor', 'Sivasspor', 'Trabzonspor'],
+        'Greece League': ['AEK', 'Asteras Tripolis', 'Athens Kallithea', 'Atromitos', 'Lamia', 'Levadeiakos', 'OFI Crete', 'Olympiakos', 'PAOK', 'Panathinaikos', 'Panetolikos', 'Panserraikos', 'Volos NFC', 'Aris']
+    },
+    'Others': {
+        'Switzerland League': ['Basel', 'Grasshoppers', 'Lausanne', 'Lugano', 'Luzern', 'Servette', 'Sion', 'St. Gallen', 'Winterthur', 'Young Boys', 'Yverdon', 'Zurich'],
+        'Denmark League': ['Aarhus', 'Midtjylland', 'Nordsjaelland', 'Aalborg', 'Silkeborg', 'Sonderjyske', 'Vejle', 'Randers FC', 'Viborg', 'Brondby', 'Lyngby', 'FC Copenhagen'],
+        'Austria League': ['Grazer AK', 'Salzburg', 'Altach', 'Tirol', 'Hartberg', 'LASK', 'Wolfsberger AC', 'A. Klagenfurt', 'BW Linz', 'Austria Vienna', 'SK Rapid', 'Sturm Graz'],
+        'Mexico League': ['Puebla', 'Santos Laguna', 'Queretaro', 'Club Tijuana', 'Juarez', 'Atlas', 'Atl. San Luis', 'Club America', 'Guadalajara Chivas', 'Toluca', 'Tigres UANL', 'Necaxa', 'Cruz Azul', 'Mazatlan FC', 'UNAM Pumas', 'Club Leon', 'Pachuca', 'Monterrey'],
+        'Russia League': ['Lokomotiv Moscow', 'Akron Togliatti', 'Krylya Sovetov', 'Zenit', 'Dynamo Moscow', 'Fakel Voronezh', 'FK Rostov', 'CSKA Moscow', 'Orenburg', 'Spartak Moscow', 'Akhmat Grozny', 'Krasnodar', 'Khimki', 'Dynamo Makhachkala', 'Pari NN', 'Rubin Kazan'],
+        'Romania League': ['Farul Constanta', 'Unirea Slobozia', 'FC Hermannstadt', 'Univ. Craiova', 'Sepsi Sf. Gheorghe', 'Poli Iasi', 'UTA Arad', 'FC Rapid Bucuresti', 'FCSB', 'U. Cluj', 'CFR Cluj', 'Din. Bucuresti', 'FC Botosani', 'Otelul', 'Petrolul', 'Gloria Buzau']
+    }
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Optimize: Defer non-critical operations
+    const form = document.getElementById('prediction-form');
+    const predictBtn = document.getElementById('predict-btn');
+    const categorySelect = document.getElementById('category');
+    const leagueSelect = document.getElementById('league');
+    const homeTeamSelect = document.getElementById('home_team');
+    const awayTeamSelect = document.getElementById('away_team');
+    
+    // Check if we're coming from a fresh navigation (e.g., from result page)
+    const urlParams = new URLSearchParams(window.location.search);
+    const isFresh = urlParams.get('fresh') === 'true';
+    
+    if (isFresh) {
+        // Clear ALL storage
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Reset form completely
+        form.reset();
+        categorySelect.value = '';
+        categorySelect.selectedIndex = 0;
+        leagueSelect.innerHTML = '<option value="">Select League</option>';
+        leagueSelect.selectedIndex = 0;
+        homeTeamSelect.innerHTML = '<option value="">Select Home Team</option>';
+        homeTeamSelect.selectedIndex = 0;
+        awayTeamSelect.innerHTML = '<option value="">Select Away Team</option>';
+        awayTeamSelect.selectedIndex = 0;
+        
+        // Clear any cached values
+        if (form.elements) {
+            Array.from(form.elements).forEach(element => {
+                if (element.tagName === 'SELECT') {
+                    element.selectedIndex = 0;
+                } else if (element.tagName === 'INPUT' && element.type !== 'hidden') {
+                    element.value = '';
+                }
+            });
+        }
+        
+        // Remove the fresh parameter from URL
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+        
+        console.log('Form cleared - Fresh start!');
+    }
+    
+    // Pre-populate leagues data is already in JavaScript (fast)
+    
+    // Category change handler
+    categorySelect.addEventListener('change', function() {
+        const category = this.value;
+        
+        // Save currently selected values
+        const currentLeague = leagueSelect.value;
+        const currentHomeTeam = homeTeamSelect.value;
+        const currentAwayTeam = awayTeamSelect.value;
+        
+        leagueSelect.innerHTML = '<option value="">Select League</option>';
+        homeTeamSelect.innerHTML = '<option value="">Select Home Team</option>';
+        awayTeamSelect.innerHTML = '<option value="">Select Away Team</option>';
+        
+        if (category && leaguesData[category]) {
+            // Optimize: Use innerHTML instead of DOM manipulation for speed
+            let optionsHTML = '<option value="">Select League</option>';
+            Object.keys(leaguesData[category]).forEach(league => {
+                const escapedLeague = league.replace(/"/g, '&quot;');
+                optionsHTML += `<option value="${escapedLeague}">${league}</option>`;
+            });
+            leagueSelect.innerHTML = optionsHTML;
+            
+            // Restore league selection if it exists in the new category
+            if (currentLeague && leaguesData[category][currentLeague]) {
+                leagueSelect.value = currentLeague;
+                
+                // Trigger league change to repopulate teams
+                const teams = leaguesData[category][currentLeague];
+                if (teams) {
+                    let homeOptions = '<option value="">Select Home Team</option>';
+                    let awayOptions = '<option value="">Select Away Team</option>';
+                    
+                    teams.forEach(team => {
+                        const escapedTeam = team.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                        homeOptions += `<option value="${escapedTeam}">${team}</option>`;
+                        awayOptions += `<option value="${escapedTeam}">${team}</option>`;
+                    });
+                    
+                    homeTeamSelect.innerHTML = homeOptions;
+                    awayTeamSelect.innerHTML = awayOptions;
+                    
+                    // Restore team selections if they exist
+                    if (currentHomeTeam && teams.includes(currentHomeTeam)) {
+                        homeTeamSelect.value = currentHomeTeam;
+                    }
+                    if (currentAwayTeam && teams.includes(currentAwayTeam)) {
+                        awayTeamSelect.value = currentAwayTeam;
+                    }
+                }
+            }
+        }
+    });
+    
+    // League change handler
+    leagueSelect.addEventListener('change', function() {
+        const category = categorySelect.value;
+        const league = this.value;
+        
+        // Save currently selected teams
+        const currentHomeTeam = homeTeamSelect.value;
+        const currentAwayTeam = awayTeamSelect.value;
+        
+        homeTeamSelect.innerHTML = '<option value="">Select Home Team</option>';
+        awayTeamSelect.innerHTML = '<option value="">Select Away Team</option>';
+        
+        if (category && league && leaguesData[category] && leaguesData[category][league]) {
+            const teams = leaguesData[category][league];
+            
+            // Optimize: Use innerHTML for faster rendering (10x faster than DOM manipulation)
+            let homeOptions = '<option value="">Select Home Team</option>';
+            let awayOptions = '<option value="">Select Away Team</option>';
+            
+            teams.forEach(team => {
+                const escapedTeam = team.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                homeOptions += `<option value="${escapedTeam}">${team}</option>`;
+                awayOptions += `<option value="${escapedTeam}">${team}</option>`;
+            });
+            
+            // Single DOM update (much faster than multiple appends)
+            homeTeamSelect.innerHTML = homeOptions;
+            awayTeamSelect.innerHTML = awayOptions;
+            
+            // Restore previously selected teams if they exist in the new league
+            if (currentHomeTeam && teams.includes(currentHomeTeam)) {
+                homeTeamSelect.value = currentHomeTeam;
+            }
+            if (currentAwayTeam && teams.includes(currentAwayTeam)) {
+                awayTeamSelect.value = currentAwayTeam;
+            }
+        }
+    });
+    
+    // Add validation when teams are selected
+    function validateTeamSelection() {
+        const homeTeam = homeTeamSelect.value;
+        const awayTeam = awayTeamSelect.value;
+        
+        if (homeTeam && awayTeam && homeTeam === awayTeam) {
+            alert('Error: Home team and away team must be different. Please select different teams.');
+            awayTeamSelect.value = '';
+            return false;
+        }
+        return true;
+    }
+    
+    homeTeamSelect.addEventListener('change', function() {
+        validateTeamSelection();
+    });
+    
+    awayTeamSelect.addEventListener('change', function() {
+        validateTeamSelection();
+    });
+    
+    // Form submission with improved UX
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const homeTeam = homeTeamSelect.value;
+        const awayTeam = awayTeamSelect.value;
+        const category = categorySelect.value;
+        
+        if (!homeTeam || !awayTeam) {
+            // Use Bootstrap alert
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-warning alert-dismissible fade show mt-3';
+            alertDiv.innerHTML = '<strong>Warning!</strong> Please select both teams.<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+            form.insertBefore(alertDiv, form.firstChild);
+            setTimeout(() => alertDiv.remove(), 5000);
+            return;
+        }
+        
+        // Validate: teams must be different
+        if (homeTeam === awayTeam) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger alert-dismissible fade show mt-3';
+            alertDiv.innerHTML = '<strong>Error!</strong> Home team and away team must be different.<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+            form.insertBefore(alertDiv, form.firstChild);
+            setTimeout(() => alertDiv.remove(), 5000);
+            return;
+        }
+        
+        // Show loading state on button
+        const btnContent = predictBtn.querySelector('.btn-content');
+        const btnLoading = predictBtn.querySelector('.btn-loading');
+        if (btnContent) btnContent.classList.add('d-none');
+        if (btnLoading) btnLoading.classList.remove('d-none');
+        predictBtn.disabled = true;
+        
+        // Submit form
+        const formData = new FormData(form);
+        
+        fetch('{% url "predictor:api_predict" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger alert-dismissible fade show mt-3';
+                alertDiv.innerHTML = `<strong>Error!</strong> ${data.error}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+                form.insertBefore(alertDiv, form.firstChild);
+                setTimeout(() => alertDiv.remove(), 5000);
+            } else {
+                // Redirect to result page
+                const probs = data.probabilities || {};
+                let probHome = probs.Home !== undefined ? probs.Home : (probs[0] !== undefined ? probs[0] : 0.4);
+                let probDraw = probs.Draw !== undefined ? probs.Draw : (probs[1] !== undefined ? probs[1] : 0.3);
+                let probAway = probs.Away !== undefined ? probs.Away : (probs[2] !== undefined ? probs[2] : 0.3);
+                
+                // Ensure probabilities are in decimal format (0-1)
+                if (probHome > 1) probHome = probHome / 100;
+                if (probDraw > 1) probDraw = probDraw / 100;
+                if (probAway > 1) probAway = probAway / 100;
+                
+                const params = new URLSearchParams({
+                    home_team: data.home_team || homeTeam,
+                    away_team: data.away_team || awayTeam,
+                    category: category,
+                    home_score: data.home_score,
+                    away_score: data.away_score,
+                    outcome: data.outcome,
+                    prediction_number: data.prediction_number,
+                    model1_prediction: data.model1_prediction || 'Model Prediction',
+                    model1_basis: data.model1_basis || 'Based on historical data analysis',
+                    model1_confidence: data.model1_confidence || '',
+                    model_type: data.model_type || '',
+                    model2_prediction: data.model2_prediction || '',
+                    final_prediction: data.final_prediction || '',
+                    prob_home: probHome,
+                    prob_draw: probDraw,
+                    prob_away: probAway
+                });
+                
+                // Clear localStorage before redirecting to result page
+                localStorage.removeItem('form_prediction-form');
+                
+                window.location.href = '/result/?' + params.toString();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger alert-dismissible fade show mt-3';
+            alertDiv.innerHTML = '<strong>Error!</strong> An error occurred while making the prediction. Please try again.<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+            form.insertBefore(alertDiv, form.firstChild);
+            setTimeout(() => alertDiv.remove(), 5000);
+        })
+        .finally(() => {
+            // Reset button state
+            if (btnContent) btnContent.classList.remove('d-none');
+            if (btnLoading) btnLoading.classList.add('d-none');
+            predictBtn.disabled = false;
+        });
+    });
+    
+    // Clear Form Button Handler
+    const clearFormBtn = document.getElementById('clear-form-btn');
+    if (clearFormBtn) {
+        clearFormBtn.addEventListener('click', function() {
+            // Clear all form fields
+            form.reset();
+            
+            // Clear localStorage
+            localStorage.removeItem('form_prediction-form');
+            
+            // Reset select dropdowns to default
+            categorySelect.value = '';
+            leagueSelect.innerHTML = '<option value="">Select League</option>';
+            homeTeamSelect.innerHTML = '<option value="">Select Home Team</option>';
+            awayTeamSelect.innerHTML = '<option value="">Select Away Team</option>';
+            
+            // Show success message
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success alert-dismissible fade show mt-3';
+            alertDiv.innerHTML = '<strong>Success!</strong> Form has been cleared.<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+            form.insertBefore(alertDiv, form.firstChild);
+            setTimeout(() => alertDiv.remove(), 3000);
+        });
+    }
+    
+});
+</script>
+{% endblock %} 

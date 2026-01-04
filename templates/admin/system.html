@@ -1,0 +1,187 @@
+{% extends 'admin/dashboard_base.html' %}
+
+{% block title %}System Control - Admin Dashboard{% endblock %}
+{% block page_title %}System Control & Maintenance{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- System Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <div class="stat-number">{{ total_predictions }}</div>
+                    <div class="stat-label">Total Predictions</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="stat-number">{{ active_predictions }}</div>
+                    <div class="stat-label">Active Predictions</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-archive"></i>
+                    </div>
+                    <div class="stat-number">{{ archived_predictions }}</div>
+                    <div class="stat-label">Archived Predictions</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="stat-label" style="font-size: 0.8rem;">{{ db_size }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Actions -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-broom"></i> Cleanup & Maintenance
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="mb-3">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Clear Cache</label>
+                            <p class="text-muted small">Remove all cached data to refresh the system.</p>
+                            <button type="submit" name="action" value="clear_cache" class="btn btn-warning">
+                                <i class="fas fa-trash"></i> Clear Cache
+                            </button>
+                        </div>
+                    </form>
+
+                    <hr>
+
+                    <form method="post" class="mb-3">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="cleanup_days" class="form-label">Archive Old Predictions</label>
+                            <input type="number" class="form-control" id="cleanup_days" name="days" value="90" min="1">
+                            <small class="text-muted">Archive predictions older than (days)</small>
+                        </div>
+                        <button type="submit" name="action" value="cleanup_predictions" class="btn btn-info">
+                            <i class="fas fa-archive"></i> Archive Predictions
+                        </button>
+                    </form>
+
+                    <hr>
+
+                    <form method="post" class="mb-3">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="delete_days" class="form-label">Delete Archived Predictions</label>
+                            <input type="number" class="form-control" id="delete_days" name="days" value="180" min="1">
+                            <small class="text-muted">Permanently delete archived predictions older than (days)</small>
+                        </div>
+                        <button type="submit" name="action" value="delete_archived" class="btn btn-danger"
+                            onclick="return confirm('Are you sure? This cannot be undone!');">
+                            <i class="fas fa-trash"></i> Delete Archived
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-wrench"></i> System Operations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6>Database Status</h6>
+                        <div class="alert alert-info mb-0">
+                            <i class="fas fa-check-circle"></i>
+                            <strong>Operational</strong><br>
+                            {{ db_size }}<br>
+                            <small>Last check: {{ now }}</small>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3">
+                        <h6>Cache Status</h6>
+                        <div class="alert alert-success mb-0">
+                            <i class="fas fa-check-circle"></i>
+                            <strong>Active</strong><br>
+                            Cache system is running normally
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3">
+                        <h6>Recent Activity</h6>
+                        <ul class="list-unstyled small">
+                            <li><i class="fas fa-check"></i> System online</li>
+                            <li><i class="fas fa-check"></i> All services running</li>
+                            <li><i class="fas fa-check"></i> Database responsive</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Options -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-sliders-h"></i> Advanced Options
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Warning:</strong> Advanced operations should only be performed by experienced
+                        administrators.
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <button class="btn btn-outline-secondary btn-sm" disabled>
+                                <i class="fas fa-sync"></i> Rebuild Indexes
+                            </button>
+                            <small class="d-block text-muted mt-2">Optimize database indexes for better
+                                performance</small>
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-outline-secondary btn-sm" disabled>
+                                <i class="fas fa-save"></i> Backup Database
+                            </button>
+                            <small class="d-block text-muted mt-2">Create a backup of current database state</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,305 @@
+{% extends 'admin/dashboard_base.html' %}
+
+{% block title %}Dashboard - Football Pro Admin{% endblock %}
+{% block page_title %}System Overview{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Performance & Conversion -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card shadow-sm border-0">
+                <div class="stat-icon bg-soft-primary">
+                    <i class="fas fa-users text-primary"></i>
+                </div>
+                <div class="stat-number">{{ total_users }}</div>
+                <div class="stat-label">Total Users</div>
+                <div class="mt-2">
+                    <span class="badge bg-success-soft text-success">+{{ new_users_month }}</span>
+                    <small class="text-muted ms-1">new this month</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card shadow-sm border-0">
+                <div class="stat-icon bg-soft-success">
+                    <i class="fas fa-gem text-success"></i>
+                </div>
+                <div class="stat-number">{{ conversion_rate|floatformat:1 }}%</div>
+                <div class="stat-label">Conversion Rate</div>
+                <div class="mt-2">
+                    <small class="text-muted">Users to Paid</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card shadow-sm border-0">
+                <div class="stat-icon bg-soft-warning">
+                    <i class="fas fa-sack-dollar text-warning"></i>
+                </div>
+                <div class="stat-number">KES {{ total_revenue|floatformat:0 }}</div>
+                <div class="stat-label">Gross Revenue</div>
+                <div class="mt-2">
+                    <small class="text-muted">Total from active subs</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card shadow-sm border-0">
+                <div class="stat-icon bg-soft-info">
+                    <i class="fas fa-chart-line text-info"></i>
+                </div>
+                <div class="stat-number">{{ total_predictions }}</div>
+                <div class="stat-label">Total Predictions</div>
+                <div class="mt-2">
+                    <span class="badge bg-info-soft text-info">{{ today_predictions }}</span>
+                    <small class="text-muted ms-1">made today</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Growth & Traffic -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 fw-bold">Latest Predictions</h6>
+                        <a href="{% url 'predictor:admin_predictions' %}" class="btn btn-sm btn-light border">View
+                            All</a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4">Match Detail</th>
+                                    <th>Confidence</th>
+                                    <th class="pe-4 text-end">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pred in recent_predictions %}
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="d-flex flex-column">
+                                            <span class="fw-bold">{{ pred.home_team }} vs {{ pred.away_team }}</span>
+                                            <small class="text-muted">{{ pred.prediction_date|date:"H:i, M d" }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                                                <div class="progress-bar {% if pred.confidence >= 80 %}bg-success{% elif pred.confidence >= 60 %}bg-warning{% else %}bg-danger{% endif %}"
+                                                    role="progressbar" style="width: {{ pred.confidence|default:0 }}%">
+                                                </div>
+                                            </div>
+                                            <small class="fw-bold text-dark">{{ pred.confidence|floatformat:0 }}%</small>
+                                        </div>
+                                    </td>
+                                    <td class="pe-4 text-end">
+                                        {% if pred.outcome %}<span
+                                            class="badge bg-success-soft text-success">Logged</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary-soft text-secondary">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted italic">No recent prediction data
+                                        available</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Analytics Stats -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white py-3">
+                            <h6 class="m-0 fw-bold">User Acquisition Mix</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-3">
+                                <span class="text-muted"><i class="fab fa-google text-primary me-2"></i> Google
+                                    SSO</span>
+                                <span class="fw-bold">{{ google_users_count }} users</span>
+                            </div>
+                            <div class="progress mb-4" style="height: 8px;">
+                                <div class="progress-bar bg-primary" role="progressbar"
+                                    style="width: {% widthratio google_users_count total_users 100 %}%"></div>
+                            </div>
+
+                            <div class="d-flex justify-content-between mb-3">
+                                <span class="text-muted"><i class="fas fa-envelope text-secondary me-2"></i>
+                                    Email/Direct</span>
+                                <span class="fw-bold">{{ total_users|add:"-google_users_count" }} users</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-secondary" role="progressbar"
+                                    style="width: {% widthratio total_users|add:"-google_users_count" total_users 100 %}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white py-3">
+                            <h6 class="m-0 fw-bold">System Status</h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="status-dot online me-3"></div>
+                                        <span>Primary Database</span>
+                                    </div>
+                                    <span class="badge bg-success-soft text-success px-3">Active</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="status-dot online me-3"></div>
+                                        <span>FastAPI Prediction Engine</span>
+                                    </div>
+                                    <span class="badge bg-success-soft text-success px-3">Syncing</span>
+                                </li>
+                                <li
+                                    class="list-group-item d-flex justify-content-between align-items-center py-3 border-0">
+                                    <div class="d-flex align-items-center">
+                                        <div class="status-dot online me-3"></div>
+                                        <span>Google Analytics</span>
+                                    </div>
+                                    <span class="badge bg-info-soft text-info px-3">
+                                        {% if google_analytics_id %}Tracking{% else %}Disabled{% endif %}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Analytics -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h6 class="m-0 fw-bold">Latest Signups</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for user in recent_users %}
+                        <a href="{% url 'predictor:admin_user_detail' user.id %}"
+                            class="list-group-item list-group-item-action py-3">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-sm bg-light text-primary rounded me-3 d-flex align-items-center justify-content-center"
+                                    style="width: 32px; height: 32px;">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0 text-dark">{{ user.username }}</h6>
+                                        <small class="text-muted">{{ user.date_joined|timesince }} ago</small>
+                                    </div>
+                                    <small class="text-muted">{{ user.email|truncatechars:25 }}</small>
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    <div class="p-3 text-center border-top">
+                        <a href="{% url 'predictor:admin_users' %}" class="btn btn-sm text-primary fw-bold">View all
+                            users <i class="fas fa-chevron-right ms-1"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Data Stats -->
+            <div class="card border-0 shadow-sm bg-primary text-white">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-4 opacity-75">Platform Data</h6>
+                    <div class="row text-center">
+                        <div class="col-4 border-end border-white border-opacity-25 text-start">
+                            <h4 class="fw-bold mb-0">{{ total_teams }}</h4>
+                            <small class="opacity-75">Teams</small>
+                        </div>
+                        <div class="col-4 border-end border-white border-opacity-25 text-start ps-3">
+                            <h4 class="fw-bold mb-0">{{ total_leagues }}</h4>
+                            <small class="opacity-75">Leagues</small>
+                        </div>
+                        <div class="col-4 text-start ps-3">
+                            <h4 class="fw-bold mb-0">{{ total_matches }}</h4>
+                            <small class="opacity-75">Matches</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Status -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-user-shield text-primary me-2"></i>
+                        <span class="fw-bold">My Session</span>
+                    </div>
+                    <div class="d-flex justify-content-between small mb-2">
+                        <span class="text-muted">Auth Scope:</span>
+                        <span class="fw-bold">{% if user.is_superuser %}Full Infrastructure{% else %}Staff Limited{% endif %}</span>
+                    </div>
+                    <div class="d-flex justify-content-between small">
+                        <span class="text-muted">Last System Login:</span>
+                        <span class="fw-bold">{{ user.last_login|date:"M d, H:i" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-soft-primary {
+        background-color: #eff6ff;
+    }
+
+    .bg-soft-success {
+        background-color: #f0fdf4;
+    }
+
+    .bg-soft-warning {
+        background-color: #fffbeb;
+    }
+
+    .bg-soft-info {
+        background-color: #f0f9ff;
+    }
+
+    .bg-success-soft {
+        background-color: rgba(34, 197, 94, 0.1);
+    }
+
+    .bg-info-soft {
+        background-color: rgba(14, 165, 233, 0.1);
+    }
+
+    .bg-secondary-soft {
+        background-color: rgba(100, 116, 139, 0.1);
+    }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+    }
+
+    .status-dot.online {
+        background-color: #22c55e;
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);
+    }
+</style>
+{% endblock %}

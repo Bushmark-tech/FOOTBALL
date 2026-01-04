@@ -1,0 +1,414 @@
+{% extends 'predictor/base.html' %}
+
+{% block title %}About - Football Predictor Pro{% endblock %}
+
+{% block extra_css %}
+<style>
+    .about-container {
+        background: #000000;
+        min-height: 100vh;
+        padding-bottom: var(--spacing-xl);
+    }
+    
+    .about-hero {
+        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+        color: white;
+        padding: 60px 0;
+        text-align: center;
+        border-bottom: 2px solid #333333;
+    }
+    
+    @media (min-width: 768px) {
+        .about-hero {
+            padding: 80px 0;
+        }
+        
+        .about-hero h1 {
+            font-size: 3.5rem !important;
+        }
+        
+        .about-hero .lead {
+            font-size: 1.25rem !important;
+        }
+    }
+    
+    .feature-card {
+        background: #1a1a1a;
+        border-radius: var(--border-radius-lg);
+        padding: 20px;
+        box-shadow: var(--shadow-md);
+        transition: all 0.3s ease;
+        border: 1px solid #333333;
+        height: 100%;
+        color: #ffffff;
+        margin-bottom: 20px;
+    }
+    
+    @media (min-width: 768px) {
+        .feature-card {
+            padding: 30px;
+            margin-bottom: 0;
+        }
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 255, 135, 0.2);
+        border-color: #00ff87;
+    }
+    
+    .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 20px;
+        display: inline-block;
+        position: relative;
+        background: linear-gradient(135deg, #00d4aa 0%, #00b894 50%, #00ff87 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        filter: drop-shadow(0 4px 12px rgba(0, 212, 170, 0.4));
+        animation: iconGlow 3s ease-in-out infinite;
+    }
+    
+    @media (min-width: 768px) {
+        .feature-icon {
+            font-size: 4rem;
+            margin-bottom: 25px;
+        }
+    }
+    
+    .feature-icon i {
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .feature-card:hover .feature-icon i {
+        transform: scale(1.2) rotate(5deg);
+        filter: drop-shadow(0 8px 20px rgba(0, 212, 170, 0.6));
+    }
+    
+    @keyframes iconGlow {
+        0%, 100% {
+            filter: drop-shadow(0 4px 12px rgba(0, 212, 170, 0.4));
+        }
+        50% {
+            filter: drop-shadow(0 6px 20px rgba(0, 212, 170, 0.7));
+        }
+    }
+    
+    .process-step {
+        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+        border-radius: 16px;
+        padding: 25px 20px;
+        text-align: center;
+        border: 2px solid transparent;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        color: #ffffff;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+    
+    @media (min-width: 768px) {
+        .process-step {
+            padding: 35px 25px;
+            margin-bottom: 0;
+        }
+    }
+    
+    .process-step::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(0, 212, 170, 0.1), transparent);
+        transition: left 0.6s;
+    }
+    
+    .process-step:hover::before {
+        left: 100%;
+    }
+    
+    .process-step:hover {
+        border-color: #00d4aa;
+        box-shadow: 0 12px 35px rgba(0, 212, 170, 0.25);
+        transform: translateY(-8px);
+    }
+    
+    .process-icon {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+        display: inline-block;
+        background: linear-gradient(135deg, #00d4aa 0%, #00b894 50%, #00ff87 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        filter: drop-shadow(0 4px 12px rgba(0, 212, 170, 0.5));
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: iconFloat 3s ease-in-out infinite;
+    }
+    
+    @media (min-width: 768px) {
+        .process-icon {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+        }
+    }
+    
+    .process-step:hover .process-icon {
+        transform: scale(1.15) rotate(5deg);
+        filter: drop-shadow(0 8px 24px rgba(0, 212, 170, 0.7));
+    }
+    
+    @keyframes iconFloat {
+        0%, 100% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-8px);
+        }
+    }
+    
+    .stats-section {
+        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+        border-radius: var(--border-radius-lg);
+        padding: 30px 20px;
+        margin: 30px 0;
+        border: 1px solid #333333;
+    }
+    
+    @media (min-width: 768px) {
+        .stats-section {
+            padding: 40px;
+            margin: 40px 0;
+        }
+    }
+    
+    .stat-item {
+        text-align: center;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    @media (min-width: 768px) {
+        .stat-item {
+        padding: 20px;
+            margin-bottom: 0;
+        }
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #00ff87;
+        margin-bottom: 10px;
+    }
+    
+    @media (min-width: 768px) {
+        .stat-number {
+            font-size: 2.5rem;
+        }
+    }
+    
+    .stat-label {
+        color: #cccccc;
+        font-weight: 500;
+    }
+    
+    .disclaimer-card {
+        background: #1a1a1a;
+        border-radius: var(--border-radius-md);
+        padding: 20px;
+        box-shadow: var(--shadow-md);
+        border: 1px solid #333333;
+        margin: 15px 0;
+        color: #ffffff;
+    }
+    
+    @media (min-width: 768px) {
+        .disclaimer-card {
+            padding: 25px;
+            margin: 20px 0;
+        }
+    }
+    
+    .disclaimer-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .disclaimer-icon {
+        font-size: 2rem;
+        margin-right: 15px;
+        background: linear-gradient(135deg, #ffd93d 0%, #ffb800 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        filter: drop-shadow(0 2px 8px rgba(255, 217, 61, 0.4));
+        animation: iconPulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes iconPulse {
+        0%, 100% {
+            transform: scale(1);
+            filter: drop-shadow(0 2px 8px rgba(255, 217, 61, 0.4));
+        }
+        50% {
+            transform: scale(1.1);
+            filter: drop-shadow(0 4px 12px rgba(255, 217, 61, 0.6));
+        }
+    }
+    
+    .demo-section {
+        background: #1a1a1a;
+        border-radius: var(--border-radius-lg);
+        padding: 30px;
+        box-shadow: var(--shadow-md);
+        border: 1px solid #333333;
+        margin: 30px 0;
+    }
+    
+    .form-control, .form-select {
+        border: 2px solid #333333;
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #0a0a0a;
+        color: #ffffff;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #00ff87;
+        box-shadow: 0 0 0 0.2rem rgba(0, 255, 135, 0.15);
+        background: #1a1a1a;
+        color: #ffffff;
+    }
+    
+    .form-select option {
+        background: #1a1a1a;
+        color: #ffffff;
+    }
+    
+    .text-muted {
+        color: #999999 !important;
+    }
+    
+    h3, h4, h5 {
+        color: #ffffff;
+    }
+    
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="about-container">
+<!-- Hero Section -->
+<section class="about-hero">
+    <div class="container">
+        <h1 class="display-4 mb-3 mb-md-4" style="font-size: 2rem;">About Football Predictor Pro</h1>
+        <p class="lead mb-3 mb-md-4" style="font-size: 1rem;">AI-powered football predictions with advanced analytics</p>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="container mt-4 mt-md-5">
+    <h3 class="text-center mb-4 mb-md-5" style="color: #ffffff; font-weight: 700; font-size: 1.8rem; margin-bottom: 2rem;">
+        <i class="fas fa-magic me-2" style="background: linear-gradient(135deg, #00d4aa 0%, #00b894 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
+        How It Works
+    </h3>
+    <div class="row">
+        <div class="col-12 col-md-4 mb-4">
+            <div class="process-step">
+                <div class="process-icon">
+                    <i class="fas fa-futbol"></i>
+                </div>
+                <h5 style="color: #00d4aa; font-weight: 700; margin-bottom: 15px; font-size: 1.2rem;">Select Teams</h5>
+                <p class="text-muted" style="line-height: 1.8;">Choose home and away teams from our database</p>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 mb-4">
+            <div class="process-step">
+                <div class="process-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h5 style="color: #00d4aa; font-weight: 700; margin-bottom: 15px; font-size: 1.2rem;">AI Analysis</h5>
+                <p class="text-muted" style="line-height: 1.8;">Our AI models analyze historical data and current form</p>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 mb-4">
+            <div class="process-step">
+                <div class="process-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <h5 style="color: #00d4aa; font-weight: 700; margin-bottom: 15px; font-size: 1.2rem;">Get Results</h5>
+                <p class="text-muted" style="line-height: 1.8;">Receive predictions with confidence scores</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Disclaimers -->
+<section class="container mt-4 mt-md-5">
+    <div class="row">
+        <div class="col-12 col-md-6">
+            <div class="disclaimer-card">
+                <div class="disclaimer-header">
+                    <i class="fas fa-exclamation-triangle disclaimer-icon"></i>
+                    <h5>Disclaimer</h5>
+                </div>
+                <p class="small text-muted">
+                    Predictions are based on statistical analysis and machine learning algorithms. 
+                    They should not be used as the sole basis for betting decisions. 
+                    Football is unpredictable and actual results may vary significantly from predictions.
+                </p>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="disclaimer-card">
+                <div class="disclaimer-header">
+                    <i class="fas fa-copyright disclaimer-icon"></i>
+                    <h5>Terms of Use</h5>
+                </div>
+                <p class="small text-muted">
+                    This application is for entertainment and educational purposes only. 
+                    Users are responsible for their own decisions and actions. 
+                    We do not guarantee the accuracy of predictions.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="container mt-4 mt-md-5 mb-4 mb-md-5">
+    <div class="text-center">
+        <a href="{% url 'predictor:predict' %}" class="btn btn-primary btn-lg d-block d-sm-inline-block mb-2 mb-sm-0 me-0 me-sm-3">
+            <i class="fas fa-rocket me-2" style="animation: iconRotate 2s ease-in-out infinite;"></i>Start Predicting
+        </a>
+        <a href="{% url 'predictor:home' %}" class="btn btn-outline-primary btn-lg d-block d-sm-inline-block">
+            <i class="fas fa-home me-2"></i>Back to Dashboard
+        </a>
+    </div>
+</section>
+
+<script>
+const leagues = {{ european_leagues|safe }};
+const leagueSelect = document.getElementById('league-select');
+const teamSelect = document.getElementById('team-select');
+
+leagueSelect.addEventListener('change', function() {
+    const teams = leagues[this.value] || [];
+    teamSelect.innerHTML = '<option value="">Choose a Team</option>';
+    teams.forEach(team => {
+        const opt = document.createElement('option');
+        opt.value = team;
+        opt.textContent = team;
+        teamSelect.appendChild(opt);
+    });
+});
+</script>
+</div>
+{% endblock %}

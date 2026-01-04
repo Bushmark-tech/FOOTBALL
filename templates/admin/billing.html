@@ -1,0 +1,313 @@
+{% extends 'admin/dashboard_base.html' %}
+
+{% block title %}Billing & Subscriptions - Admin Dashboard{% endblock %}
+{% block page_title %}Billing Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <!-- Stats -->
+        <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+            <div class="card stat-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="stat-icon bg-soft-success text-success rounded p-3">
+                            <i class="fas fa-dollar-sign fa-lg"></i>
+                        </div>
+                        <span class="badge bg-success-soft text-success">+{{ 12.5 }}%</span>
+                    </div>
+                    <div class="stat-number h3 fw-bold mb-1">${{ total_revenue|floatformat:2 }}</div>
+                    <div class="stat-label text-muted">Total Active Revenue</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+            <div class="card stat-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="stat-icon bg-soft-primary text-primary rounded p-3">
+                            <i class="fas fa-users-check fa-lg"></i>
+                        </div>
+                    </div>
+                    <div class="stat-number h3 fw-bold mb-1">{{ active_subscriptions }}</div>
+                    <div class="stat-label text-muted">Active Subscriptions</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3 border-0">
+                    <h6 class="m-0 fw-bold">Revenue Trend (30 Days)</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="revenueChart" style="height: 120px; width: 100%;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-filter"></i> Filters
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <select name="status" class="form-select">
+                        <option value="all">All Status</option>
+                        <option value="active" {% if status_filter=='active' %}selected{% endif %}>Active</option>
+                        <option value="inactive" {% if status_filter=='inactive' %}selected{% endif %}>Inactive</option>
+                        <option value="pending" {% if status_filter=='pending' %}selected{% endif %}>Pending</option>
+                        <option value="cancelled" {% if status_filter=='cancelled' %}selected{% endif %}>Cancelled
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <select name="method" class="form-select">
+                        <option value="all">All Payment Methods</option>
+                        <option value="mpesa" {% if method_filter=='mpesa' %}selected{% endif %}>M-Pesa</option>
+                        <option value="card" {% if method_filter=='card' %}selected{% endif %}>Card</option>
+                        <option value="paypal" {% if method_filter=='paypal' %}selected{% endif %}>PayPal</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Subscriptions Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-credit-card"></i> Subscriptions ({{ subscriptions|length }})
+            </h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Amount</th>
+                        <th>Currency</th>
+                        <th>Payment Method</th>
+                        <th>Status</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if subscriptions %}
+                    {% for subscription in subscriptions %}
+                    <tr>
+                        <td>
+                            <strong>{{ subscription.user.username }}</strong>
+                            <br>
+                            <small class="text-muted">{{ subscription.user.email }}</small>
+                        </td>
+                        <td>
+                            <strong>${{ subscription.amount|floatformat:2 }}</strong>
+                        </td>
+                        <td>{{ subscription.currency }}</td>
+                        <td>
+                            <span class="badge bg-light text-dark border">{{ subscription.payment_method|upper }}</span>
+                        </td>
+                        <td>
+                            {% if subscription.status == 'active' %}
+                            <span class="badge badge-active">Active</span>
+                            {% elif subscription.status == 'pending' %}
+                            <span class="badge badge-pending">Pending</span>
+                            {% else %}
+                            <span class="badge badge-inactive">{{ subscription.status|title }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ subscription.start_date|date:"M d, Y" }}</td>
+                        <td>
+                            {% if subscription.end_date %}
+                            {{ subscription.end_date|date:"M d, Y" }}
+                            {% else %}
+                            —
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal"
+                                data-bs-target="#subModal{{ subscription.id }}">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4">
+                            <p class="text-muted mb-0">No subscriptions found</p>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Details Modals (Rendered outside table) -->
+    {% if subscriptions %}
+    {% for subscription in subscriptions %}
+    <div class="modal fade" id="subModal{{ subscription.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Subscription Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label"><strong>User</strong></label>
+                        <p>{{ subscription.user.username }} ({{ subscription.user.email }})</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Amount</strong></label>
+                        <p>{{ subscription.currency }} {{ subscription.amount|floatformat:2 }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Payment Method</strong></label>
+                        <p>{{ subscription.payment_method|upper }}</p>
+                    </div>
+                    {% if subscription.mpesa_number %}
+                    <div class="mb-3">
+                        <label class="form-label"><strong>M-Pesa Number</strong></label>
+                        <p>{{ subscription.mpesa_number }}</p>
+                    </div>
+                    {% endif %}
+                    {% if subscription.mpesa_transaction_id %}
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Transaction ID</strong></label>
+                        <p><code>{{ subscription.mpesa_transaction_id }}</code></p>
+                    </div>
+                    {% endif %}
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Status</strong></label>
+                        <p>
+                            {% if subscription.status == 'active' %}
+                            <span class="badge badge-active">Active</span>
+                            {% elif subscription.status == 'pending' %}
+                            <span class="badge badge-pending">Pending</span>
+                            {% else %}
+                            <span class="badge badge-inactive">{{ subscription.status|title }}</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Period</strong></label>
+                        <p>
+                            {{ subscription.start_date|date:"M d, Y" }}
+                            {% if subscription.end_date %}
+                            to {{ subscription.end_date|date:"M d, Y" }}
+                            {% else %}
+                            to —
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Created</strong></label>
+                        <p>{{ subscription.created_at|date:"M d, Y H:i" }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Last Updated</strong></label>
+                        <p>{{ subscription.updated_at|date:"M d, Y H:i" }}</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <a href="/system-core-database/predictor/subscription/{{ subscription.id }}/change/"
+                        class="btn btn-primary" target="_blank">
+                        <i class="fas fa-edit"></i> Edit in Admin
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+</div>
+
+<style>
+    .bg-soft-success {
+        background-color: rgba(34, 197, 94, 0.1);
+    }
+
+    .bg-soft-primary {
+        background-color: rgba(59, 130, 246, 0.1);
+    }
+
+    .bg-success-soft {
+        background-color: rgba(34, 197, 94, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 120);
+        gradient.addColorStop(0, 'rgba(34, 197, 94, 0.15)');
+        gradient.addColorStop(1, 'rgba(34, 197, 94, 0)');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ revenue_labels| safe }},
+        datasets: [{
+            label: 'Daily Revenue ($)',
+            data: {{ revenue_data| safe }},
+        borderColor: '#22c55e',
+        backgroundColor: gradient,
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        fill: true,
+        tension: 0.4
+                }]
+            },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                mode: 'index',
+                intersect: false,
+            }
+        },
+        scales: {
+            x: {
+                grid: { display: false },
+                ticks: {
+                    font: { size: 10 },
+                    maxTicksLimit: 7
+                }
+            },
+            y: {
+                display: false
+            }
+        },
+        interaction: {
+            mode: 'nearest',
+            axis: 'x',
+            intersect: false
+        }
+    }
+        });
+    });
+</script>
+{% endblock %}

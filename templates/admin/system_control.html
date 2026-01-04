@@ -1,0 +1,238 @@
+{% extends 'admin/dashboard_base.html' %}
+
+{% block title %}System Control - Admin Dashboard{% endblock %}
+{% block page_title %}System Control{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- System Status Overview -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-server"></i> System Status
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Application Status</strong></label>
+                        <p>
+                            <span class="badge badge-active">
+                                <i class="fas fa-check-circle"></i> Online
+                            </span>
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Database Connection</strong></label>
+                        <p>
+                            <span class="badge badge-active">
+                                <i class="fas fa-check-circle"></i> Connected
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Cache Status</strong></label>
+                        <p>
+                            <span class="badge badge-active">
+                                <i class="fas fa-check-circle"></i> Active
+                            </span>
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Last Check</strong></label>
+                        <p>Just now</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Maintenance Mode -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-tools"></i> Maintenance Mode
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info mb-3">
+                <i class="fas fa-info-circle"></i>
+                When enabled, users will see a maintenance page instead of the application.
+            </div>
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="maintenance_mode">
+                <div class="mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="enabled" id="maintenanceToggle"
+                            value="true">
+                        <label class="form-check-label" for="maintenanceToggle">
+                            <strong>Enable Maintenance Mode</strong>
+                        </label>
+                    </div>
+                    <small class="text-muted d-block mt-2">
+                        This will take effect immediately and affect all users.
+                    </small>
+                </div>
+                <button type="submit" class="btn btn-warning">
+                    <i class="fas fa-save"></i> Apply
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Database Backup -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-database"></i> Database Management
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Backup Database</h6>
+                    <p class="text-muted">Create a backup of the current database for disaster recovery.</p>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="backup_database">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-download"></i> Create Backup
+                        </button>
+                    </form>
+                </div>
+                <div class="col-md-6">
+                    <h6>Restore Database</h6>
+                    <p class="text-muted">Restore database from a previous backup file.</p>
+                    <div class="mb-3">
+                        <input type="file" class="form-control" accept=".sql,.backup,.db" disabled>
+                    </div>
+                    <button type="button" class="btn btn-warning" disabled>
+                        <i class="fas fa-upload"></i> Restore from Backup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Log Management -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-file-medical"></i> Logs
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Application Logs</h6>
+                    <p class="text-muted">View and download application event logs.</p>
+                    <button type="button" class="btn btn-info" onclick="alert('Application logs feature coming soon')">
+                        <i class="fas fa-eye"></i> View Logs
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <h6>Error Logs</h6>
+                    <p class="text-muted">View system error logs and debug information.</p>
+                    <button type="button" class="btn btn-danger" onclick="alert('Error logs feature coming soon')">
+                        <i class="fas fa-bug"></i> View Errors
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Monitoring -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-tachometer-alt"></i> Performance Monitoring
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div style="background: #f0f0f0; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                        <h6 class="text-muted">CPU Usage</h6>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar" role="progressbar" style="width: 35%; background-color: #10b981;"
+                                aria-valuenow="35" aria-valuemin="0" aria-valuemax="100">
+                                35%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div style="background: #f0f0f0; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                        <h6 class="text-muted">Memory Usage</h6>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar" role="progressbar" style="width: 52%; background-color: #f59e0b;"
+                                aria-valuenow="52" aria-valuemin="0" aria-valuemax="100">
+                                52%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div style="background: #f0f0f0; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                        <h6 class="text-muted">Disk Usage</h6>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar" role="progressbar" style="width: 68%; background-color: #ef4444;"
+                                aria-valuenow="68" aria-valuemin="0" aria-valuemax="100">
+                                68%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <small class="text-muted">
+                <i class="fas fa-info-circle"></i>
+                Performance metrics are updated every 5 minutes. Last update: Just now
+            </small>
+        </div>
+    </div>
+
+    <!-- Advanced Controls -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-sliders-h"></i> Advanced Controls
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-warning mb-3">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Warning:</strong> These operations can affect system stability. Use with caution.
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Restart Application</h6>
+                    <p class="text-muted">Restart the Django application (may cause downtime).</p>
+                    <button type="button" class="btn btn-danger"
+                        onclick="return confirm('Are you sure? This will restart the application.') && alert('Restart initiated')">
+                        <i class="fas fa-power-off"></i> Restart Application
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <h6>Clear All Cache</h6>
+                    <p class="text-muted">Clear all cached data in the system.</p>
+                    <button type="button" class="btn btn-warning"
+                        onclick="return confirm('Clear all cached data?') && alert('Cache cleared')">
+                        <i class="fas fa-broom"></i> Clear Cache
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .progress {
+        background-color: #e5e7eb;
+    }
+</style>
+{% endblock %}

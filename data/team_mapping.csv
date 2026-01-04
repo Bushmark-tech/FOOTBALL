@@ -1,0 +1,380 @@
+Team,ID
+AEK,0
+AVS,1
+AZ Alkmaar,2
+Aarhus,3
+Aberdeen,3
+Akhmat Grozny,6
+Ajax,6
+Alanyaspor,7
+Akron Togliatti,7
+Altach,8
+Alaves,8
+Albacete,9
+Atl. San Luis,11
+Atlas,12
+Austria Vienna,13
+Almeria,13
+BW Linz,14
+Alverca,15
+Baltika,15
+Basel,16
+Amiens,16
+Brondby,17
+CFR Cluj,18
+Anderlecht,18
+Andorra,19
+CSKA Moscow,19
+Angers,20
+Annecy,22
+Club America,22
+Antalyaspor,23
+Club Leon,23
+Antwerp,24
+Club Tijuana,24
+Cruz Azul,26
+Aris,26
+Arouca,27
+Csikszereda M. Ciuc,27
+Din. Bucuresti,28
+Arsenal,28
+Dynamo Makhachkala,29
+Asteras Tripolis,30
+Dynamo Moscow,30
+Aston Villa,31
+FC Arges,32
+Atalanta,32
+FC Botosani,33
+Ath Bilbao,33
+Ath Madrid,34
+FC Copenhagen,34
+FC Hermannstadt,35
+Atromitos,36
+FC Rapid Bucuresti,36
+Augsburg,37
+Auxerre,38
+FCSB,38
+FK Rostov,39
+Avellino,39
+Barcelona,41
+Farul Constanta,41
+Fredericia,42
+Bari,42
+Bastia,44
+Bayern Munich,45
+Grasshoppers,45
+Grazer AK,46
+Guadalajara Chivas,47
+Hartberg,48
+Benfica,49
+Besiktas,50
+Betis,51
+Juarez,52
+Bielefeld,52
+Birmingham,53
+Krasnodar,54
+Blackburn,54
+Krylya Sovetov,55
+LASK,56
+Lausanne,57
+Bochum,57
+Lokomotiv Moscow,59
+Bologna,59
+Lugano,60
+Boulogne,61
+Luzern,61
+Bournemouth,62
+Braunschweig,63
+Brentford,64
+Mazatlan FC,64
+Metaloglobus Bucharest,65
+Midtjylland,66
+Brest,66
+Brighton,67
+Bristol City,68
+Burgos,69
+Monterrey,69
+Necaxa,70
+Burnley,70
+Nordsjaelland,71
+Buyuksehyr,71
+Odense,72
+Cadiz,72
+Orenburg,73
+Cagliari,74
+Otelul,74
+Pachuca,75
+Pari NN,76
+Carrarese,77
+Petrolul,77
+Casa Pia,79
+Puebla,79
+Castellon,80
+Queretaro,80
+Catanzaro,81
+Randers FC,82
+Celta,82
+Ried,83
+Celtic,83
+Cercle Brugge,84
+Cesena,85
+Rubin Kazan,85
+SK Rapid,86
+Ceuta,86
+Salzburg,88
+Charleroi,88
+Charlton,89
+Santos Laguna,89
+Servette,92
+Chelsea,92
+Silkeborg,93
+Sion,94
+Clermont,95
+Sochi,95
+Sonderjyske,96
+Club Brugge,96
+Como,97
+Spartak Moscow,97
+St. Gallen,98
+Cordoba,99
+Sturm Graz,100
+Coventry,101
+Cremonese,102
+Thun,102
+Tigres UANL,103
+Tirol,104
+Crystal Palace,104
+Toluca,105
+Cultural Leonesa,105
+Darmstadt,106
+Dender,108
+U. Cluj,109
+Derby,110
+UNAM Pumas,110
+UTA Arad,111
+Dortmund,112
+Unirea Slobozia,113
+Dresden,113
+Dundee,114
+Univ. Craiova,114
+Dundee United,115
+Dunkerque,116
+Vejle,117
+Eibar,117
+Ein Frankfurt,118
+Elche,119
+Viborg,119
+Elversberg,121
+Winterthur,121
+Wolfsberger AC,122
+Empoli,122
+Espanol,125
+Young Boys,125
+Estoril,126
+Zenit,127
+Estrela,127
+Zurich,128
+Everton,129
+Excelsior,130
+Eyupspor,132
+FC Koln,134
+Falkirk,135
+Famalicao,136
+Fenerbahce,138
+Feyenoord,141
+Fiorentina,142
+For Sittard,143
+Fortuna Dusseldorf,144
+Freiburg,145
+Frosinone,146
+Fulham,148
+Galatasaray,149
+Gaziantep,150
+Genclerbirligi,151
+Genk,152
+Genoa,153
+Gent,154
+Getafe,155
+Gil Vicente,157
+Girona,159
+Go Ahead Eagles,160
+Goztep,161
+Granada,162
+Grenoble,163
+Greuther Furth,164
+Groningen,165
+Guimaraes,166
+Guingamp,167
+Hamburg,168
+Hannover,170
+Hearts,173
+Heerenveen,174
+Heidenheim,175
+Heracles,176
+Hertha,177
+Hibernian,178
+Hoffenheim,179
+Holstein Kiel,180
+Huesca,182
+Hull,183
+Inter,186
+Ipswich,188
+Juve Stabia,190
+Juventus,191
+Kaiserslautern,192
+Karagumruk,193
+Karlsruhe,194
+Kasimpasa,195
+Kayserispor,196
+Kifisia,197
+Kilmarnock,198
+Kocaelispor,199
+Konyaspor,200
+La Coruna,202
+Larisa,204
+Las Palmas,205
+Laval,206
+Lazio,207
+Le Havre,208
+Le Mans,209
+Lecce,210
+Leeds,212
+Leganes,213
+Leicester,214
+Lens,215
+Levadeiakos,216
+Levante,217
+Leverkusen,218
+Lille,219
+Liverpool,220
+Livingston,221
+Lorient,224
+Lyon,227
+M'gladbach,228
+Magdeburg,229
+Mainz,230
+Malaga,231
+Mallorca,232
+Man City,233
+Man United,234
+Mantova,235
+Marseille,237
+Mechelen,239
+Metz,240
+Middlesbrough,241
+Milan,242
+Millwall,243
+Mirandes,244
+Modena,245
+Monaco,246
+Montpellier,247
+Monza,248
+Moreirense,249
+Motherwell,250
+NAC Breda,252
+Nacional,253
+Nancy,254
+Nantes,255
+Napoli,256
+Newcastle,257
+Nice,258
+Nijmegen,259
+Norwich,262
+Nott'm Forest,263
+Nurnberg,265
+OFI Crete,266
+Olympiakos,267
+Osasuna,270
+Oud-Heverlee Leuven,272
+Oviedo,273
+Oxford,274
+PAOK,275
+PSV Eindhoven,276
+Paderborn,278
+Padova,279
+Palermo,280
+Panathinaikos,281
+Panetolikos,282
+Panserraikos,284
+Paris FC,285
+Paris SG,286
+Parma,287
+Pau FC,288
+Pescara,291
+Pisa,293
+Porto,298
+Portsmouth,299
+Preston,300
+QPR,302
+RAAL La Louviere,304
+RB Leipzig,305
+Rangers,307
+Real Madrid,309
+Red Star,310
+Reggiana,312
+Reims,314
+Rennes,315
+Rio Ave,316
+Rizespor,317
+Rodez,318
+Roma,319
+Sampdoria,324
+Samsunspor,325
+Santa Clara,327
+Santander,328
+Sassuolo,329
+Schalke 04,330
+Sevilla,333
+Sheffield United,334
+Sheffield Weds,335
+Sociedad,338
+Sociedad B,339
+Southampton,340
+Sp Braga,341
+Sp Gijon,342
+Sp Lisbon,343
+Sparta Rotterdam,345
+Spezia,346
+St Etienne,347
+St Mirren,349
+St Pauli,350
+St Truiden,351
+St. Gilloise,352
+Standard,353
+Stoke,354
+Strasbourg,355
+Stuttgart,356
+Sudtirol,357
+Sunderland,358
+Swansea,359
+Telstar,360
+Tondela,363
+Torino,364
+Tottenham,365
+Toulouse,366
+Trabzonspor,367
+Troyes,369
+Twente,370
+Udinese,371
+Union Berlin,374
+Utrecht,375
+Valencia,377
+Valladolid,379
+Vallecano,380
+Venezia,381
+Verona,382
+Villarreal,384
+Virtus Entella,386
+Volendam,389
+Volos NFC,390
+Waregem,393
+Watford,394
+Werder Bremen,396
+West Brom,397
+West Ham,398
+Westerlo,399
+Wolfsburg,402
+Wolves,403
+Wrexham,404
+Zaragoza,409
+Zwolle,410

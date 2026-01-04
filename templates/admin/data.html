@@ -1,0 +1,227 @@
+{% extends 'admin/dashboard_base.html' %}
+
+{% block title %}Data Management - Admin Dashboard{% endblock %}
+{% block page_title %}Data Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Data Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="stat-number">{{ leagues_count }}</div>
+                    <div class="stat-label">Leagues</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-number">{{ teams_count }}</div>
+                    <div class="stat-label">Teams</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar"></i>
+                    </div>
+                    <div class="stat-number">{{ matches_count }}</div>
+                    <div class="stat-label">Matches</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-magic"></i>
+                    </div>
+                    <div class="stat-number">{{ predictions_count }}</div>
+                    <div class="stat-label">Predictions</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leagues Overview -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list"></i> Leagues Overview
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>League Name</th>
+                                    <th>Teams</th>
+                                    <th>Predictions</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for league in leagues %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ league.name }}</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-primary">{{ league.team_count }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-info">{{ league.match_count }}</span>
+                                    </td>
+                                    <td>
+                                        <a href="/system-core-database/predictor/league/{{ league.id }}/change/"
+                                            class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">No leagues found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Quality -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-check-circle"></i> Data Quality Status
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6>Data Validation</h6>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: 95%">95%</div>
+                        </div>
+                        <small class="text-muted">Database integrity check</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6>Record Completeness</h6>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-info" role="progressbar" style="width: 88%">88%</div>
+                        </div>
+                        <small class="text-muted">Complete records vs total</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6>Accuracy Rate</h6>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-warning" role="progressbar" style="width: 75%">75%</div>
+                        </div>
+                        <small class="text-muted">Prediction accuracy</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation"></i> Issues & Alerts
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if teams_without_league > 0 %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-warning"></i>
+                        <strong>{{ teams_without_league }}</strong> teams without league assignment
+                        <button class="btn btn-sm btn-outline-warning ms-2">View</button>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i>
+                        All teams are properly assigned to leagues
+                    </div>
+                    {% endif %}
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        Regular database maintenance is recommended weekly
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        Last cleanup performed: Yesterday at 2:30 AM
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Management Tools -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tools"></i> Data Management Tools
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="text-center p-3 border rounded">
+                                <i class="fas fa-upload fa-2x text-primary mb-3"></i>
+                                <h6>Import Data</h6>
+                                <p class="text-muted small">Import teams, leagues, and match data from CSV</p>
+                                <button class="btn btn-sm btn-outline-primary" disabled>
+                                    <i class="fas fa-upload"></i> Import
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-3 border rounded">
+                                <i class="fas fa-download fa-2x text-success mb-3"></i>
+                                <h6>Export Data</h6>
+                                <p class="text-muted small">Export predictions and data to CSV/Excel</p>
+                                <button class="btn btn-sm btn-outline-success" disabled>
+                                    <i class="fas fa-download"></i> Export
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-3 border rounded">
+                                <i class="fas fa-sync fa-2x text-warning mb-3"></i>
+                                <h6>Sync Data</h6>
+                                <p class="text-muted small">Synchronize with external data sources</p>
+                                <button class="btn btn-sm btn-outline-warning" disabled>
+                                    <i class="fas fa-sync"></i> Sync
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
