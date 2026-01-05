@@ -267,25 +267,40 @@ def find_team_in_data(team_name, data, column_name):
         logger.warning(f"Error getting unique teams from column {column_name}: {e}")
         return None
     
-    # Strategy 1: Exact match
+    # Strategy 1: Exact match (HIGHEST PRIORITY - most reliable)
     if team_name in unique_teams:
         logger.debug(f"Found exact match for '{team_name}' in {column_name}")
         return team_name
     
-    # Strategy 2: ID Mapping match (Most robust for ID-based data)
+    # Strategy 2: Normalized name match (before trying ID mapping)
+    team_normalized = normalize_team_name(team_name)
+    for team in unique_teams:
+        if normalize_team_name(str(team)) == team_normalized:
+            logger.info(f"Matched '{team_name}' to '{team}' (normalized) in {column_name}")
+            return team
+    
+    # Strategy 3: Case-insensitive match
+    team_lower = team_name.lower().strip()
+    for team in unique_teams:
+        if str(team).lower().strip() == team_lower:
+            logger.info(f"Matched '{team_name}' to '{team}' (case-insensitive) in {column_name}")
+            return team
+    
+    # Strategy 4: ID Mapping match (ONLY if IDs actually exist in dataset)
+    # NOTE: team_mapping.csv may have incorrect IDs that don't exist in the dataset
+    # This caused predictions to use wrong team data (e.g., Man United ID 234 doesn't exist)
     try:
         team_mapping = load_team_mapping()
         if team_mapping:
-            # Check if input team is in mapping (try original and normalized)
+            # Check if input team is in mapping
             target_id = team_mapping.get(team_name.strip())
             if target_id is None:
                 target_id = team_mapping.get(normalize_team_name(team_name))
                 
             if target_id is not None:
-                logger.debug(f"Input team '{team_name}' has ID {target_id}")
+                logger.debug(f"Input team '{team_name}' maps to ID {target_id}")
                 
-                # Check if unique_teams contains numeric IDs (not names)
-                # If so, directly check if target_id is in the list
+                # Check if unique_teams contains numeric IDs
                 if len(unique_teams) > 0:
                     sample = unique_teams[0]
                     try:
@@ -295,15 +310,16 @@ def find_team_in_data(team_name, data, column_name):
                         is_numeric = isinstance(sample, (int, float))
                     
                     if is_numeric:
-                        # Data uses IDs directly - check if target_id exists
+                        # CRITICAL: Only use ID if it actually exists in the dataset
                         if target_id in unique_teams:
-                            logger.info(f"Matched '{team_name}' to ID {target_id} (direct ID match) in {column_name}")
+                            logger.info(f"Matched '{team_name}' to ID {target_id} (verified ID exists) in {column_name}")
                             return target_id
+                        else:
+                            logger.warning(f"ID {target_id} for '{team_name}' NOT FOUND in dataset (has {len(unique_teams)} teams). Skipping ID mapping.")
                     else:
                         # Data uses names - try to find matching name by ID
                         for team in unique_teams:
                             team_str = str(team).strip()
-                            # Check if candidate team maps to same ID
                             candidate_id = team_mapping.get(team_str)
                             if candidate_id == target_id:
                                 logger.info(f"Matched '{team_name}' to '{team}' (ID {target_id}) in {column_name}")
@@ -311,24 +327,8 @@ def find_team_in_data(team_name, data, column_name):
     except Exception as e:
         logger.warning(f"Error in ID matching strategy: {e}")
     
-    # Strategy 2: Case-insensitive match
+    # Strategy 5: Partial match (contains)
     team_lower = team_name.lower().strip()
-    for team in unique_teams:
-        if str(team).lower().strip() == team_lower:
-            logger.info(f"Matched '{team_name}' to '{team}' (case-insensitive) in {column_name}")
-            return team
-    
-    # Strategy 3: Normalized name match
-    normalized_input = normalize_team_name(team_name)
-    normalized_input_lower = normalized_input.lower().strip()
-    
-    for team in unique_teams:
-        normalized_team = normalize_team_name(str(team))
-        if normalized_team.lower().strip() == normalized_input_lower:
-            logger.info(f"Matched '{team_name}' to '{team}' (normalized) in {column_name}")
-            return team
-    
-    # Strategy 4: Partial match (contains)
     for team in unique_teams:
         team_str = str(team).lower().strip()
         if team_lower in team_str or team_str in team_lower:
