@@ -478,6 +478,24 @@ def home(request):
     
     logger.info(f"Home view - Final count: {total_predictions} total predictions")
     
+    # Cap displayed count at free limit for non-subscribed users
+    # This handles cases where users made predictions before the limit was enforced
+    profile = getattr(request.user, 'profile', None)
+    if profile:
+        # Check if user has active subscription
+        has_subscription = Subscription.objects.filter(
+            user=request.user,
+            status='active'
+        ).exists()
+        
+        if not has_subscription:
+            # Cap at free limit for display purposes
+            display_predictions = min(total_predictions, profile.free_matches_limit)
+        else:
+            display_predictions = total_predictions
+    else:
+        display_predictions = total_predictions
+    
     # Calculate accuracy rate (assuming we have some way to track accuracy)
     # For now, we'll use a realistic estimate based on total predictions
     if total_predictions > 0:
@@ -498,7 +516,7 @@ def home(request):
         predictions_with_display.append(pred)
     
     context = {
-        'total_predictions': total_predictions,
+        'total_predictions': display_predictions,  # Use capped count for display
         'accuracy_rate': accuracy_rate,
         'teams_covered': unique_teams,
         'leagues_supported': unique_leagues,
