@@ -857,6 +857,11 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
+                        if (data.redirect) {
+                            // Immediate redirect if provided (e.g. for subscription limit)
+                            window.location.href = data.redirect;
+                            return;
+                        }
                         const alertDiv = document.createElement('div');
                         alertDiv.className = 'alert alert-danger alert-dismissible fade show mt-3';
                         alertDiv.innerHTML = `<strong>Error!</strong> ${data.error}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
