@@ -436,7 +436,7 @@
         <!-- Pricing Section -->
         <div class="pricing-section">
             <div class="price-display">
-                <div class="price-amount">${{ price_usd|floatformat:"0" }} USD</div>
+                <div class="price-amount">{{ price_usd|floatformat:"0" }} USD</div>
                 <div class="divider-text">OR</div>
                 <div class="price-amount">KSH {{ price_ksh|floatformat:"0" }}</div>
             </div>
@@ -470,7 +470,7 @@
                 <div class="form-section">
                     <label class="form-label">SELECT CURRENCY</label>
                     <select class="currency-select" id="currencySelect" name="currency" required>
-                        <option value="USD">USD (${{ price_usd|floatformat:"0" }})</option>
+                        <option value="USD">USD ({{ price_usd|floatformat:"0" }})</option>
                         <option value="KSH" selected>KSH ({{ price_ksh|floatformat:"0" }})</option>
                     </select>
                 </div>
