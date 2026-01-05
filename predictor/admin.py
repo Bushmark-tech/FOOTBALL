@@ -224,14 +224,17 @@ class BillingUsageAdmin(admin.ModelAdmin):
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
     """Enhanced admin for user profiles"""
-    list_display = ['user', 'free_matches_used', 'free_matches_limit', 'payment_method_display', 'created_at']
-    list_filter = ['created_at']
-    search_fields = ['user__username', 'mpesa_number']
-    readonly_fields = ['created_at', 'updated_at']
+    list_display = ['user', 'email_verified_display', 'free_matches_used', 'free_matches_limit', 'payment_method_display', 'created_at']
+    list_filter = ['email_verified', 'created_at']
+    search_fields = ['user__username', 'user__email', 'mpesa_number']
+    readonly_fields = ['created_at', 'updated_at', 'token_status']
     
     fieldsets = (
         ('User Information', {
             'fields': ('user',)
+        }),
+        ('Email Verification', {
+            'fields': ('email_verified', 'verification_token', 'token_created_at', 'token_status')
         }),
         ('Free Tier', {
             'fields': ('free_matches_used', 'free_matches_limit', 'free_access_until')
@@ -244,7 +247,58 @@ class UserProfileAdmin(admin.ModelAdmin):
         }),
     )
     
-    actions = ['reset_free_quota', 'grant_free_month']
+    actions = ['verify_users', 'reset_free_quota', 'grant_free_month']
+    
+    def email_verified_display(self, obj):
+        """Display email verification status with color"""
+        if obj.email_verified:
+            return format_html(
+                '<span style="color: green; font-weight: bold;">✓ Verified</span>'
+            )
+        return format_html(
+            '<span style="color: red; font-weight: bold;">✗ Not Verified</span>'
+        )
+    email_verified_display.short_description = "Email Status"
+    
+    def token_status(self, obj):
+        """Display token validity status"""
+        if not obj.verification_token:
+            if obj.email_verified:
+                return "Email verified - no token needed"
+            return "No token generated"
+        
+        if obj.is_token_valid():
+            from datetime import timedelta
+            expiry = obj.token_created_at + timedelta(hours=24)
+            hours_left = int((expiry - timezone.now()).total_seconds() / 3600)
+            return format_html(
+                '<span style="color: green;">Valid (expires in {} hours)</span>',
+                hours_left
+            )
+        return format_html(
+            '<span style="color: red;">Expired</span>'
+        )
+    token_status.short_description = "Token Status"
+    
+    def verify_users(self, request, queryset):
+        """Manually verify selected users"""
+        count = 0
+        for profile in queryset:
+            if not profile.email_verified:
+                profile.email_verified = True
+                profile.verification_token = None
+                profile.token_created_at = None
+                profile.save()
+                
+                # Activate user account
+                if not profile.user.is_active:
+                    profile.user.is_active = True
+                    profile.user.save()
+                
+                count += 1
+        
+        self.message_user(request, f"Verified {count} users. They can now log in.")
+    verify_users.short_description = "✓ Verify selected users (bypass email)"
     
     def payment_method_display(self, obj):
         """Display payment method with color"""
