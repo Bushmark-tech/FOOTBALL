@@ -224,8 +224,8 @@ class BillingUsageAdmin(admin.ModelAdmin):
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
     """Enhanced admin for user profiles"""
-    list_display = ['user', 'email_verified_display', 'free_matches_used', 'free_matches_limit', 'payment_method_display', 'created_at']
-    list_filter = ['email_verified', 'created_at']
+    list_display = ['user', 'email_verified_display', 'user_is_active', 'user_last_login', 'free_matches_used', 'free_matches_limit', 'created_at']
+    list_filter = ['email_verified', 'user__is_active', 'user__last_login', 'created_at']
     search_fields = ['user__username', 'user__email', 'mpesa_number']
     readonly_fields = ['created_at', 'updated_at', 'token_status']
     
@@ -299,6 +299,24 @@ class UserProfileAdmin(admin.ModelAdmin):
         
         self.message_user(request, f"Verified {count} users. They can now log in.")
     verify_users.short_description = "✓ Verify selected users (bypass email)"
+
+    def user_last_login(self, obj):
+        """Display the last time the user logged in"""
+        if obj.user.last_login:
+            from django.utils.timezone import localtime
+            local_time = localtime(obj.user.last_login)
+            return local_time.strftime("%Y-%m-%d %H:%M:%S")
+        return "-"
+    user_last_login.short_description = "Last Login"
+    user_last_login.admin_order_field = 'user__last_login'
+
+    def user_is_active(self, obj):
+        """Display if the user account is active"""
+        if obj.user.is_active:
+            return format_html('<span style="color: green;">Active</span>')
+        return format_html('<span style="color: red;">Inactive</span>')
+    user_is_active.short_description = "Account Status"
+    user_is_active.admin_order_field = 'user__is_active'
     
     def payment_method_display(self, obj):
         """Display payment method with color"""
