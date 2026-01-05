@@ -87,14 +87,36 @@ WSGI_APPLICATION = 'football_predictor.wsgi.application'
 # Database
 # Use PostgreSQL on Render, SQLite for local development
 import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
-}
+# Check if we are running on Render
+IS_RENDER = os.environ.get('RENDER')
+
+if IS_RENDER or not DEBUG:
+    # In production (Render), we MUST use PostgreSQL
+    if not os.environ.get('DATABASE_URL'):
+        raise ImproperlyConfigured(
+            "DATABASE_URL environment variable not set. "
+            "You cannot run with SQLite in production as data will be lost on every deploy."
+        )
+    
+    DATABASES = {
+        'default': dj_database_url.config(
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+else:
+    # Local development - nice fallback to SQLite if Postgres not set
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+
+print(f"Active Database Engine: {DATABASES['default']['ENGINE']}")
 
 # Redis Cache Configuration
 # Use Redis if available (from Render Redis service), otherwise fallback to database
