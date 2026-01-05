@@ -309,6 +309,12 @@ class UserProfile(models.Model):
     free_matches_limit = models.IntegerField(default=3)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     mpesa_number = models.CharField(max_length=20, blank=True, null=True)
+    
+    # Email verification fields
+    email_verified = models.BooleanField(default=False)
+    verification_token = models.CharField(max_length=100, blank=True, null=True, unique=True)
+    token_created_at = models.DateTimeField(blank=True, null=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -331,9 +337,28 @@ class UserProfile(models.Model):
             return True
         return False
     
+    def generate_verification_token(self):
+        """Generate a unique verification token."""
+        import secrets
+        from django.utils import timezone
+        self.verification_token = secrets.token_urlsafe(32)
+        self.token_created_at = timezone.now()
+        self.save()
+        return self.verification_token
+    
+    def is_token_valid(self):
+        """Check if verification token is still valid (24 hours)."""
+        from django.utils import timezone
+        from datetime import timedelta
+        if not self.token_created_at:
+            return False
+        expiry_time = self.token_created_at + timedelta(hours=24)
+        return timezone.now() < expiry_time
+    
     class Meta:
         indexes = [
             models.Index(fields=['user', 'free_matches_used']),
+            models.Index(fields=['verification_token']),
         ]
 
 

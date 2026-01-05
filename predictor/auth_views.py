@@ -534,3 +534,56 @@ def mpesa_callback(request):
     
     return JsonResponse({'error': 'Method not allowed'}, status=405)
 
+
+def verify_email(request, token):
+    """
+    Email verification endpoint.
+    Verifies user email using the token sent via email.
+    """
+    try:
+        # Find user profile with this token
+        profile = UserProfile.objects.filter(verification_token=token).first()
+        
+        if not profile:
+            messages.error(request, 'Invalid verification link.')
+            return redirect('predictor:login')
+        
+        # Check if token is still valid (24 hours)
+        if not profile.is_token_valid():
+            messages.error(request, 
+                'Verification link has expired. Please contact support or register again.')
+            return redirect('predictor:login')
+        
+        # Check if already verified
+        if profile.email_verified:
+            messages.info(request, 'Email already verified. You can log in now.')
+            return redirect('predictor:login')
+        
+        # Verify the email
+        profile.email_verified = True
+        profile.verification_token = None  # Clear token after use
+        profile.token_created_at = None
+        profile.save()
+        
+        # Activate the user account
+        user = profile.user
+        user.is_active = True
+        user.save()
+        
+        # Send welcome email
+        from .email_utils import send_welcome_email
+        send_welcome_email(user)
+        
+        logger.info(f"Email verified for user: {user.username}")
+        
+        messages.success(request, 
+            f'Email verified successfully! Welcome to Football Predictor Pro, {user.username}!')
+        messages.info(request, 
+            'You can now log in and start making predictions.')
+        
+        return redirect('predictor:login')
+        
+    except Exception as e:
+        logger.error(f"Error in email verification: {e}")
+        messages.error(request, 'An error occurred during verification. Please try again.')
+        return redirect('predictor:login')

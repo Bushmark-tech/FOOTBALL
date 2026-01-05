@@ -47,6 +47,7 @@ urlpatterns = [
     path('login/', auth_views.login_view, name='login'),
     path('register/', auth_views.register_view, name='register'),
     path('logout/', auth_views.logout_view, name='logout'),
+    path('verify-email/<str:token>/', auth_views.verify_email, name='verify_email'),
     path('subscribe/', auth_views.subscribe_view, name='subscribe'),
     
     # ========== API ENDPOINTS ==========

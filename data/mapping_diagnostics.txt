@@ -1,0 +1,81 @@
+=== Mapping File Diagnostics ===
+Total Rows: 379
+Unique IDs: 317
+Unique Names: 379
+
+[WARNING] 62 IDs map to multiple teams (Possible Synonyms or Collisions):
+ID 3: Aarhus, Aberdeen
+ID 6: Akhmat Grozny, Ajax
+ID 7: Alanyaspor, Akron Togliatti
+ID 8: Altach, Alaves
+ID 13: Austria Vienna, Almeria
+ID 15: Alverca, Baltika
+ID 16: Basel, Amiens
+ID 18: CFR Cluj, Anderlecht
+ID 19: Andorra, CSKA Moscow
+ID 22: Annecy, Club America
+ID 23: Antalyaspor, Club Leon
+ID 24: Antwerp, Club Tijuana
+ID 26: Cruz Azul, Aris
+ID 27: Arouca, Csikszereda M. Ciuc
+ID 28: Din. Bucuresti, Arsenal
+ID 30: Asteras Tripolis, Dynamo Moscow
+ID 32: FC Arges, Atalanta
+ID 33: FC Botosani, Ath Bilbao
+ID 34: Ath Madrid, FC Copenhagen
+ID 36: Atromitos, FC Rapid Bucuresti
+ID 38: Auxerre, FCSB
+ID 39: FK Rostov, Avellino
+ID 41: Barcelona, Farul Constanta
+ID 42: Fredericia, Bari
+ID 45: Bayern Munich, Grasshoppers
+ID 52: Juarez, Bielefeld
+ID 54: Krasnodar, Blackburn
+ID 57: Lausanne, Bochum
+ID 59: Lokomotiv Moscow, Bologna
+ID 61: Boulogne, Luzern
+ID 64: Brentford, Mazatlan FC
+ID 66: Midtjylland, Brest
+ID 69: Burgos, Monterrey
+ID 70: Necaxa, Burnley
+ID 71: Nordsjaelland, Buyuksehyr
+ID 72: Odense, Cadiz
+ID 74: Cagliari, Otelul
+ID 77: Carrarese, Petrolul
+ID 79: Casa Pia, Puebla
+ID 80: Castellon, Queretaro
+ID 82: Randers FC, Celta
+ID 83: Ried, Celtic
+ID 85: Cesena, Rubin Kazan
+ID 86: SK Rapid, Ceuta
+ID 88: Salzburg, Charleroi
+ID 89: Charlton, Santos Laguna
+ID 92: Servette, Chelsea
+ID 95: Clermont, Sochi
+ID 96: Sonderjyske, Club Brugge
+ID 97: Como, Spartak Moscow
+ID 102: Cremonese, Thun
+ID 104: Tirol, Crystal Palace
+ID 105: Toluca, Cultural Leonesa
+ID 110: Derby, UNAM Pumas
+ID 113: Unirea Slobozia, Dresden
+ID 114: Dundee, Univ. Craiova
+ID 117: Vejle, Eibar
+ID 119: Elche, Viborg
+ID 121: Elversberg, Winterthur
+ID 122: Wolfsberger AC, Empoli
+ID 125: Espanol, Young Boys
+ID 127: Zenit, Estrela
+
+=== Data1 Coverage (data/football_data1.csv) ===
+Total Unique IDs used: 411
+IDs present in Mapping: 317
+IDs MISSING from Mapping: 94
+Missing IDs (First 50): 4, 5, 10, 21, 25, 40, 43, 58, 78, 87, 90, 91, 107, 120, 123, 124, 131, 133, 137, 139, 140, 147, 156, 158, 169, 171, 172, 181, 184, 185, 187, 189, 201, 203, 211, 222, 223, 225, 226, 236, 238, 251, 260, 261, 264, 268, 269, 271, 277, 283
+... and 44 more.
+
+=== Data2 Coverage (data/football_data2.csv) ===
+Total Unique IDs used: 129
+IDs present in Mapping: 113
+IDs MISSING from Mapping: 16
+Missing IDs (First 50): 4, 5, 10, 21, 25, 40, 43, 58, 78, 87, 90, 91, 107, 120, 123, 124
