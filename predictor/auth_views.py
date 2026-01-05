@@ -49,25 +49,26 @@ def check_subscription_status(user):
             'subscription': active_subscription
         }
     
-    # Check actual predictions count first (handles cases where predictions were made before tracking)
-    actual_predictions = Prediction.objects.filter(user=user, is_archived=False).count()
+    # SECURITY FIX: Count ALL predictions (including archived) to prevent bypass
+    # Users were archiving predictions to reset their count
+    total_predictions = Prediction.objects.filter(user=user).count()
     
     # If user has exceeded free matches limit, block access
-    if actual_predictions >= profile.free_matches_limit:
+    if total_predictions >= profile.free_matches_limit:
         # Sync the count for accurate tracking
-        if profile.free_matches_used < profile.free_matches_limit:
-            profile.free_matches_used = profile.free_matches_limit
+        if profile.free_matches_used < total_predictions:
+            profile.free_matches_used = total_predictions
             profile.save()
-            logger.info(f"User {user.username} has exceeded free matches limit. Synced count: {profile.free_matches_used}/{profile.free_matches_limit}")
+            logger.info(f"User {user.username} has exceeded free matches limit. Total predictions: {total_predictions}/{profile.free_matches_limit}")
         return {
             'has_access': False,
             'reason': 'subscription_required',
             'profile': profile
         }
     
-    # Sync free_matches_used with actual prediction count if needed
-    if actual_predictions > profile.free_matches_used:
-        profile.free_matches_used = actual_predictions
+    # Sync free_matches_used with actual prediction count
+    if total_predictions > profile.free_matches_used:
+        profile.free_matches_used = total_predictions
         profile.save()
         logger.info(f"Synced free_matches_used for {user.username}: {profile.free_matches_used}/{profile.free_matches_limit}")
     
@@ -107,21 +108,21 @@ def use_prediction_credit(user):
     if active_subscription and active_subscription.is_active():
         return True  # Subscription users have unlimited access
     
-    # Check actual predictions count first (handles cases where predictions were made before tracking)
-    actual_predictions = Prediction.objects.filter(user=user, is_archived=False).count()
+    # SECURITY FIX: Count ALL predictions (including archived) to prevent bypass
+    total_predictions = Prediction.objects.filter(user=user).count()
     
     # If user has exceeded free matches limit, block access
-    if actual_predictions >= profile.free_matches_limit:
+    if total_predictions >= profile.free_matches_limit:
         # Sync the count for accurate tracking
-        if profile.free_matches_used < profile.free_matches_limit:
-            profile.free_matches_used = profile.free_matches_limit
+        if profile.free_matches_used < total_predictions:
+            profile.free_matches_used = total_predictions
             profile.save()
-            logger.info(f"User {user.username} has exceeded free matches limit. Synced count: {profile.free_matches_used}/{profile.free_matches_limit}")
+            logger.info(f"User {user.username} has exceeded free matches limit. Total predictions: {total_predictions}/{profile.free_matches_limit}")
         return False
     
-    # Sync free_matches_used with actual prediction count if needed
-    if actual_predictions > profile.free_matches_used:
-        profile.free_matches_used = actual_predictions
+    # Sync free_matches_used with actual prediction count
+    if total_predictions > profile.free_matches_used:
+        profile.free_matches_used = total_predictions
         profile.save()
         logger.info(f"Synced free_matches_used for {user.username}: {profile.free_matches_used}/{profile.free_matches_limit}")
     

@@ -3751,3 +3751,86 @@ def health_check(request):
         return JsonResponse(health_status, status=200)
     else:
         return JsonResponse(health_status, status=500)
+
+
+def init_database(request):
+    """
+    Manual database initialization endpoint.
+    Call this on Render to populate the database with leagues and teams.
+    Access: https://your-site.onrender.com/init-db/
+    """
+    from django.core.management import call_command
+    from django.core.cache import cache
+    import logging
+    
+    logger = logging.getLogger(__name__)
+    
+    response_data = {
+        'status': 'starting',
+        'steps': []
+    }
+    
+    try:
+        # Step 1: Check current state
+        league_count_before = League.objects.count()
+        team_count_before = Team.objects.count()
+        response_data['steps'].append({
+            'step': 'initial_check',
+            'leagues_before': league_count_before,
+            'teams_before': team_count_before
+        })
+        
+        # Step 2: Run seed command
+        try:
+            call_command('seed_leagues')
+            response_data['steps'].append({
+                'step': 'seed_command',
+                'status': 'success'
+            })
+        except Exception as e:
+            response_data['steps'].append({
+                'step': 'seed_command',
+                'status': 'failed',
+                'error': str(e)
+            })
+            logger.error(f"Seed command failed: {e}")
+        
+        # Step 3: Verify data
+        league_count_after = League.objects.count()
+        team_count_after = Team.objects.count()
+        response_data['steps'].append({
+            'step': 'verification',
+            'leagues_after': league_count_after,
+            'teams_after': team_count_after,
+            'leagues_added': league_count_after - league_count_before,
+            'teams_added': team_count_after - team_count_before
+        })
+        
+        # Step 4: Clear cache
+        cache.clear()
+        response_data['steps'].append({
+            'step': 'cache_clear',
+            'status': 'success'
+        })
+        
+        # Step 5: Sample data
+        sample_leagues = []
+        for league in League.objects.all()[:5]:
+            sample_leagues.append({
+                'name': league.name,
+                'category': league.category,
+                'teams_count': league.teams.count()
+            })
+        response_data['sample_leagues'] = sample_leagues
+        
+        response_data['status'] = 'completed'
+        response_data['message'] = f'Database initialized with {league_count_after} leagues and {team_count_after} teams'
+        
+        return JsonResponse(response_data, status=200)
+        
+    except Exception as e:
+        response_data['status'] = 'error'
+        response_data['error'] = str(e)
+        logger.error(f"Database initialization failed: {e}")
+        return JsonResponse(response_data, status=500)
+

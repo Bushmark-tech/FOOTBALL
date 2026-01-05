@@ -61,6 +61,7 @@ urlpatterns = [
     
     # Health Check
     path('health/', views.health_check, name='health_check'),
+    path('init-db/', views.init_database, name='init_database'),  # Manual DB initialization
     
     path('favicon.ico', views.favicon_view, name='favicon'),
     path('sw.js', views.favicon_view, name='sw_js'),  # Prevent 404 for service worker
