@@ -20,6 +20,10 @@ python manage.py collectstatic --noinput
 echo "Running database migrations..."
 python manage.py migrate --noinput
 
+# Create cache table if it doesn't exist
+echo "Creating cache table..."
+python manage.py createcachetable
+
 # Seed database with leagues and teams
 echo "Seeding database with leagues and teams..."
 python manage.py seed_leagues

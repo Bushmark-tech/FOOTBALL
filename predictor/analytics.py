@@ -3087,10 +3087,11 @@ def advanced_predict_match(home_team, away_team, model1, model2):
                 logger.info(f"  - Probabilities are very close (diff={prob_difference:.3f}), using DOUBLE CHANCE: {final}")
             else:
                 # Probabilities are different enough, use single prediction
-                prediction = model_prediction
+                # BUGFIX: Use highest probability from BLENDED probabilities, not original model
+                prediction = max(prob_dict, key=prob_dict.get)
                 confidence = prob_dict[prediction]
                 outcome_map = {0: "Away", 1: "Draw", 2: "Home"}
-                outcome = outcome_map[model_prediction]
+                outcome = outcome_map[prediction]
                 final = outcome
             
             logger.info(f"  - Historical probabilities (raw): Away={hist_prob_dict_raw[0]:.1%}, Draw={hist_prob_dict_raw[1]:.1%}, Home={hist_prob_dict_raw[2]:.1%}")
