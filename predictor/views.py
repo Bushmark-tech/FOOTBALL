@@ -9,7 +9,7 @@ from django.utils import timezone
 import json
 import os
 import logging
-from .models import Prediction, Match, Team, League, BillingUsage
+from .models import Prediction, Match, Team, League, BillingUsage, Subscription
 from .auth_views import check_subscription_status, use_prediction_credit, subscription_required
 
 # Set up logger for the module
