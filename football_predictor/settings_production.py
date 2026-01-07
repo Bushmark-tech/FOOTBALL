@@ -12,7 +12,7 @@ import os
 DEBUG = False
 
 # ALLOWED_HOSTS - MUST be configured in production
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0,leon-football.com,www.leon-football.com').split(',')
 ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS if host.strip()]
 
 # Validate ALLOWED_HOSTS is set in production
@@ -26,7 +26,7 @@ ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS if host.strip()]
 REQUIRED_ENV_VARS = {
     'SECRET_KEY': os.environ.get('SECRET_KEY'),
     'DATABASE_URL': os.environ.get('DATABASE_URL'),
-    'ALLOWED_HOSTS': os.environ.get('ALLOWED_HOSTS'),
+    # 'ALLOWED_HOSTS': os.environ.get('ALLOWED_HOSTS'),  # We have defaults now
 }
 
 missing_vars = [var for var, value in REQUIRED_ENV_VARS.items() if not value]
