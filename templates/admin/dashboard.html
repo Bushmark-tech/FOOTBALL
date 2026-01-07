@@ -145,7 +145,8 @@
                             </div>
                             <div class="progress" style="height: 8px;">
                                 <div class="progress-bar bg-secondary" role="progressbar"
-                                    style="width: {% widthratio email_users_count total_users 100 %}%"></div>
+                                    style="width: {% if total_users > 0 %}{% widthratio email_users_count total_users 100 %}{% else %}0{% endif %}%">
+                                </div>
                             </div>
                         </div>
                     </div>
