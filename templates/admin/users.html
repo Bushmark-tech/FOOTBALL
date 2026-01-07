@@ -143,8 +143,8 @@
                 <span class="text-muted small">Viewing page <strong>{{ page }}</strong></span>
                 <ul class="pagination pagination-sm mb-0">
                     <li class="page-item {% if not has_prev %}disabled{% endif %}">
-                        <a class="page-link" href="?page={{ page|add:" -1" }}&filter={{ filter_type }}&search={{
-                            search_query }}">Network
+                        <a class="page-link"
+                            href="?page={{ page|add:'-1' }}&filter={{ filter_type }}&search={{ search_query }}">Network
                             Prev</a>
                     </li>
                     <li class="page-item {% if not has_next %}disabled{% endif %}">
