@@ -120,77 +120,9 @@
                 </div>
             </div>
 
-            <!-- Advanced Analytics Stats -->
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card border-0 shadow-sm mb-4">
-                        <div class="card-header bg-white py-3">
-                            <h6 class="m-0 fw-bold">User Acquisition Mix</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between mb-3">
-                                <span class="text-muted"><i class="fab fa-google text-primary me-2"></i> Google
-                                    SSO</span>
-                                <span class="fw-bold">{{ google_users_count }} users</span>
-                            </div>
-                            <div class="progress mb-4" style="height: 8px;">
-                                <div class="progress-bar bg-primary" role="progressbar"
-                                    style="width: {% widthratio google_users_count total_users 100 %}%"></div>
-                            </div>
+            <!-- Advanced Analytics Stats - Simplified (No System Status, No Acquisition Mix) -->
+            <!-- Removing complicated info as requested -->
 
-                            <div class="d-flex justify-content-between mb-3">
-                                <span class="text-muted"><i class="fas fa-envelope text-secondary me-2"></i>
-                                    Email/Direct</span>
-                                <span class="fw-bold">{{ email_users_count }} users</span>
-                            </div>
-                            <div class="progress" style="height: 8px;">
-                                <div class="progress-bar bg-secondary" role="progressbar"
-                                    style="width: {% if total_users > 0 %}{% widthratio email_users_count total_users 100 %}{% else %}0{% endif %}%">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card border-0 shadow-sm mb-4">
-                        <div class="card-header bg-white py-3">
-                            <h6 class="m-0 fw-bold">System Status</h6>
-                        </div>
-                        <div class="card-body p-0">
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item d-flex justify-content-between align-items-center py-3">
-                                    <div class="d-flex align-items-center">
-                                        <div class="status-dot online me-3"></div>
-                                        <span>Primary Database</span>
-                                    </div>
-                                    <span class="badge bg-success-soft text-success px-3">Active</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center py-3">
-                                    <div class="d-flex align-items-center">
-                                        <div class="status-dot online me-3"></div>
-                                        <span>FastAPI Prediction Engine</span>
-                                    </div>
-                                    <span class="badge bg-success-soft text-success px-3">Syncing</span>
-                                </li>
-                                <li
-                                    class="list-group-item d-flex justify-content-between align-items-center py-3 border-0">
-                                    <div class="d-flex align-items-center">
-                                        <div class="status-dot online me-3"></div>
-                                        <span>Google Analytics</span>
-                                    </div>
-                                    <span class="badge bg-info-soft text-info px-3">
-                                        {% if google_analytics_id %}
-                                        Tracking
-                                        {% else %}
-                                        Disabled
-                                        {% endif %}
-                                    </span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- Sidebar Analytics -->
@@ -227,50 +159,8 @@
                 </div>
             </div>
 
-            <!-- Quick Data Stats -->
-            <div class="card border-0 shadow-sm bg-primary text-white">
-                <div class="card-body p-4">
-                    <h6 class="fw-bold mb-4 opacity-75">Platform Data</h6>
-                    <div class="row text-center">
-                        <div class="col-4 border-end border-white border-opacity-25 text-start">
-                            <h4 class="fw-bold mb-0">{{ total_teams }}</h4>
-                            <small class="opacity-75">Teams</small>
-                        </div>
-                        <div class="col-4 border-end border-white border-opacity-25 text-start ps-3">
-                            <h4 class="fw-bold mb-0">{{ total_leagues }}</h4>
-                            <small class="opacity-75">Leagues</small>
-                        </div>
-                        <div class="col-4 text-start ps-3">
-                            <h4 class="fw-bold mb-0">{{ total_matches }}</h4>
-                            <small class="opacity-75">Matches</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- Removed Platform Data and Session Info to simplify -->
 
-            <!-- Admin Status -->
-            <div class="card border-0 shadow-sm mt-4">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <i class="fas fa-user-shield text-primary me-2"></i>
-                        <span class="fw-bold">My Session</span>
-                    </div>
-                    <div class="d-flex justify-content-between small mb-2">
-                        <span class="text-muted">Auth Scope:</span>
-                        <span class="fw-bold">
-                            {% if user.is_superuser %}
-                            Full Infrastructure
-                            {% else %}
-                            Staff Limited
-                            {% endif %}
-                        </span>
-                    </div>
-                    <div class="d-flex justify-content-between small">
-                        <span class="text-muted">Last System Login:</span>
-                        <span class="fw-bold">{{ user.last_login|date:"M d, H:i" }}</span>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
