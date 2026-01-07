@@ -96,28 +96,23 @@ if IS_RENDER or not DEBUG:
     # In production (Render), we MUST use PostgreSQL
     # EXCEPTION: Allow build process (collectstatic) to run without DB
     import sys
-    is_building = 'collectstatic' in sys.argv
+    is_building = 'collectstatic' in sys.argv or 'migrate' in sys.argv or 'createcachetable' in sys.argv
     
-    if not os.environ.get('DATABASE_URL') and not is_building:
-        raise ImproperlyConfigured(
-            "DATABASE_URL environment variable not set. "
-            "You cannot run with SQLite in production as data will be lost on every deploy."
-        )
-    
-    if os.environ.get('DATABASE_URL'):
-        DATABASES = {
-            'default': dj_database_url.config(
-                conn_max_age=600,
-                conn_health_checks=True,
-            )
-        }
-    else:
-        # Fallback for build process only
+    if not os.environ.get('DATABASE_URL'):
+        print("WARNING: DATABASE_URL not set. Using SQLite in production. Data will be lost on every deploy.")
+        # Fallback to SQLite
         DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.sqlite3',
                 'NAME': BASE_DIR / 'db.sqlite3',
             }
+        }
+    else:
+        DATABASES = {
+            'default': dj_database_url.config(
+                conn_max_age=600,
+                conn_health_checks=True,
+            )
         }
 else:
     # Local development - nice fallback to SQLite if Postgres not set

@@ -28,5 +28,9 @@ python manage.py createcachetable
 echo "Seeding database with leagues and teams..."
 python manage.py seed_leagues
 
+# Create admin user
+echo "Creating admin user..."
+python create_admin_user.py
+
 echo "Build completed successfully!"
 
