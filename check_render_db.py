@@ -28,6 +28,12 @@ def main():
     
     if league_count == 0:
         print("\n⚠️  DATABASE IS EMPTY!")
+        print("   Creating cache table...")
+        try:
+            call_command('createcachetable')
+        except Exception:
+            pass  # Already exists or standard error
+            
         print("   Running seed_leagues command...")
         try:
             call_command('seed_leagues')
