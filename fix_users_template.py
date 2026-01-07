@@ -1,4 +1,9 @@
-<!-- FIX APPLIED -->
+
+import os
+
+path = r"c:\Users\user\Desktop\FOOTBALL-PREDICTION-APP-main\templates\admin\users.html"
+
+new_content = """<!-- FIX APPLIED -->
 {% extends 'admin/dashboard_base.html' %}
 
 {% block title %}User Infrastructure - LEON GAMES PRO Admin{% endblock %}
@@ -180,3 +185,9 @@
     }
 </style>
 {% endblock %}
+"""
+
+with open(path, "w", encoding="utf-8") as f:
+    f.write(new_content)
+
+print(f"File overwritten successfully at {path}")
