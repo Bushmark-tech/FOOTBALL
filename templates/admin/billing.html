@@ -12,11 +12,11 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div class="stat-icon bg-soft-success text-success rounded p-3">
-                            <i class="fas fa-dollar-sign fa-lg"></i>
+                            <i class="fas fa-money-bill-wave fa-lg"></i>
                         </div>
                         <span class="badge bg-success-soft text-success">+{{ 12.5 }}%</span>
                     </div>
-                    <div class="stat-number h3 fw-bold mb-1">${{ total_revenue|floatformat:2 }}</div>
+                    <div class="stat-number h3 fw-bold mb-1">KES {{ total_revenue|floatformat:0 }}</div>
                     <div class="stat-label text-muted">Total Active Revenue</div>
                 </div>
             </div>
@@ -60,19 +60,19 @@
                 <div class="col-md-4">
                     <select name="status" class="form-select">
                         <option value="all">All Status</option>
-                        <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
-                        <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
-                        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
-                        <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled
+                        <option value="active" {% if status_filter=='active' %}selected{% endif %}>Active</option>
+                        <option value="inactive" {% if status_filter=='inactive' %}selected{% endif %}>Inactive</option>
+                        <option value="pending" {% if status_filter=='pending' %}selected{% endif %}>Pending</option>
+                        <option value="cancelled" {% if status_filter=='cancelled' %}selected{% endif %}>Cancelled
                         </option>
                     </select>
                 </div>
                 <div class="col-md-4">
                     <select name="method" class="form-select">
                         <option value="all">All Payment Methods</option>
-                        <option value="mpesa" {% if method_filter == 'mpesa' %}selected{% endif %}>M-Pesa</option>
-                        <option value="card" {% if method_filter == 'card' %}selected{% endif %}>Card</option>
-                        <option value="paypal" {% if method_filter == 'paypal' %}selected{% endif %}>PayPal</option>
+                        <option value="mpesa" {% if method_filter=='mpesa' %}selected{% endif %}>M-Pesa</option>
+                        <option value="card" {% if method_filter=='card' %}selected{% endif %}>Card</option>
+                        <option value="paypal" {% if method_filter=='paypal' %}selected{% endif %}>PayPal</option>
                     </select>
                 </div>
                 <div class="col-md-4">
@@ -115,7 +115,7 @@
                             <small class="text-muted">{{ subscription.user.email }}</small>
                         </td>
                         <td>
-                            <strong>${{ subscription.amount|floatformat:2 }}</strong>
+                            <strong>KES {{ subscription.amount|floatformat:0 }}</strong>
                         </td>
                         <td>{{ subscription.currency }}</td>
                         <td>
@@ -175,7 +175,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label"><strong>Amount</strong></label>
-                        <p>{{ subscription.currency }} {{ subscription.amount|floatformat:2 }}</p>
+                        <p>{{ subscription.currency }} {{ subscription.amount|floatformat:0 }}</p>
                     </div>
                     <div class="mb-3">
                         <label class="form-label"><strong>Payment Method</strong></label>
@@ -268,7 +268,7 @@
             data: {
                 labels: {{ revenue_labels| safe }},
         datasets: [{
-            label: 'Daily Revenue ($)',
+            label: 'Daily Revenue (KES)',
             data: {{ revenue_data| safe }},
         borderColor: '#22c55e',
         backgroundColor: gradient,
