@@ -17,10 +17,10 @@
                         <div class="col-md-3">
                             <select name="days" class="form-select form-select-sm border-0 bg-light fw-bold"
                                 onchange="this.form.submit()">
-                                <option value="7" {% if days==7 %}selected{% endif %}>Last 7 Days (Short Term)</option>
-                                <option value="14" {% if days==14 %}selected{% endif %}>Last 14 Days (Staging)</option>
-                                <option value="30" {% if days==30 %}selected{% endif %}>Last 30 Days (Standard)</option>
-                                <option value="90" {% if days==90 %}selected{% endif %}>Last 90 Days (Quarterly)
+                                <option value="7" {% if days == 7 %}selected{% endif %}>Last 7 Days (Short Term)</option>
+                                <option value="14" {% if days == 14 %}selected{% endif %}>Last 14 Days (Staging)</option>
+                                <option value="30" {% if days == 30 %}selected{% endif %}>Last 30 Days (Standard)</option>
+                                <option value="90" {% if days == 90 %}selected{% endif %}>Last 90 Days (Quarterly)
                                 </option>
                             </select>
                         </div>
