@@ -121,6 +121,7 @@ def admin_dashboard(request):
         'new_users_month': new_users_month,
         'new_users_week': new_users_week,
         'google_users_count': google_users_count,
+        'email_users_count': total_users - google_users_count,
         'total_predictions': total_predictions,
         'today_predictions': today_predictions,
         'week_predictions': week_predictions,
