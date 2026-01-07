@@ -352,10 +352,14 @@ def initiate_mpesa_payment(request):
         result = initiate_stk_push(mpesa_number, amount, subscription.id)
         
         if result.get('success'):
+            # Use message from result (will be different for mock vs real)
+            message = result.get('data', {}).get('CustomerMessage', 'Payment request sent to your phone. Please complete the payment.')
+            
             return JsonResponse({
                 'success': True,
-                'message': 'Payment request sent to your phone. Please complete the payment.',
-                'subscription_id': subscription.id
+                'message': message,
+                'subscription_id': subscription.id,
+                'is_mock': result.get('mock', False)
             })
         else:
             subscription.status = 'cancelled'
@@ -370,8 +374,40 @@ def initiate_mpesa_payment(request):
 
 
 def initiate_stk_push(phone_number, amount, subscription_id):
-    """Initiate M-Pesa STK Push payment."""
+    """Initiate M-Pesa STK Push payment with mock mode for testing."""
     try:
+        # Check if M-PESA credentials are configured
+        mpesa_configured = (
+            hasattr(settings, 'MPESA_CONSUMER_KEY') and 
+            settings.MPESA_CONSUMER_KEY and 
+            settings.MPESA_CONSUMER_KEY != 'your-mpesa-consumer-key'
+        )
+        
+        # MOCK MODE: If M-PESA not configured, simulate successful payment
+        if not mpesa_configured:
+            logger.info(f"MOCK PAYMENT MODE: Simulating successful payment for subscription {subscription_id}")
+            
+            # Simulate a successful payment
+            subscription = Subscription.objects.get(id=subscription_id)
+            subscription.status = 'active'
+            subscription.mpesa_transaction_id = f'MOCK-{subscription_id}-{datetime.now().strftime("%Y%m%d%H%M%S")}'
+            subscription.activate(duration_days=getattr(settings, 'SUBSCRIPTION_DURATION_DAYS', 30))
+            subscription.save()
+            
+            logger.info(f"MOCK PAYMENT: Subscription {subscription_id} activated successfully")
+            
+            return {
+                'success': True, 
+                'data': {
+                    'ResponseCode': '0',
+                    'ResponseDescription': 'Success (Mock Mode)',
+                    'CheckoutRequestID': subscription.mpesa_transaction_id,
+                    'CustomerMessage': 'Payment successful! (Test Mode - No actual charge)'
+                },
+                'mock': True
+            }
+        
+        # REAL M-PESA MODE: Use actual M-PESA API
         # Get access token
         access_token = get_mpesa_access_token()
         if not access_token:

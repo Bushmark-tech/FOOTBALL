@@ -1,49 +1,43 @@
+"""
+Script to check which teams have historical match data
+"""
+import os
+import django
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'football_predictor.settings')
+django.setup()
+
+from predictor.models import League, Team
 import pandas as pd
 
-# Load the dataset
-df = pd.read_csv('data/football_data1.csv')
+print("=" * 70)
+print("TEAMS WITH HISTORICAL DATA IN DATABASE")
+print("=" * 70)
 
-print(f'Total rows in dataset: {len(df)}')
-print(f'Columns: {list(df.columns)[:10]}...')
+# Get all leagues and teams from database
+leagues = League.objects.all().prefetch_related('teams')
 
-# Check for Man City
-print(f'\n{"="*60}')
-print('Searching for "Man City"...')
-man_city = df[(df['HomeTeam'].astype(str).str.contains('Man City', case=False, na=False)) | 
-              (df['AwayTeam'].astype(str).str.contains('Man City', case=False, na=False))]
-print(f'Found {len(man_city)} matches')
-if len(man_city) > 0:
-    print(man_city[['Date', 'HomeTeam', 'AwayTeam']].head())
+print(f"\nTotal Leagues in Database: {leagues.count()}")
+print(f"Total Teams in Database: {Team.objects.count()}")
 
-# Check for Manchester
-print(f'\n{"="*60}')
-print('Searching for "Manchester"...')
-manc = df[(df['HomeTeam'].astype(str).str.contains('Manchester', case=False, na=False)) | 
-          (df['AwayTeam'].astype(str).str.contains('Manchester', case=False, na=False))]
-print(f'Found {len(manc)} matches')
-if len(manc) > 0:
-    print('\nSample matches:')
-    print(manc[['Date', 'HomeTeam', 'AwayTeam']].head(10))
-    
-    # Get unique team names
-    teams = set(manc['HomeTeam'].unique()) | set(manc['AwayTeam'].unique())
-    manchester_teams = [t for t in teams if 'manchester' in str(t).lower() or 'man' in str(t).lower()]
-    print(f'\nManchester-related teams found: {manchester_teams}')
+print("\n" + "=" * 70)
+print("TEAMS BY LEAGUE (These are available for predictions)")
+print("=" * 70)
 
-# Check what the actual team values look like
-print(f'\n{"="*60}')
-print('Sample team values (first 20 rows):')
-print(df[['HomeTeam', 'AwayTeam']].head(20))
+for league in leagues:
+    teams = league.teams.all()
+    if teams.exists():
+        print(f"\n📊 {league.name} ({league.category})")
+        print(f"   Teams: {teams.count()}")
+        team_names = sorted([team.name for team in teams])
+        for i, team in enumerate(team_names, 1):
+            print(f"   {i}. {team}")
 
-# Check if there's a Country column for European leagues
-if 'Country' in df.columns:
-    print(f'\n{"="*60}')
-    print('Countries in dataset:')
-    print(df['Country'].value_counts().head(10))
-    
-    # Check England specifically
-    england = df[df['Country'] == 'England']
-    print(f'\nEngland matches: {len(england)}')
-    if len(england) > 0:
-        print('Sample England teams:')
-        print(england[['HomeTeam', 'AwayTeam']].head(10))
+print("\n" + "=" * 70)
+print("RECOMMENDATION")
+print("=" * 70)
+print("\n✅ Use teams from the lists above for predictions")
+print("✅ These teams are in your database and will show proper form data")
+print("✅ For best results, try Swiss League teams (Basel, Lugano, Luzern, etc.)")
+print("\n⚠️  Teams NOT in the database (like Liverpool, Arsenal) will use fallback data")
+print("=" * 70)

@@ -1,121 +1,102 @@
 {% extends 'predictor/base.html' %}
 
-{% block title %}About - Football Predictor Pro{% endblock %}
+{% block title %}About - LEON GAMES PRO{% endblock %}
 
 {% block extra_css %}
 <style>
     .about-container {
         background: #000000;
         min-height: 100vh;
-        padding-bottom: var(--spacing-xl);
+        padding: 2rem 1rem;
     }
 
     .about-hero {
-        background: linear-gradient(135deg, #0d47a1 0%, #1565c0 100%);
+        background: linear-gradient(135deg, #1a1f2e 0%, #2a3142 100%);
+        border: 2px solid #00d9a3;
+        border-radius: 20px;
         color: white;
-        padding: 60px 0;
+        padding: 3rem 2rem;
         text-align: center;
-        border-bottom: 2px solid #1976d2;
+        margin-bottom: 3rem;
+        box-shadow: 0 10px 40px rgba(0, 217, 163, 0.2);
     }
 
-    @media (min-width: 768px) {
-        .about-hero {
-            padding: 80px 0;
-        }
+    .about-hero h1 {
+        color: #00d9a3;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
 
-        .about-hero h1 {
-            font-size: 3.5rem !important;
-        }
+    .about-hero p {
+        color: #9ca3af;
+        font-size: 1.2rem;
+        margin: 0;
+    }
 
-        .about-hero .lead {
-            font-size: 1.25rem !important;
-        }
+    .section-title {
+        text-align: center;
+        color: #00d9a3;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 3rem;
+    }
+
+    .section-title i {
+        margin-right: 0.5rem;
     }
 
     .feature-card {
-        background: #1a1a1a;
-        border-radius: var(--border-radius-lg);
-        padding: 20px;
-        box-shadow: var(--shadow-md);
-        transition: all 0.3s ease;
-        border: 1px solid #333333;
+        background: #1a1f2e;
+        border: 2px solid #2a3142;
+        border-radius: 15px;
+        padding: 2rem;
         height: 100%;
-        color: #ffffff;
-        margin-bottom: 20px;
-    }
-
-    @media (min-width: 768px) {
-        .feature-card {
-            padding: 30px;
-            margin-bottom: 0;
-        }
+        transition: all 0.3s ease;
+        text-align: center;
     }
 
     .feature-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 20px 40px rgba(33, 150, 243, 0.2);
-        border-color: #2196f3;
+        border-color: #00d9a3;
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0, 217, 163, 0.3);
     }
 
     .feature-icon {
-        font-size: 3rem;
-        margin-bottom: 20px;
-        display: inline-block;
-        position: relative;
-        background: linear-gradient(135deg, #2196f3 0%, #1976d2 50%, #64b5f6 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        filter: drop-shadow(0 4px 12px rgba(33, 150, 243, 0.4));
-        animation: iconGlow 3s ease-in-out infinite;
+        font-size: 4rem;
+        color: #00d9a3;
+        margin-bottom: 1.5rem;
+        display: block;
+        transition: all 0.3s ease;
     }
 
-    @media (min-width: 768px) {
-        .feature-icon {
-            font-size: 4rem;
-            margin-bottom: 25px;
-        }
-    }
-
-    .feature-icon i {
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .feature-card:hover .feature-icon i {
+    .feature-card:hover .feature-icon {
         transform: scale(1.2) rotate(5deg);
-        filter: drop-shadow(0 8px 20px rgba(33, 150, 243, 0.6));
     }
 
-    @keyframes iconGlow {
+    .feature-card h5 {
+        color: #ffffff;
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
 
-        0%,
-        100% {
-            filter: drop-shadow(0 4px 12px rgba(33, 150, 243, 0.4));
-        }
-
-        50% {
-            filter: drop-shadow(0 6px 20px rgba(33, 150, 243, 0.7));
-        }
+    .feature-card p {
+        color: #9ca3af;
+        line-height: 1.8;
+        margin: 0;
     }
 
     .process-step {
-        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-        border-radius: 16px;
-        padding: 25px 20px;
+        background: linear-gradient(135deg, #1a1f2e 0%, #2a3142 100%);
+        border: 2px solid #2a3142;
+        border-radius: 15px;
+        padding: 2rem;
         text-align: center;
-        border: 2px solid transparent;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        color: #ffffff;
+        transition: all 0.3s ease;
+        height: 100%;
         position: relative;
         overflow: hidden;
-        margin-bottom: 20px;
-    }
-
-    @media (min-width: 768px) {
-        .process-step {
-            padding: 35px 25px;
-            margin-bottom: 0;
-        }
     }
 
     .process-step::before {
@@ -125,7 +106,7 @@
         left: -100%;
         width: 100%;
         height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(33, 150, 243, 0.1), transparent);
+        background: linear-gradient(90deg, transparent, rgba(0, 217, 163, 0.1), transparent);
         transition: left 0.6s;
     }
 
@@ -134,285 +115,328 @@
     }
 
     .process-step:hover {
-        border-color: #2196f3;
-        box-shadow: 0 12px 35px rgba(33, 150, 243, 0.25);
+        border-color: #00d9a3;
         transform: translateY(-8px);
+        box-shadow: 0 12px 35px rgba(0, 217, 163, 0.25);
     }
 
     .process-icon {
-        font-size: 2.5rem;
-        margin-bottom: 15px;
-        display: inline-block;
-        background: linear-gradient(135deg, #2196f3 0%, #1976d2 50%, #64b5f6 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        filter: drop-shadow(0 4px 12px rgba(33, 150, 243, 0.5));
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        animation: iconFloat 3s ease-in-out infinite;
-    }
-
-    @media (min-width: 768px) {
-        .process-icon {
-            font-size: 3.5rem;
-            margin-bottom: 20px;
-        }
+        font-size: 3.5rem;
+        color: #00d9a3;
+        margin-bottom: 1.5rem;
+        display: block;
+        transition: all 0.3s ease;
     }
 
     .process-step:hover .process-icon {
         transform: scale(1.15) rotate(5deg);
-        filter: drop-shadow(0 8px 24px rgba(33, 150, 243, 0.7));
     }
 
-    @keyframes iconFloat {
+    .process-step h5 {
+        color: #ffffff;
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
 
-        0%,
-        100% {
-            transform: translateY(0px);
-        }
-
-        50% {
-            transform: translateY(-8px);
-        }
+    .process-step p {
+        color: #9ca3af;
+        line-height: 1.8;
+        margin: 0;
     }
 
     .stats-section {
-        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-        border-radius: var(--border-radius-lg);
-        padding: 30px 20px;
-        margin: 30px 0;
-        border: 1px solid #333333;
-    }
-
-    @media (min-width: 768px) {
-        .stats-section {
-            padding: 40px;
-            margin: 40px 0;
-        }
+        background: linear-gradient(135deg, #1a1f2e 0%, #2a3142 100%);
+        border: 2px solid #2a3142;
+        border-radius: 20px;
+        padding: 3rem 2rem;
+        margin: 3rem 0;
     }
 
     .stat-item {
         text-align: center;
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-
-    @media (min-width: 768px) {
-        .stat-item {
-            padding: 20px;
-            margin-bottom: 0;
-        }
+        padding: 1.5rem;
     }
 
     .stat-number {
-        font-size: 2rem;
+        font-size: 3rem;
         font-weight: 700;
-        color: #2196f3;
-        margin-bottom: 10px;
-    }
-
-    @media (min-width: 768px) {
-        .stat-number {
-            font-size: 2.5rem;
-        }
+        color: #00d9a3;
+        margin-bottom: 0.5rem;
+        display: block;
     }
 
     .stat-label {
-        color: #cccccc;
+        color: #9ca3af;
+        font-size: 1.1rem;
         font-weight: 500;
     }
 
     .disclaimer-card {
-        background: #1a1a1a;
-        border-radius: var(--border-radius-md);
-        padding: 20px;
-        box-shadow: var(--shadow-md);
-        border: 1px solid #333333;
-        margin: 15px 0;
-        color: #ffffff;
+        background: #1a1f2e;
+        border: 2px solid #2a3142;
+        border-radius: 15px;
+        padding: 2rem;
+        height: 100%;
+        transition: all 0.3s ease;
     }
 
-    @media (min-width: 768px) {
-        .disclaimer-card {
-            padding: 25px;
-            margin: 20px 0;
-        }
+    .disclaimer-card:hover {
+        border-color: #fbbf24;
+        box-shadow: 0 10px 30px rgba(251, 191, 36, 0.2);
     }
 
     .disclaimer-header {
         display: flex;
         align-items: center;
-        margin-bottom: 15px;
+        margin-bottom: 1rem;
     }
 
     .disclaimer-icon {
         font-size: 2rem;
-        margin-right: 15px;
-        background: linear-gradient(135deg, #ffd93d 0%, #ffb800 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        filter: drop-shadow(0 2px 8px rgba(255, 217, 61, 0.4));
-        animation: iconPulse 2s ease-in-out infinite;
+        color: #fbbf24;
+        margin-right: 1rem;
     }
 
-    @keyframes iconPulse {
-
-        0%,
-        100% {
-            transform: scale(1);
-            filter: drop-shadow(0 2px 8px rgba(255, 217, 61, 0.4));
-        }
-
-        50% {
-            transform: scale(1.1);
-            filter: drop-shadow(0 4px 12px rgba(255, 217, 61, 0.6));
-        }
+    .disclaimer-header h5 {
+        color: #ffffff;
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin: 0;
     }
 
-    .demo-section {
-        background: #1a1a1a;
-        border-radius: var(--border-radius-lg);
-        padding: 30px;
-        box-shadow: var(--shadow-md);
-        border: 1px solid #333333;
-        margin: 30px 0;
+    .disclaimer-card p {
+        color: #9ca3af;
+        line-height: 1.8;
+        margin: 0;
     }
 
-    .form-control,
-    .form-select {
-        border: 2px solid #333333;
-        border-radius: 8px;
-        padding: 12px 16px;
-        font-size: 1rem;
+    .cta-section {
+        text-align: center;
+        margin: 4rem 0 2rem 0;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #00d9a3 0%, #00b388 100%);
+        border: none;
+        color: #000;
+        padding: 1rem 2.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1.1rem;
         transition: all 0.3s ease;
-        background: #0a0a0a;
-        color: #ffffff;
+        box-shadow: 0 4px 15px rgba(0, 217, 163, 0.3);
+        text-decoration: none;
+        display: inline-block;
     }
 
-    .form-control:focus,
-    .form-select:focus {
-        border-color: #2196f3;
-        box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.15);
-        background: #1a1a1a;
-        color: #ffffff;
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 217, 163, 0.4);
+        color: #000;
     }
 
-    .form-select option {
-        background: #1a1a1a;
-        color: #ffffff;
+    .btn-outline-primary {
+        background: transparent;
+        border: 2px solid #00d9a3;
+        color: #00d9a3;
+        padding: 1rem 2.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
     }
 
-    .text-visible {
-        color: #e0e0e0 !important;
+    .btn-outline-primary:hover {
+        background: #00d9a3;
+        color: #000;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 217, 163, 0.4);
     }
 
-    h3,
-    h4,
-    h5 {
-        color: #ffffff;
+    @media (max-width: 768px) {
+        .about-hero {
+            padding: 2rem 1.5rem;
+        }
+
+        .about-hero h1 {
+            font-size: 2rem;
+        }
+
+        .about-hero p {
+            font-size: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .feature-card,
+        .process-step,
+        .disclaimer-card {
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+        }
+
+        .btn-primary,
+        .btn-outline-primary {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="about-container">
-    <!-- Hero Section -->
-    <section class="about-hero">
-        <div class="container">
-            <h1 class="display-4 mb-3 mb-md-4" style="font-size: 2rem;">About Football Predictor Pro</h1>
-            <p class="lead mb-3 mb-md-4" style="font-size: 1rem;">AI-powered football predictions with advanced
-                analytics</p>
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="about-hero">
+            <h1><i class="fas fa-info-circle"></i> About LEON GAMES PRO</h1>
+            <p>AI-powered football predictions with advanced analytics</p>
         </div>
-    </section>
 
-    <!-- How It Works -->
-    <section class="container mt-4 mt-md-5">
-        <h3 class="text-center mb-4 mb-md-5"
-            style="color: #ffffff; font-weight: 700; font-size: 1.8rem; margin-bottom: 2rem;">
-            <i class="fas fa-magic me-2"
-                style="background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
-            How It Works
-        </h3>
-        <div class="row">
-            <div class="col-12 col-md-4 mb-4">
-                <div class="process-step">
-                    <div class="process-icon">
-                        <i class="fas fa-futbol"></i>
+        <!-- Features Section -->
+        <section class="mb-5">
+            <h3 class="section-title">
+                <i class="fas fa-star"></i>Why Choose Us
+            </h3>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <i class="fas fa-brain feature-icon"></i>
+                        <h5>AI-Powered Analysis</h5>
+                        <p>Advanced machine learning algorithms analyze thousands of data points to generate accurate
+                            predictions</p>
                     </div>
-                    <h5 style="color: #ffffff; font-weight: 700; margin-bottom: 15px; font-size: 1.2rem;">Select Teams
-                    </h5>
-                    <p class="text-visible" style="line-height: 1.8;">Choose home and away teams from our database</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <i class="fas fa-chart-line feature-icon"></i>
+                        <h5>Real-Time Data</h5>
+                        <p>Access to up-to-date team statistics, form, and historical performance data</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <i class="fas fa-shield-alt feature-icon"></i>
+                        <h5>Proven Accuracy</h5>
+                        <p>Our models are continuously refined to improve prediction accuracy and reliability</p>
+                    </div>
                 </div>
             </div>
-            <div class="col-12 col-md-4 mb-4">
-                <div class="process-step">
-                    <div class="process-icon">
-                        <i class="fas fa-robot"></i>
-                    </div>
-                    <h5 style="color: #ffffff; font-weight: 700; margin-bottom: 15px; font-size: 1.2rem;">AI Analysis
-                    </h5>
-                    <p class="text-visible" style="line-height: 1.8;">Our AI models analyze historical data and current
-                        form</p>
-                </div>
-            </div>
-            <div class="col-12 col-md-4 mb-4">
-                <div class="process-step">
-                    <div class="process-icon">
-                        <i class="fas fa-trophy"></i>
-                    </div>
-                    <h5 style="color: #ffffff; font-weight: 700; margin-bottom: 15px; font-size: 1.2rem;">Get Results
-                    </h5>
-                    <p class="text-visible" style="line-height: 1.8;">Receive predictions with confidence scores</p>
-                </div>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Disclaimers -->
-    <section class="container mt-4 mt-md-5">
-        <div class="row">
-            <div class="col-12 col-md-6">
-                <div class="disclaimer-card">
-                    <div class="disclaimer-header">
-                        <i class="fas fa-exclamation-triangle disclaimer-icon"></i>
-                        <h5>Disclaimer</h5>
+        <!-- How It Works Section -->
+        <section class="mb-5">
+            <h3 class="section-title">
+                <i class="fas fa-magic"></i>How It Works
+            </h3>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="process-step">
+                        <i class="fas fa-futbol process-icon"></i>
+                        <h5>1. Select Teams</h5>
+                        <p>Choose home and away teams from our comprehensive database of leagues worldwide</p>
                     </div>
-                    <p class="small text-visible">
-                        Predictions are based on statistical analysis and machine learning algorithms.
-                        They should not be used as the sole basis for betting decisions.
-                        Football is unpredictable and actual results may vary significantly from predictions.
-                    </p>
+                </div>
+                <div class="col-md-4">
+                    <div class="process-step">
+                        <i class="fas fa-robot process-icon"></i>
+                        <h5>2. AI Analysis</h5>
+                        <p>Our AI models analyze historical data, current form, and head-to-head statistics</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="process-step">
+                        <i class="fas fa-trophy process-icon"></i>
+                        <h5>3. Get Results</h5>
+                        <p>Receive detailed predictions with confidence scores and probability breakdowns</p>
+                    </div>
                 </div>
             </div>
-            <div class="col-12 col-md-6">
-                <div class="disclaimer-card">
-                    <div class="disclaimer-header">
-                        <i class="fas fa-copyright disclaimer-icon"></i>
-                        <h5>Terms of Use</h5>
-                    </div>
-                    <p class="small text-visible">
-                        This application is for entertainment and educational purposes only.
-                        Users are responsible for their own decisions and actions.
-                        We do not guarantee the accuracy of predictions.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Call to Action -->
-    <section class="container mt-4 mt-md-5 mb-4 mb-md-5">
-        <div class="text-center">
-            <a href="{% url 'predictor:predict' %}"
-                class="btn btn-primary btn-lg d-block d-sm-inline-block mb-2 mb-sm-0 me-0 me-sm-3">
-                <i class="fas fa-rocket me-2" style="animation: iconRotate 2s ease-in-out infinite;"></i>Start
-                Predicting
+        <!-- Stats Section -->
+        <section class="stats-section">
+            <div class="row">
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <span class="stat-number">10K+</span>
+                        <div class="stat-label">Predictions Made</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <span class="stat-number">75%</span>
+                        <div class="stat-label">Accuracy Rate</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <span class="stat-number">50+</span>
+                        <div class="stat-label">Leagues Covered</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <span class="stat-number">24/7</span>
+                        <div class="stat-label">Available</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Disclaimers Section -->
+        <section class="mb-5">
+            <h3 class="section-title">
+                <i class="fas fa-exclamation-triangle"></i>Important Information
+            </h3>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="disclaimer-card">
+                        <div class="disclaimer-header">
+                            <i class="fas fa-exclamation-triangle disclaimer-icon"></i>
+                            <h5>Disclaimer</h5>
+                        </div>
+                        <p>
+                            Predictions are based on statistical analysis and machine learning algorithms.
+                            They should not be used as the sole basis for betting decisions.
+                            Football is unpredictable and actual results may vary significantly from predictions.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="disclaimer-card">
+                        <div class="disclaimer-header">
+                            <i class="fas fa-copyright disclaimer-icon"></i>
+                            <h5>Terms of Use</h5>
+                        </div>
+                        <p>
+                            This application is for entertainment and educational purposes only.
+                            Users are responsible for their own decisions and actions.
+                            We do not guarantee the accuracy of predictions.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Call to Action -->
+        <section class="cta-section">
+            <a href="{% url 'predictor:predict' %}" class="btn-primary me-3 mb-3">
+                <i class="fas fa-rocket me-2"></i>Start Predicting
             </a>
-            <a href="{% url 'predictor:home' %}" class="btn btn-outline-primary btn-lg d-block d-sm-inline-block">
+            <a href="{% url 'predictor:home' %}" class="btn-outline-primary mb-3">
                 <i class="fas fa-home me-2"></i>Back to Dashboard
             </a>
-        </div>
-    </section>
+        </section>
+    </div>
 </div>
 {% endblock %}

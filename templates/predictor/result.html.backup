@@ -1,0 +1,229 @@
+{% extends 'predictor/base.html' %}
+{% load static %}
+
+{% block title %}{{ home_team }} vs {{ away_team }} - Prediction Result{% endblock %}
+
+{% block content %}
+<div class="result-page py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Main Prediction Card -->
+                <div class="card glass mb-4" data-aos="fade-up">
+                    <div class="card-header text-center">
+                        <span class="badge bg-primary mb-2">{{ category }}</span>
+                        <h4 class="mb-0">{{ league }}</h4>
+                    </div>
+                    <div class="card-body text-center p-4 p-md-5">
+                        <div class="matchup-display mb-4">
+                            <div class="row align-items-center">
+                                <div class="col-4">
+                                    <div class="team-logo mb-2">
+                                        <i class="fas fa-tshirt fa-3x text-white"></i>
+                                    </div>
+                                    <h5 class="fw-bold">{{ home_team }}</h5>
+                                    {% if home_score is not None %}
+                                    <div class="score h2 text-muted">{{ home_score }}</div>
+                                    {% endif %}
+                                    <div class="form-indicators mt-2">
+                                        {% for char in home_team_form %}
+                                        <span
+                                            class="badge {% if char == 'W' %}bg-success{% elif char == 'D' %}bg-warning{% else %}bg-danger{% endif %} rounded-circle p-1 me-1"
+                                            style="width: 25px; height: 25px; display: inline-flex; align-items: center; justify-content: center;">{{
+                                            char }}</span>
+                                        {% empty %}
+                                        <span class="text-muted small">No form data</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="vs-badge mb-2 fw-bold text-muted">VS</div>
+                                    <div class="prediction-highlight my-3 p-3 rounded glass"
+                                        style="border: 1px solid var(--betika-primary);">
+                                        <small class="text-uppercase text-muted d-block mb-1">Prediction</small>
+                                        <h3 class="fw-bold mb-0 text-primary">{{ prediction_outcome }}</h3>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="team-logo mb-2">
+                                        <i class="fas fa-tshirt fa-3x text-white"></i>
+                                    </div>
+                                    <h5 class="fw-bold">{{ away_team }}</h5>
+                                    {% if away_score is not None %}
+                                    <div class="score h2 text-muted">{{ away_score }}</div>
+                                    {% endif %}
+                                    <div class="form-indicators mt-2">
+                                        {% for char in away_team_form %}
+                                        <span
+                                            class="badge {% if char == 'W' %}bg-success{% elif char == 'D' %}bg-warning{% else %}bg-danger{% endif %} rounded-circle p-1 me-1"
+                                            style="width: 25px; height: 25px; display: inline-flex; align-items: center; justify-content: center;">{{
+                                            char }}</span>
+                                        {% empty %}
+                                        <span class="text-muted small">No form data</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Probabilities -->
+                        <div class="probabilities mb-4">
+                            <h6 class="text-uppercase text-muted mb-3">Win Probabilities</h6>
+
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>{{ home_team }} Win</span>
+                                    <span>{{ prob_home_pct }}%</span>
+                                </div>
+                                <div class="progress" style="height: 10px; background-color: rgba(255,255,255,0.1);">
+                                    <div class="progress-bar bg-success" role="progressbar"
+                                        style="width: {{ prob_home_pct }}%" aria-valuenow="{{ prob_home_pct }}"
+                                        aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Draw</span>
+                                    <span>{{ prob_draw_pct }}%</span>
+                                </div>
+                                <div class="progress" style="height: 10px; background-color: rgba(255,255,255,0.1);">
+                                    <div class="progress-bar bg-warning" role="progressbar"
+                                        style="width: {{ prob_draw_pct }}%" aria-valuenow="{{ prob_draw_pct }}"
+                                        aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>{{ away_team }} Win</span>
+                                    <span>{{ prob_away_pct }}%</span>
+                                </div>
+                                <div class="progress" style="height: 10px; background-color: rgba(255,255,255,0.1);">
+                                    <div class="progress-bar bg-danger" role="progressbar"
+                                        style="width: {{ prob_away_pct }}%" aria-valuenow="{{ prob_away_pct }}"
+                                        aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Prediction Basis -->
+                        <div class="prediction-details p-3 bg-dark rounded text-start border border-secondary">
+                            <h6 class="text-primary mb-2"><i class="fas fa-robot me-2"></i>AI Analysis</h6>
+                            <p class="mb-1"><strong>Confidence:</strong> {{ model1_confidence }}</p>
+                            <p class="mb-0 small text-muted">{{ model1_basis }}</p>
+                        </div>
+                    </div>
+                    <div class="card-footer p-3 text-center border-top border-secondary">
+                        <a href="{% url 'predictor:home' %}" class="btn btn-primary me-2"><i
+                                class="fas fa-search me-2"></i>New Prediction</a>
+                        <a href="{% url 'predictor:history' %}" class="btn btn-outline-light"><i
+                                class="fas fa-history me-2"></i>History</a>
+                    </div>
+                </div>
+
+                <!-- H2H Matches -->
+                {% if h2h_matches %}
+                <div class="card glass mb-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-handshake me-2"></i>Head to Head</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover mb-0 align-middle">
+                                <thead>
+                                    <tr>
+                                        <th class="ps-3">Date</th>
+                                        <th>Match</th>
+                                        <th class="text-center">Score</th>
+                                        <th class="text-center pe-3">Result</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for match in h2h_matches %}
+                                    <tr>
+                                        <td class="ps-3 text-muted small">{{ match.date }}</td>
+                                        <td>
+                                            <span
+                                                class="{% if match.winner == home_team %}text-primary fw-bold{% endif %}">{{
+                                                home_team }}</span>
+                                            <span class="text-muted mx-1 small">vs</span>
+                                            <span
+                                                class="{% if match.winner == away_team %}text-primary fw-bold{% endif %}">{{
+                                                away_team }}</span>
+                                        </td>
+                                        <td class="text-center fw-bold">{{ match.home_score }} - {{ match.away_score }}
+                                        </td>
+                                        <td class="text-center pe-3">
+                                            {% if match.result == 'D' or match.winner == 'Draw' %}
+                                            <span class="badge bg-secondary">D</span>
+                                            {% elif match.winner == home_team %}
+                                            <span class="badge bg-success">H</span>
+                                            {% else %}
+                                            <span class="badge bg-danger">A</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Errors or Warnings -->
+                {% if show_no_data_message %}
+                <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
+                    <i class="fas fa-exclamation-triangle me-3 fa-2x"></i>
+                    <div>
+                        <strong>Limited Data Available</strong>
+                        <p class="mb-0 small">Prediction is based on limited historical data for these specific teams.
+                            Results may be less accurate.</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .prediction-highlight {
+        background: rgba(0, 212, 170, 0.05);
+        backdrop-filter: blur(5px);
+        transition: all 0.3s ease;
+    }
+
+    .prediction-highlight:hover {
+        background: rgba(0, 212, 170, 0.15);
+        transform: scale(1.02);
+    }
+
+    .team-logo i {
+        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+    }
+
+    .form-indicators .badge {
+        font-size: 0.7rem;
+        font-weight: bold;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Custom table styles */
+    .table-dark {
+        --bs-table-bg: transparent;
+        --bs-table-striped-bg: rgba(255, 255, 255, 0.03);
+    }
+
+    .table-hover>tbody>tr:hover>* {
+        --bs-table-accent-bg: rgba(0, 212, 170, 0.05);
+        color: white;
+    }
+
+    td,
+    th {
+        border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+    }
+</style>
+{% endblock %}

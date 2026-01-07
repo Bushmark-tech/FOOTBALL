@@ -789,6 +789,12 @@ def calculate_probabilities_original(home, away, data, version="v1"):
         # Find actual team names in the dataset
         home_matched = find_team_in_data(home_str, data, home_col)
         away_matched = find_team_in_data(away_str, data, away_col)
+
+        # FIX: Ensure we work with strings for comparison checks (handles numeric IDs)
+        if home_matched is not None:
+            home_matched = str(home_matched)
+        if away_matched is not None:
+            away_matched = str(away_matched)
         
         # If teams not found, use form-based fallback
         if home_matched is None or away_matched is None:
@@ -2471,10 +2477,16 @@ def advanced_predict_match(home_team, away_team, model1, model2):
                     logger.warning(f"preprocess_for_models returned None, falling back to compute_mean_for_teams")
                     input_data = compute_mean_for_teams(home_team, away_team, data, model, get_column_names, version="v1")
         else:
-            # Use original logic: compute_mean_for_teams for Model 1
-            logger.info(f"Using compute_mean_for_teams for {model_type}")
+            # Use preprocess_for_models for Model 1 as well (better feature engineering)
+            logger.info(f"Using preprocess_for_models for {model_type}")
             t_features = time.time()
-            input_data = compute_mean_for_teams(home_team, away_team, data, model, get_column_names, version="v1")
+            input_data = preprocess_for_models(home_team, away_team, model, data=data)
+            
+            # Fallback to compute_mean_for_teams if that fails
+            if input_data is None:
+                logger.warning(f"preprocess_for_models returned None for {model_type}, falling back to compute_mean_for_teams")
+                input_data = compute_mean_for_teams(home_team, away_team, data, model, get_column_names, version="v1")
+            
             debug_timings['compute_features'] = time.time() - t_features
         
         # Get historical probabilities - use Model2-specific logic for Model2

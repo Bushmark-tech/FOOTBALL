@@ -1,7 +1,7 @@
 <!-- FIX APPLIED -->
 {% extends 'admin/dashboard_base.html' %}
 
-{% block title %}User Infrastructure - Football Pro Admin{% endblock %}
+{% block title %}User Infrastructure - LEON GAMES PRO Admin{% endblock %}
 {% block page_title %}Network Infrastructure: Users{% endblock %}
 
 {% block content %}
@@ -19,14 +19,14 @@
                 </div>
                 <div class="col-md-3">
                     <select name="filter" class="form-select border-0 bg-light fw-bold">
-                        <option value="all" {% if filter_type == 'all' %}selected{% endif %}>Show All Nodes</option>
-                        <option value="active" {% if filter_type == 'active' %}selected{% endif %}>Active (7d Pulse)
+                        <option value="all" {% if filter_type=='all' %}selected{% endif %}>Show All Nodes</option>
+                        <option value="active" {% if filter_type=='active' %}selected{% endif %}>Active (7d Pulse)
                         </option>
-                        <option value="inactive" {% if filter_type == 'inactive' %}selected{% endif %}>Offline (30d+)
+                        <option value="inactive" {% if filter_type=='inactive' %}selected{% endif %}>Offline (30d+)
                         </option>
-                        <option value="subscribed" {% if filter_type == 'subscribed' %}selected{% endif %}>Premium Linked
+                        <option value="subscribed" {% if filter_type=='subscribed' %}selected{% endif %}>Premium Linked
                         </option>
-                        <option value="staff" {% if filter_type == 'staff' %}selected{% endif %}>Core Staff Only</option>
+                        <option value="staff" {% if filter_type=='staff' %}selected{% endif %}>Core Staff Only</option>
                     </select>
                 </div>
                 <div class="col-md-2">
@@ -99,7 +99,8 @@
                             <span class="badge bg-danger-soft text-danger"><i class="fas fa-circle-xmark me-1"></i>
                                 Deactivated</span>
                             {% endif %}
-                            {% if u.is_staff %}<span class="badge bg-warning-soft text-warning ms-1">Root</span>{% endif %}
+                            {% if u.is_staff %}<span class="badge bg-warning-soft text-warning ms-1">Root</span>{% endif
+                            %}
                         </td>
                         <td class="pe-4 text-end">
                             <div class="btn-group">

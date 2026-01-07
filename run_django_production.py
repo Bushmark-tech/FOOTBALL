@@ -37,7 +37,7 @@ def main():
     workers = int(os.getenv('GUNICORN_WORKERS', cpu_count * 2 + 1))
     
     print("=" * 70)
-    print("Football Predictor Django - Production Mode")
+    print("LEON GAMES PRO Django - Production Mode")
     print("=" * 70)
     print(f"Bind: {bind}")
     print(f"Workers: {workers} (CPU cores: {cpu_count})")

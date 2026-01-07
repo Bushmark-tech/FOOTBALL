@@ -25,7 +25,7 @@ from predictor.analytics import (
 )
 
 app = FastAPI(
-    title="Football Predictor API",
+    title="LEON GAMES PRO API",
     description="Simple API for football match predictions",
     version="1.0.0"
 )
@@ -133,7 +133,7 @@ class PredictionResponse(BaseModel):
 async def root():
     """API root endpoint."""
     return {
-        "message": "Football Predictor API",
+        "message": "LEON GAMES PRO API",
         "version": "1.0.0",
         "endpoints": {
             "/predict": "POST - Get match prediction",

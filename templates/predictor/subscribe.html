@@ -1,598 +1,768 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'predictor/base.html' %}
+{% load static %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subscribe - Football Predictor Pro</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+{% block title %}Subscribe - LEON GAMES PRO{% endblock %}
+
+{% block extra_css %}
+<style>
+    .subscribe-container {
+        background: #000000;
+        min-height: 100vh;
+        padding: 2rem 1rem;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .page-header h1 {
+        color: #00d9a3;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .status-badge {
+        background: rgba(239, 68, 68, 0.1);
+        border: 2px solid #ef4444;
+        border-radius: 10px;
+        padding: 1rem;
+        color: #ef4444;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 2rem;
+    }
+
+    .status-badge.active {
+        background: rgba(0, 217, 163, 0.1);
+        border-color: #00d9a3;
+        color: #00d9a3;
+    }
+
+    .plans-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        max-width: 1400px;
+        margin: 0 auto 3rem auto;
+    }
+
+    .plan-card {
+        background: #1a1f2e;
+        border: 2px solid #2a3142;
+        border-radius: 15px;
+        padding: 2rem;
+        transition: all 0.3s ease;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .plan-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 217, 163, 0.2);
+    }
+
+    .plan-card.popular {
+        border-color: #00d9a3;
+        box-shadow: 0 0 30px rgba(0, 217, 163, 0.3);
+    }
+
+    .plan-card.premium {
+        border-color: #fbbf24;
+        box-shadow: 0 0 30px rgba(251, 191, 36, 0.3);
+    }
+
+    .plan-badge {
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #00d9a3;
+        color: #000;
+        padding: 0.5rem 1.5rem;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+
+    .plan-badge.premium {
+        background: #fbbf24;
+    }
+
+    .plan-icon {
+        font-size: 3rem;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    .plan-name {
+        color: #ffffff;
+        font-size: 1.5rem;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    .plan-price {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .plan-price .amount {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #00d9a3;
+    }
+
+    .plan-price .period {
+        color: #9ca3af;
+        font-size: 0.9rem;
+        display: block;
+        margin-top: 0.5rem;
+    }
+
+    .plan-features {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 2rem 0;
+        flex-grow: 1;
+    }
+
+    .plan-features li {
+        padding: 0.75rem 0;
+        color: #e5e7eb;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .plan-features li i {
+        color: #00d9a3;
+        font-size: 1.2rem;
+    }
+
+    .plan-button {
+        width: 100%;
+        padding: 1rem;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: auto;
+    }
+
+    .plan-button.primary {
+        background: linear-gradient(135deg, #00d9a3 0%, #00b388 100%);
+        color: #ffffff;
+        box-shadow: 0 4px 15px rgba(0, 217, 163, 0.3);
+    }
+
+    .plan-button.primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 217, 163, 0.4);
+    }
+
+    .plan-button.premium {
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        color: #000000;
+        box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
+    }
+
+    .plan-button.premium:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(251, 191, 36, 0.4);
+    }
+
+    .plan-button.secondary {
+        background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+        color: #ffffff;
+    }
+
+    .payment-section {
+        max-width: 600px;
+        margin: 3rem auto;
+        background: #1a1f2e;
+        border: 2px solid #2a3142;
+        border-radius: 15px;
+        padding: 2rem;
+        display: none;
+    }
+
+    .payment-section.active {
+        display: block;
+    }
+
+    .payment-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .payment-header h2 {
+        color: #00d9a3;
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .selected-plan-info {
+        background: rgba(0, 217, 163, 0.1);
+        border: 2px solid #00d9a3;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .selected-plan-info .plan-name-display {
+        color: #00d9a3;
+        font-size: 1.2rem;
+        font-weight: 700;
+    }
+
+    .selected-plan-info .plan-price-display {
+        color: #ffffff;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-top: 0.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-input {
+        width: 100%;
+        background: #0f1419;
+        border: 2px solid #2a3142;
+        border-radius: 10px;
+        padding: 1rem;
+        color: #e5e7eb;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #00d9a3;
+        box-shadow: 0 0 0 0.2rem rgba(0, 217, 163, 0.25);
+    }
+
+    .submit-button {
+        width: 100%;
+        background: linear-gradient(135deg, #00d9a3 0%, #00b388 100%);
+        border: none;
+        border-radius: 10px;
+        padding: 1rem;
+        color: #ffffff;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 217, 163, 0.3);
+    }
+
+    .submit-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 217, 163, 0.4);
+    }
+
+    .submit-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .cancel-button {
+        width: 100%;
+        background: transparent;
+        border: 2px solid #6b7280;
+        border-radius: 10px;
+        padding: 1rem;
+        color: #9ca3af;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+    }
+
+    .cancel-button:hover {
+        border-color: #9ca3af;
+        color: #ffffff;
+    }
+
+    /* Payment Processing Modal */
+    .payment-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .payment-modal.active {
+        display: flex;
+    }
+
+    .payment-modal-content {
+        background: #1a1f2e;
+        border: 2px solid #00d9a3;
+        border-radius: 20px;
+        padding: 3rem 2rem;
+        max-width: 500px;
+        width: 90%;
+        text-align: center;
+        animation: modalSlideIn 0.3s ease;
+    }
+
+    @keyframes modalSlideIn {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
         }
 
-        body {
-            background: #000000;
-            color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            min-height: 100vh;
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .payment-spinner {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 2rem auto;
+        border: 4px solid #2a3142;
+        border-top: 4px solid #00d9a3;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
         }
 
-        .navbar {
-            background: #0a0e1a;
-            padding: 1rem 0;
-            border-bottom: 1px solid #1a1f2e;
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .payment-modal h2 {
+        color: #00d9a3;
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+    }
+
+    .payment-modal p {
+        color: #9ca3af;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .payment-steps {
+        background: rgba(0, 217, 163, 0.1);
+        border: 1px solid #00d9a3;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        text-align: left;
+    }
+
+    .payment-steps h3 {
+        color: #00d9a3;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .payment-steps ol {
+        color: #e5e7eb;
+        padding-left: 1.5rem;
+        margin: 0;
+    }
+
+    .payment-steps li {
+        margin-bottom: 0.75rem;
+        line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+        .plans-grid {
+            grid-template-columns: 1fr;
         }
 
-        .navbar-brand {
-            color: #00d9a3;
-            font-weight: 700;
-            font-size: 1.5rem;
-            text-decoration: none;
+        .page-header h1 {
+            font-size: 2rem;
         }
 
-        .navbar-brand i {
-            margin-right: 0.5rem;
+        .payment-modal-content {
+            padding: 2rem 1.5rem;
         }
+    }
+</style>
+{% endblock %}
 
-        .nav-link {
-            color: #9ca3af;
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            transition: color 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .nav-link:hover {
-            color: #00d9a3;
-        }
-
-        .nav-link.active {
-            color: #00d9a3;
-        }
-
-        .container-main {
-            max-width: 100%;
-            margin: 2rem auto;
-            padding: 0 2rem;
-            width: 100%;
-        }
-
-        @media (min-width: 768px) {
-            .container-main {
-                max-width: 700px;
-            }
-        }
-
-        @media (min-width: 992px) {
-            .container-main {
-                max-width: 850px;
-            }
-        }
-
-        @media (min-width: 1200px) {
-            .container-main {
-                max-width: 1000px;
-            }
-        }
-
-        @media (min-width: 1400px) {
-            .container-main {
-                max-width: 1200px;
-            }
-        }
-
-        .page-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .crown-icon {
-            font-size: 3rem;
-            color: #00d9a3;
-        }
-
-        .page-title {
-            font-size: 3rem;
-            font-weight: 700;
-            color: #ffffff;
-            margin: 0;
-        }
-
-        .free-matches-badge {
-            background: #1a1f2e;
-            border: 1px solid #2a3142;
-            border-radius: 10px;
-            padding: 1rem 1.5rem;
-            margin-bottom: 2rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .free-matches-badge i {
-            color: #00d9a3;
-            font-size: 1.5rem;
-        }
-
-        .free-matches-text {
-            font-size: 1rem;
-            color: #e5e7eb;
-        }
-
-        .pricing-section {
-            background: #1a1f2e;
-            border: 1px solid #2a3142;
-            border-radius: 15px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            width: 100%;
-        }
-
-        @media (min-width: 768px) {
-            .pricing-section {
-                padding: 2.5rem;
-            }
-        }
-
-        @media (min-width: 992px) {
-            .pricing-section {
-                padding: 3rem;
-            }
-        }
-
-        .price-display {
-            text-align: center;
-            margin-bottom: 2rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 1rem;
-            width: 100%;
-        }
-
-        @media (min-width: 768px) {
-            .price-display {
-                flex-direction: row;
-                justify-content: center;
-                align-items: center;
-                gap: 2rem;
-            }
-
-            .divider-text {
-                margin: 0;
-            }
-        }
-
-        .price-amount {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #00d9a3;
-            white-space: nowrap;
-        }
-
-        @media (min-width: 768px) {
-            .price-amount {
-                font-size: 3rem;
-            }
-        }
-
-        @media (min-width: 992px) {
-            .price-amount {
-                font-size: 3.5rem;
-            }
-        }
-
-
-        .price-currency {
-            font-size: 1rem;
-            color: #9ca3af;
-            display: block;
-            margin-top: 0.5rem;
-        }
-
-        .divider-text {
-            text-align: center;
-            color: #6b7280;
-            margin: 1.5rem 0;
-            font-weight: 600;
-        }
-
-        .per-month {
-            text-align: center;
-            color: #9ca3af;
-            font-size: 1.1rem;
-            margin-top: 1rem;
-        }
-
-        .features-list {
-            list-style: none;
-            padding: 0;
-            margin: 2rem 0;
-            width: 100%;
-        }
-
-        @media (min-width: 768px) {
-            .features-list {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 1rem;
-            }
-        }
-
-        @media (min-width: 992px) {
-            .features-list {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 1.5rem;
-            }
-        }
-
-        .features-list li {
-            padding: 0.75rem 0;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            color: #e5e7eb;
-            font-size: 1.05rem;
-        }
-
-        .features-list li i {
-            color: #00d9a3;
-            font-size: 1.2rem;
-        }
-
-        .form-section {
-            margin-top: 2rem;
-            width: 100%;
-        }
-
-        .form-row {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-            width: 100%;
-        }
-
-        @media (min-width: 768px) {
-            .form-row {
-                flex-direction: row;
-                gap: 2rem;
-            }
-
-            .form-row .form-section {
-                flex: 1;
-            }
-        }
-
-        .form-label {
-            color: #ffffff;
-            font-weight: 600;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 1rem;
-            display: block;
-        }
-
-        .currency-select {
-            width: 100%;
-            background: #0f1419;
-            border: 2px solid #2a3142;
-            border-radius: 10px;
-            padding: 1rem;
-            color: #e5e7eb;
-            font-size: 1rem;
-            margin-bottom: 2rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .currency-select:focus {
-            outline: none;
-            border-color: #00d9a3;
-            box-shadow: 0 0 0 0.2rem rgba(0, 217, 163, 0.25);
-        }
-
-        .phone-input {
-            width: 100%;
-            background: #0f1419;
-            border: 2px solid #2a3142;
-            border-radius: 10px;
-            padding: 1rem;
-            color: #e5e7eb;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .phone-input:focus {
-            outline: none;
-            border-color: #00d9a3;
-            box-shadow: 0 0 0 0.2rem rgba(0, 217, 163, 0.25);
-        }
-
-        .phone-input::placeholder {
-            color: #6b7280;
-        }
-
-        .helper-text {
-            color: #6b7280;
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
-        }
-
-        .subscribe-btn {
-            width: 100%;
-            background: linear-gradient(135deg, #00d9a3 0%, #00b388 100%);
-            border: none;
-            border-radius: 10px;
-            padding: 1rem;
-            color: #ffffff;
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-top: 2rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 217, 163, 0.3);
-        }
-
-        .subscribe-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 217, 163, 0.4);
-            background: linear-gradient(135deg, #00e6b0 0%, #00c695 100%);
-        }
-
-        .footer-note {
-            text-align: center;
-            color: #6b7280;
-            font-size: 0.9rem;
-            margin-top: 2rem;
-            padding: 1rem;
-        }
-
-        @media (max-width: 768px) {
-            .page-title {
-                font-size: 2rem;
-            }
-
-            .crown-icon {
-                font-size: 2rem;
-            }
-
-            .container-main {
-                padding: 0 1.5rem;
-            }
-
-            .pricing-section {
-                padding: 2rem 1.5rem;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .container-main {
-                padding: 0 1rem;
-                margin: 2rem auto;
-            }
-
-            .pricing-section {
-                padding: 1.5rem 1rem;
-            }
-
-            .page-header {
-                margin-bottom: 1.5rem;
-            }
-        }
-    </style>
-</head>
-
-<body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="container-fluid px-4">
-            <a href="{% url 'predictor:home' %}" class="navbar-brand">
-                <i class="fas fa-chart-line"></i> FOOTBALL PREDICTOR PRO
-            </a>
-            <div class="d-flex gap-3">
-                <a href="{% url 'predictor:home' %}" class="nav-link"><i class="fas fa-home"></i> DASHBOARD</a>
-                <a href="{% url 'predictor:predict' %}" class="nav-link"><i class="fas fa-list"></i> PREDICTIONS</a>
-                <a href="{% url 'predictor:predict' %}?multi=true" class="nav-link"><i class="fas fa-layer-group"></i>
-                    MULTI-MATCH</a>
-                <a href="{% url 'predictor:history' %}" class="nav-link"><i class="fas fa-history"></i> HISTORY</a>
-                <a href="{% url 'predictor:subscribe' %}" class="nav-link active"><i class="fas fa-crown"></i>
-                    SUBSCRIBE</a>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <div class="container-main">
+{% block content %}
+<div class="subscribe-container">
+    <div class="container">
         <!-- Page Header -->
         <div class="page-header">
-            <i class="fas fa-crown crown-icon"></i>
-            <h1 class="page-title">Subscribe</h1>
-        </div>
-
-        <!-- Free Matches Badge -->
-        <div class="free-matches-badge">
-            <i class="fas fa-gift"></i>
-            <span class="free-matches-text">
+            <h1><i class="fas fa-crown"></i> Choose Your Plan</h1>
+            <div class="status-badge {% if status.has_access and status.reason == 'subscription' %}active{% endif %}">
                 {% if status.has_access and status.reason == 'free_matches' %}
-                You have {{ status.remaining }} free matches remaining
+                <i class="fas fa-gift"></i> You have {{ status.remaining }} free matches remaining
                 {% elif status.has_access and status.reason == 'subscription' %}
-                You have an active subscription!
+                <i class="fas fa-check-circle"></i> You have an active subscription!
                 {% else %}
-                You have used all your free matches
+                <i class="fas fa-exclamation-triangle"></i> You have used all your free matches
                 {% endif %}
-            </span>
+            </div>
         </div>
 
-        <!-- Pricing Section -->
-        <div class="pricing-section">
-            <div class="price-display">
-                <div class="price-amount">{{ price_usd|floatformat:"0" }} USD</div>
-                <div class="divider-text">OR</div>
-                <div class="price-amount">KSH {{ price_ksh|floatformat:"0" }}</div>
+        <!-- Subscription Plans Grid -->
+        <div class="plans-grid">
+            <!-- Trial Plan -->
+            <div class="plan-card">
+                <div class="plan-icon">🆓</div>
+                <h3 class="plan-name">Trial Plan</h3>
+                <div class="plan-price">
+                    <div class="amount">Free</div>
+                </div>
+                <ul class="plan-features">
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>1 match only</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>Basic predictions</span>
+                    </li>
+                </ul>
+                <button class="plan-button secondary" disabled>
+                    Current Plan
+                </button>
             </div>
 
-            <div class="per-month">Per Month</div>
-
-            <!-- Features List -->
-            <ul class="features-list">
-                <li>
-                    <i class="fas fa-check-circle"></i>
-                    <span>Unlimited predictions</span>
-                </li>
-                <li>
-                    <i class="fas fa-check-circle"></i>
-                    <span>Access to all leagues</span>
-                </li>
-                <li>
-                    <i class="fas fa-check-circle"></i>
-                    <span>Advanced analytics</span>
-                </li>
-                <li>
-                    <i class="fas fa-check-circle"></i>
-                    <span>Priority support</span>
-                </li>
-            </ul>
-
-            {% if not status.has_access or status.reason != 'subscription' %}
-            <form method="post" id="subscribeForm" action="{% url 'predictor:mpesa_payment' %}">
-                {% csrf_token %}
-                <!-- Currency Selection -->
-                <div class="form-section">
-                    <label class="form-label">SELECT CURRENCY</label>
-                    <select class="currency-select" id="currencySelect" name="currency" required>
-                        <option value="USD">USD ({{ price_usd|floatformat:"0" }})</option>
-                        <option value="KSH" selected>KSH ({{ price_ksh|floatformat:"0" }})</option>
-                    </select>
+            <!-- Basic Plan -->
+            <div class="plan-card popular">
+                <div class="plan-badge">POPULAR</div>
+                <div class="plan-icon">🟢</div>
+                <h3 class="plan-name">Basic Plan</h3>
+                <div class="plan-price">
+                    <div class="amount">KSh 200</div>
+                    <span class="period">per month</span>
                 </div>
+                <ul class="plan-features">
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>10 matches per day</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>300 matches per month</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>Advanced analytics</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>All leagues access</span>
+                    </li>
+                </ul>
+                <button class="plan-button primary" onclick="selectPlan('Basic Plan', 200, 'basic')">
+                    <i class="fas fa-crown"></i> Select Plan
+                </button>
+            </div>
 
-                <!-- M-PESA Phone Number -->
-                <div class="form-section">
+            <!-- Starter Plan -->
+            <div class="plan-card">
+                <div class="plan-icon">⭐</div>
+                <h3 class="plan-name">Starter Plan</h3>
+                <div class="plan-price">
+                    <div class="amount">KSh 500</div>
+                    <span class="period">per month</span>
+                </div>
+                <ul class="plan-features">
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>50 matches per day</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>1,500 matches per month</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>Premium analytics</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>Priority support</span>
+                    </li>
+                </ul>
+                <button class="plan-button primary" onclick="selectPlan('Starter Plan', 500, 'starter')">
+                    <i class="fas fa-star"></i> Select Plan
+                </button>
+            </div>
+
+            <!-- Unlimited Plan -->
+            <div class="plan-card premium">
+                <div class="plan-badge premium">BEST VALUE</div>
+                <div class="plan-icon">♾️</div>
+                <h3 class="plan-name">Unlimited Plan</h3>
+                <div class="plan-price">
+                    <div class="amount" style="color: #fbbf24;">KSh 1,000</div>
+                    <span class="period">per month</span>
+                </div>
+                <ul class="plan-features">
+                    <li>
+                        <i class="fas fa-check-circle" style="color: #fbbf24;"></i>
+                        <span>100 matches per day</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle" style="color: #fbbf24;"></i>
+                        <span>1,500 matches per month</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle" style="color: #fbbf24;"></i>
+                        <span>VIP analytics</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle" style="color: #fbbf24;"></i>
+                        <span>24/7 priority support</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle" style="color: #fbbf24;"></i>
+                        <span>Exclusive features</span>
+                    </li>
+                </ul>
+                <button class="plan-button premium" onclick="selectPlan('Unlimited Plan', 1000, 'unlimited')">
+                    <i class="fas fa-infinity"></i> Select Plan
+                </button>
+            </div>
+        </div>
+
+        <!-- Payment Section (Hidden by default) -->
+        <div class="payment-section" id="paymentSection">
+            <div class="payment-header">
+                <h2><i class="fas fa-credit-card"></i> Complete Payment</h2>
+            </div>
+
+            <div class="selected-plan-info" id="selectedPlanInfo">
+                <div class="plan-name-display" id="selectedPlanName">Basic Plan</div>
+                <div class="plan-price-display" id="selectedPlanPrice">KSh 200/month</div>
+            </div>
+
+            <form method="post" id="paymentForm" action="{% url 'predictor:mpesa_payment' %}">
+                {% csrf_token %}
+                <input type="hidden" name="plan_type" id="planType" value="basic">
+                <input type="hidden" name="amount" id="planAmount" value="200">
+
+                <div class="form-group">
                     <label class="form-label">M-PESA PHONE NUMBER</label>
-                    <input type="tel" class="phone-input" id="phoneNumber" name="mpesa_number"
+                    <input type="tel" class="form-input" id="phoneNumber" name="mpesa_number"
                         placeholder="254712345678 or 0712345678" value="{{ profile.mpesa_number|default_if_none:'' }}"
                         required>
-                    <div class="helper-text">Enter your M-Pesa registered phone number</div>
+                    <small style="color: #9ca3af; display: block; margin-top: 0.5rem;">
+                        Enter your M-Pesa registered phone number
+                    </small>
                 </div>
 
-                <!-- Subscribe Button -->
-                <button type="submit" class="subscribe-btn" id="subscribeBtn">
-                    <i class="fas fa-crown"></i> Subscribe Now
+                <button type="submit" class="submit-button" id="submitButton">
+                    <i class="fas fa-lock"></i> Pay Now - <span id="payAmount">KSh 200</span>
+                </button>
+
+                <button type="button" class="cancel-button" onclick="cancelPayment()">
+                    Cancel
                 </button>
             </form>
-            {% endif %}
         </div>
 
-        <!-- Footer Note -->
-        <div class="footer-note">
-            Subscription will auto-renew monthly. Cancel anytime from your account settings.
+        <!-- Payment Processing Modal -->
+        <div class="payment-modal" id="paymentModal">
+            <div class="payment-modal-content">
+                <div class="payment-spinner"></div>
+                <h2><i class="fas fa-credit-card"></i> Processing Payment</h2>
+                <p>Please wait while we process your payment request...</p>
+                <p style="color: #00d9a3; font-weight: 600; margin-top: 1rem;">
+                    <span id="modalPlanName">Basic Plan</span> - <span id="modalAmount">KSh 200</span>
+                </p>
+
+                <div class="payment-steps">
+                    <h3><i class="fas fa-mobile-alt"></i> What to Expect</h3>
+                    <ol>
+                        <li>You'll receive an M-PESA prompt on your phone</li>
+                        <li>Enter your M-PESA PIN to authorize payment</li>
+                        <li>You'll receive a confirmation SMS</li>
+                        <li>Your subscription will be activated immediately</li>
+                    </ol>
+                </div>
+
+                <p style="margin-top: 2rem; font-size: 0.9rem; color: #6b7280;">
+                    <i class="fas fa-info-circle"></i> This may take a few seconds...
+                </p>
+            </div>
         </div>
     </div>
+</div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Phone number validation
-        const phoneInput = document.getElementById('phoneNumber');
+<script>
+    let selectedPlanData = null;
 
-        if (phoneInput) {
-            phoneInput.addEventListener('input', function (e) {
-                // Remove non-numeric characters
-                let value = e.target.value.replace(/\D/g, '');
-                e.target.value = value;
-            });
-        }
+    function selectPlan(planName, price, planType) {
+        // Store selected plan data
+        selectedPlanData = { planName, price, planType };
 
-        // Subscribe form handler
-        const subscribeForm = document.getElementById('subscribeForm');
-        if (subscribeForm) {
-            subscribeForm.addEventListener('submit', function (e) {
-                e.preventDefault();
+        // Update payment section
+        document.getElementById('selectedPlanName').textContent = planName;
+        document.getElementById('selectedPlanPrice').textContent = `KSh ${price}/month`;
+        document.getElementById('planType').value = planType;
+        document.getElementById('planAmount').value = price;
+        document.getElementById('payAmount').textContent = `KSh ${price}`;
 
-                const phoneNumber = phoneInput.value;
-                const currency = document.getElementById('currencySelect').value;
-                const subscribeBtn = document.getElementById('subscribeBtn');
+        // Show payment section
+        const paymentSection = document.getElementById('paymentSection');
+        paymentSection.classList.add('active');
 
-                if (!phoneNumber) {
-                    alert('Please enter your M-Pesa phone number');
-                    return;
+        // Scroll to payment section
+        paymentSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function cancelPayment() {
+        const paymentSection = document.getElementById('paymentSection');
+        paymentSection.classList.remove('active');
+
+        // Scroll back to plans
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Phone number validation
+    const phoneInput = document.getElementById('phoneNumber');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function (e) {
+            let value = e.target.value.replace(/\D/g, '');
+            e.target.value = value;
+        });
+    }
+
+    // Payment form submission
+    const paymentForm = document.getElementById('paymentForm');
+    if (paymentForm) {
+        paymentForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const phoneNumber = phoneInput.value;
+            const submitButton = document.getElementById('submitButton');
+
+            if (!phoneNumber) {
+                alert('Please enter your M-Pesa phone number');
+                return;
+            }
+
+            if (phoneNumber.length < 9) {
+                alert('Please enter a valid phone number');
+                return;
+            }
+
+            // Format phone number
+            let formattedPhone = phoneNumber.replace(/\D/g, '');
+            if (formattedPhone.startsWith('0')) {
+                formattedPhone = '254' + formattedPhone.substring(1);
+            } else if (!formattedPhone.startsWith('254')) {
+                formattedPhone = '254' + formattedPhone;
+            }
+
+            if (formattedPhone.length !== 12) {
+                alert('Please enter a valid M-Pesa phone number (e.g., 254712345678 or 0712345678)');
+                return;
+            }
+
+            // Disable button and show loading
+            const originalText = submitButton.innerHTML;
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+            // Show payment processing modal
+            const paymentModal = document.getElementById('paymentModal');
+            document.getElementById('modalPlanName').textContent = selectedPlanData.planName;
+            document.getElementById('modalAmount').textContent = `KSh ${selectedPlanData.price}`;
+            paymentModal.classList.add('active');
+
+            // Create payload
+            const payload = {
+                mpesa_number: formattedPhone,
+                amount: selectedPlanData.price,
+                plan_type: selectedPlanData.planType
+            };
+
+            // Send payment request
+            fetch(this.action, {
+                method: 'POST',
+                body: JSON.stringify(payload),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': new FormData(this).get('csrfmiddlewaretoken')
                 }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Hide modal
+                    paymentModal.classList.remove('active');
 
-                if (phoneNumber.length < 9) {
-                    alert('Please enter a valid phone number');
-                    return;
-                }
+                    if (data.success) {
+                        // Show success message with different text for mock vs real
+                        let successMessage = '✅ Payment Successful!\n\n';
 
-                // Format phone number
-                let formattedPhone = phoneNumber.replace(/\D/g, '');
-                if (formattedPhone.startsWith('0')) {
-                    formattedPhone = '254' + formattedPhone.substring(1);
-                } else if (!formattedPhone.startsWith('254')) {
-                    formattedPhone = '254' + formattedPhone;
-                }
+                        if (data.is_mock) {
+                            successMessage += '🎉 TEST MODE: Your subscription has been activated!\n\n';
+                            successMessage += '✨ You now have unlimited access to all features.\n';
+                            successMessage += '💡 Note: This is a test payment - no actual charge was made.\n\n';
+                            successMessage += 'To use real M-PESA payments, configure your API credentials in the .env file.';
+                        } else {
+                            successMessage += data.message || 'Your subscription has been activated. You now have unlimited access to all features!';
+                        }
 
-                if (formattedPhone.length !== 12) {
-                    alert('Please enter a valid M-Pesa phone number (e.g., 254712345678 or 0712345678)');
-                    return;
-                }
+                        alert(successMessage);
 
-                // Disable button and show loading
-                const originalText = subscribeBtn.innerHTML;
-                subscribeBtn.disabled = true;
-                subscribeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-
-                // Create JSON payload
-                const payload = {
-                    mpesa_number: formattedPhone,
-                    currency: currency
-                };
-
-                fetch(this.action, {
-                    method: 'POST',
-                    body: JSON.stringify(payload),
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': new FormData(this).get('csrfmiddlewaretoken')
+                        // Redirect to home after 2 seconds
+                        setTimeout(() => {
+                            window.location.href = '/';
+                        }, 2000);
+                    } else {
+                        alert('❌ Payment Failed\n\n' + (data.error || 'Payment initiation failed. Please try again.'));
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalText;
                     }
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert(data.message || 'Payment request sent to your phone. Please complete the payment.');
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 2000);
-                        } else {
-                            alert(data.error || 'Payment initiation failed. Please try again.');
-                            subscribeBtn.disabled = false;
-                            subscribeBtn.innerHTML = originalText;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred. Please try again.');
-                        subscribeBtn.disabled = false;
-                        subscribeBtn.innerHTML = originalText;
-                    });
-            });
-        }
+                .catch(error => {
+                    // Hide modal
+                    paymentModal.classList.remove('active');
 
-        // Currency change handler
-        const currencySelect = document.getElementById('currencySelect');
-        if (currencySelect) {
-            currencySelect.addEventListener('change', function (e) {
-                console.log('Currency changed to:', e.target.value);
-            });
-        }
-    </script>
-</body>
-
-</html>
+                    console.error('Error:', error);
+                    alert('❌ Error\n\nAn error occurred while processing your payment. Please try again.');
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalText;
+                });
+        });
+    }
+</script>
+{% endblock %}

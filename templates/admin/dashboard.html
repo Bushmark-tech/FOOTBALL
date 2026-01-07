@@ -1,6 +1,6 @@
 {% extends 'admin/dashboard_base.html' %}
 
-{% block title %}Dashboard - Football Pro Admin{% endblock %}
+{% block title %}Dashboard - LEON GAMES PRO Admin{% endblock %}
 {% block page_title %}System Overview{% endblock %}
 
 {% block content %}
@@ -96,7 +96,8 @@
                                                     role="progressbar" style="width: {{ pred.confidence|default:0 }}%">
                                                 </div>
                                             </div>
-                                            <small class="fw-bold text-dark">{{ pred.confidence|floatformat:0 }}%</small>
+                                            <small class="fw-bold text-dark">{{ pred.confidence|floatformat:0
+                                                }}%</small>
                                         </div>
                                     </td>
                                     <td class="pe-4 text-end">
@@ -144,7 +145,8 @@
                             </div>
                             <div class="progress" style="height: 8px;">
                                 <div class="progress-bar bg-secondary" role="progressbar"
-                                    style="width: {% widthratio total_users|add:"-google_users_count" total_users 100 %}%"></div>
+                                    style="width: {% widthratio total_users|add:" -google_users_count" total_users 100
+                                    %}%"></div>
                             </div>
                         </div>
                     </div>
@@ -250,7 +252,8 @@
                     </div>
                     <div class="d-flex justify-content-between small mb-2">
                         <span class="text-muted">Auth Scope:</span>
-                        <span class="fw-bold">{% if user.is_superuser %}Full Infrastructure{% else %}Staff Limited{% endif %}</span>
+                        <span class="fw-bold">{% if user.is_superuser %}Full Infrastructure{% else %}Staff Limited{%
+                            endif %}</span>
                     </div>
                     <div class="d-flex justify-content-between small">
                         <span class="text-muted">Last System Login:</span>

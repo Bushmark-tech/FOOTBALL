@@ -220,6 +220,9 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+# Skip the intermediate "Sign in with Google" confirmation page
+SOCIALACCOUNT_LOGIN_ON_GET = True
+
 # Subscription Settings
 FREE_MATCHES_LIMIT = 3
 SUBSCRIPTION_PRICE_USD = 2.00
@@ -251,6 +254,7 @@ SESSION_COOKIE_AGE = 1209600  # 2 weeks
 SESSION_SAVE_EVERY_REQUEST = False
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'False').lower() == 'true'
+SESSION_COOKIE_NAME = 'sessionid_v2'  # Rotate cookie to fix "Session data corrupted" errors
 
 # FastAPI Service Configuration
 FASTAPI_URL = os.environ.get('FASTAPI_URL', 'http://127.0.0.1:8001')

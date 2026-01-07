@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Admin Dashboard - Football Predictor{% endblock %}</title>
+    <title>{% block title %}Admin Dashboard - LEON GAMES PRO{% endblock %}</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,7 +18,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Google Analytics Integration -->
-    {% if google_analytics_id %}<script async src="https://www.googletagmanager.com/gtag/js?id={{ google_analytics_id }}"></script>
+    {% if google_analytics_id %}
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ google_analytics_id }}"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
@@ -263,7 +264,7 @@
     <aside class="sidebar">
         <div class="navbar-brand">
             <i class="fas fa-bolt text-primary"></i>
-            <span>FOOTBALL PRO</span>
+            <span>LEON GAMES PRO</span>
         </div>
         <ul class="sidebar-nav">
             <li>
@@ -347,7 +348,8 @@
             <div class="user-menu">
                 <div class="d-flex flex-column text-end d-none d-md-flex">
                     <span class="fw-bold">{{ user.username }}</span>
-                    <small class="text-muted">{% if user.is_superuser %}Administrator{% else %}Staff Member{% endif %}</small>
+                    <small class="text-muted">{% if user.is_superuser %}Administrator{% else %}Staff Member{% endif
+                        %}</small>
                 </div>
                 <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
                     style="width: 40px; height: 40px; font-weight: 700;">

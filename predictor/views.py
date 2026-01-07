@@ -128,17 +128,15 @@ def load_prediction_models():
                 logger.warning('Model 2 could not be loaded, will use form-based fallback')
                 model2 = None
     
-    # Only create working models if both failed
+    
+    # If models fail to load, they will be None and fallback logic will be used
     if model1 is None and model2 is None:
-        logger.info('Both models failed to load, creating working models')
-        from .analytics import create_working_models
-        model1, model2 = create_working_models()
+        logger.warning('Both models failed to load, will use fallback prediction logic')
     elif model1 is None:
-        logger.info('Model 1 failed, creating working model 1')
-        from .analytics import create_working_models
-        model1, _ = create_working_models()
+        logger.warning('Model 1 failed to load, will use fallback for Model 1 predictions')
     elif model2 is None:
-        logger.info('Model 2 failed, will use form-based fallback for Model 2 teams')
+        logger.warning('Model 2 failed to load, will use form-based fallback for Model 2 teams')
+    
     
     return model1, model2
 
@@ -192,6 +190,22 @@ LEAGUES_BY_CATEGORY = {
         "Romania League": sorted(['CFR Cluj', 'Csikszereda M. Ciuc', 'Din. Bucuresti', 'FC Arges', 'FC Botosani', 'FC Hermannstadt', 'FC Rapid Bucuresti', 'FCSB', 'Farul Constanta', 'Metaloglobus Bucharest', 'Otelul', 'Petrolul', 'U. Cluj', 'UTA Arad', 'Unirea Slobozia', 'Univ. Craiova'])
     }
 }
+
+
+def get_league_for_team(team_name):
+    """Find league for a given team name from LEAGUES_BY_CATEGORY."""
+    if not team_name:
+        return ''
+    
+    # Check LEAGUES_BY_CATEGORY
+    for category, leagues in LEAGUES_BY_CATEGORY.items():
+        for league_name, teams in leagues.items():
+            if team_name in teams:
+                return league_name
+            # Case-insensitive check
+            if any(t.lower() == team_name.lower() for t in teams):
+                return league_name
+    return ''
 
 
 def process_prediction_probabilities(advanced_result):
@@ -544,6 +558,7 @@ def predict(request):
         home_team = request.POST.get('home_team')
         away_team = request.POST.get('away_team')
         category = request.POST.get('category')
+        league = request.POST.get('league')  # Get league from form
         
         # Validate: teams must be different
         if home_team and away_team:
@@ -751,6 +766,7 @@ def predict(request):
                             away_score=away_score,
                             confidence=confidence,
                             category=category or '',
+                            league=league or '',  # Add league field
                             outcome=outcome,
                             prob_home=probabilities.get('Home', 0.33),
                             prob_draw=probabilities.get('Draw', 0.33),
@@ -986,6 +1002,19 @@ def multi_match_predictions_api(request):
     elif request.method == 'POST':
         try:
             import json
+            from .auth_views import check_subscription_status
+            
+            # Check subscription status BEFORE allowing new prediction
+            status = check_subscription_status(request.user)
+            
+            if not status['has_access']:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'You have used all your free matches. Please subscribe to continue.',
+                    'redirect': '/subscribe/',
+                    'subscription_required': True
+                }, status=403)
+            
             data = json.loads(request.body)
             
             # Validate required fields
@@ -1011,6 +1040,24 @@ def multi_match_predictions_api(request):
                 model1_prediction=data.get('prediction', ''),
                 final_prediction=data.get('prediction', '')
             )
+            
+            # Check if user has now exceeded their limit after this prediction
+            # This will trigger on the NEXT prediction attempt
+            total_predictions = Prediction.objects.filter(user=request.user).count()
+            profile = request.user.profile if hasattr(request.user, 'profile') else None
+            
+            if profile and total_predictions >= profile.free_matches_limit:
+                # Update the profile
+                profile.free_matches_used = total_predictions
+                profile.save()
+                
+                return JsonResponse({
+                    'success': True,
+                    'prediction_id': prediction.id,
+                    'message': 'Prediction saved successfully',
+                    'limit_reached': True,
+                    'warning': f'You have used all your free matches ({profile.free_matches_limit}). Subscribe to continue making predictions.'
+                })
             
             return JsonResponse({
                 'success': True,
@@ -1303,6 +1350,12 @@ def api_predict(request):
                 category = request.POST.get('category')
                 league = request.POST.get('league')
             
+            # Auto-detect league if not provided
+            if home_team and not league:
+                 league = get_league_for_team(home_team)
+                 if not league and away_team:
+                     league = get_league_for_team(away_team)
+            
             # Check subscription status before processing
             if request.user.is_authenticated:
                 status = check_subscription_status(request.user)
@@ -1531,8 +1584,8 @@ def api_predict(request):
                         else:
                             session_key = None
                         
-                        # Prevent duplicate predictions - check if same match was predicted in last 5 minutes
-                        recent_time = timezone.now() - timedelta(minutes=5)
+                        # Prevent duplicate predictions - check if same match was predicted in last 10 seconds
+                        recent_time = timezone.now() - timedelta(seconds=10)
                         
                         # Check for duplicates based on user/session and teams
                         if request.user.is_authenticated:
@@ -1553,36 +1606,92 @@ def api_predict(request):
                             duplicate_check = False
                         
                         if not duplicate_check:
-                            # Create new prediction
+                            # Create new prediction (use get_or_create to prevent race conditions)
                             try:
-                                prediction = Prediction.objects.create(
-                                    home_team=clean_home,
-                                    away_team=clean_away,
-                                    home_score=home_score,
-                                    away_score=away_score,
-                                    confidence=confidence,
-                                    category=category or '',
-                                    league=league or '',
-                                    outcome=outcome,
-                                    prob_home=probabilities.get('Home', 0.33),
-                                    prob_draw=probabilities.get('Draw', 0.33),
-                                    prob_away=probabilities.get('Away', 0.33),
-                                    model_type=model_type,
-                                    final_prediction=outcome,
-                                    user=request.user if request.user.is_authenticated else None,
-                                    session_key=session_key
-                                )
-                                # Verify prediction was actually saved
-                                if prediction and prediction.id:
-                                    prediction_saved = True
-                                    logger.info(f"API Prediction saved to database: {prediction.id} - {clean_home} vs {clean_away} (User: {request.user.username if request.user.is_authenticated else 'Anonymous'}, Session: {session_key})")
-                                    
-                                    # Update billing statistics
-                                    logger.info(f"Updating billing statistics for multi-match prediction (User: {request.user.username if request.user.is_authenticated else 'Anonymous'}, Session: {session_key})")
-                                    update_billing_statistics(
+                                # Use get_or_create with a reasonable time window to prevent duplicates
+                                lookup_time = timezone.now() - timedelta(seconds=30)
+                                
+                                # Build lookup criteria
+                                if request.user.is_authenticated:
+                                    lookup_criteria = {
+                                        'user': request.user,
+                                        'home_team': clean_home,
+                                        'away_team': clean_away,
+                                        'prediction_date__gte': lookup_time
+                                    }
+                                elif session_key:
+                                    lookup_criteria = {
+                                        'session_key': session_key,
+                                        'home_team': clean_home,
+                                        'away_team': clean_away,
+                                        'prediction_date__gte': lookup_time
+                                    }
+                                else:
+                                    lookup_criteria = {}
+                                
+                                # Try to get existing prediction first
+                                if lookup_criteria:
+                                    existing_pred = Prediction.objects.filter(**lookup_criteria).first()
+                                    if existing_pred:
+                                        prediction = existing_pred
+                                        created = False
+                                        logger.info(f"Using existing prediction: {prediction.id} - {clean_home} vs {clean_away}")
+                                    else:
+                                        # Create new prediction
+                                        prediction = Prediction.objects.create(
+                                            home_team=clean_home,
+                                            away_team=clean_away,
+                                            home_score=home_score,
+                                            away_score=away_score,
+                                            confidence=confidence,
+                                            category=category or '',
+                                            league=league or '',
+                                            outcome=outcome,
+                                            prob_home=probabilities.get('Home', 0.33),
+                                            prob_draw=probabilities.get('Draw', 0.33),
+                                            prob_away=probabilities.get('Away', 0.33),
+                                            model_type=model_type,
+                                            final_prediction=outcome,
+                                            user=request.user if request.user.is_authenticated else None,
+                                            session_key=session_key
+                                        )
+                                        created = True
+                                else:
+                                    # No lookup criteria (shouldn't happen), create anyway
+                                    prediction = Prediction.objects.create(
+                                        home_team=clean_home,
+                                        away_team=clean_away,
+                                        home_score=home_score,
+                                        away_score=away_score,
+                                        confidence=confidence,
+                                        category=category or '',
+                                        league=league or '',
+                                        outcome=outcome,
+                                        prob_home=probabilities.get('Home', 0.33),
+                                        prob_draw=probabilities.get('Draw', 0.33),
+                                        prob_away=probabilities.get('Away', 0.33),
+                                        model_type=model_type,
+                                        final_prediction=outcome,
                                         user=request.user if request.user.is_authenticated else None,
                                         session_key=session_key
                                     )
+                                    created = True
+                                
+                                # Verify prediction was actually saved
+                                if prediction and prediction.id:
+                                    prediction_saved = True
+                                    if created:
+                                        logger.info(f"API Prediction saved to database: {prediction.id} - {clean_home} vs {clean_away} (User: {request.user.username if request.user.is_authenticated else 'Anonymous'}, Session: {session_key})")
+                                    else:
+                                        logger.info(f"API Prediction already exists: {prediction.id} - {clean_home} vs {clean_away}")
+                                    
+                                    # Update billing statistics only if newly created
+                                    if created:
+                                        logger.info(f"Updating billing statistics for multi-match prediction (User: {request.user.username if request.user.is_authenticated else 'Anonymous'}, Session: {session_key})")
+                                        update_billing_statistics(
+                                            user=request.user if request.user.is_authenticated else None,
+                                            session_key=session_key
+                                        )
                                 else:
                                     logger.error(f"CRITICAL: Prediction object created but has no ID! {clean_home} vs {clean_away}")
                                     prediction_saved = False
@@ -1714,17 +1823,14 @@ def api_team_stats(request):
                             logger.warning('Model 2 could not be loaded, will use form-based fallback')
                             model2 = None
                 
-                # Only create working models if both failed
+                # If models fail to load, they will be None and fallback logic will be used
                 if model1 is None and model2 is None:
-                    logger.info('Both models failed to load, creating working models')
-                    from .analytics import create_working_models
-                    model1, model2 = create_working_models()
+                    logger.warning('Both models failed to load, will use fallback prediction logic')
                 elif model1 is None:
-                    logger.info('Model 1 failed, creating working model 1')
-                    from .analytics import create_working_models
-                    model1, _ = create_working_models()
+                    logger.warning('Model 1 failed to load, will use fallback for Model 1 predictions')
                 elif model2 is None:
-                    logger.info('Model 2 failed, will use form-based fallback for Model 2 teams')
+                    logger.warning('Model 2 failed to load, will use form-based fallback for Model 2 teams')
+                
                 
                 # Use advanced prediction logic with exact model_utils implementation
                 from .analytics import advanced_predict_match
@@ -2336,6 +2442,7 @@ def result(request):
     home_team = clean_team_name(request.GET.get('home_team', ''))
     away_team = clean_team_name(request.GET.get('away_team', ''))
     category = request.GET.get('category', '')
+    league = request.GET.get('league', '')
     
     # If team names are missing from URL, try to get from most recent prediction
     if not home_team or not away_team:
@@ -2350,12 +2457,20 @@ def result(request):
                 home_team = clean_team_name(latest_prediction.home_team)
                 away_team = clean_team_name(latest_prediction.away_team)
                 category = latest_prediction.category or ''
+                league = latest_prediction.league or ''
                 logger.info(f"Loaded teams from {request.user.username}'s latest prediction: {home_team} vs {away_team}")
         except Prediction.DoesNotExist:
             logger.warning(f"No predictions found for user {request.user.username if request.user.is_authenticated else 'anonymous'}")
         except Exception as e:
             logger.error(f"Error loading latest prediction: {e}")
     
+    # Try to determine league if not provided
+    if not league and home_team:
+        try:
+            league = get_league_for_team(home_team)
+        except:
+            pass
+
     # Get prediction data from URL parameters or generate fallback
     home_score = request.GET.get('home_score', '')
     away_score = request.GET.get('away_score', '')
@@ -2424,16 +2539,20 @@ def result(request):
         except Exception:
             model_type = 'Model1'  # Default fallback
     final_prediction = request.GET.get('final_prediction', '')
+    if not final_prediction:
+        final_prediction = request.GET.get('model1_prediction', '')
     
     # Convert confidence to float, handling both percentage and decimal formats
     try:
-        if model1_confidence_str:
+        if model1_confidence_str and model1_confidence_str != 'None':
             model1_confidence = float(model1_confidence_str)
             # If it's less than 1, it's probably a decimal (0.0-1.0), convert to percentage
-            if model1_confidence < 1.0:
+            if model1_confidence <= 1.0:
                 model1_confidence = model1_confidence * 100
             # Ensure it's a reasonable value (0-100)
             model1_confidence = max(0, min(100, model1_confidence))
+            # Format to 1 decimal place
+            model1_confidence = f"{model1_confidence:.1f}%"
         else:
             model1_confidence = None
     except (ValueError, TypeError):
@@ -2575,9 +2694,22 @@ def result(request):
             # (These are the model probabilities, we'll calculate real historical later if needed)
             historical_probabilities = probabilities.copy()
             
-            logger.info(f"[RESULT VIEW] Using probabilities from URL/database (normalized): Home={probabilities['Home']*100:.1f}%, Draw={probabilities['Draw']*100:.1f}%, Away={probabilities['Away']*100:.1f}%")
+            temporary_probs = probabilities.copy()
+            logger.info(f"[RESULT VIEW] Using probabilities from URL/database (normalized): Home={temporary_probs['Home']*100:.1f}%, Draw={temporary_probs['Draw']*100:.1f}%, Away={temporary_probs['Away']*100:.1f}%")
             # Save original probabilities BEFORE any recalculation
-            saved_probabilities = probabilities.copy()
+            saved_probabilities = temporary_probs.copy()
+            
+            # If model1_confidence is still None, calculate it from these probabilities
+            if model1_confidence is None:
+                try:
+                    # Confidence is usually the highest probability
+                    max_prob = max(temporary_probs.values())
+                    model1_confidence = f"{max_prob * 100:.1f}%"
+                    logger.info(f"[RESULT VIEW] Calculated missing confidence from probabilities: {model1_confidence}")
+                except Exception as e:
+                    logger.warning(f"Could not calculate confidence from probabilities: {e}")
+            
+            probabilities = temporary_probs
         except (ValueError, TypeError) as e:
             logger.error(f"Error parsing probabilities from URL: {e}")
             probabilities = None
@@ -2777,6 +2909,15 @@ def result(request):
                             # Store historical probabilities separately for Past Performance section
                             historical_probabilities = probabilities.copy()
                             logger.warning(f"[RESULT VIEW] RECALCULATED probabilities (should not happen if database has predictions): Home={probabilities['Home']*100:.1f}%, Draw={probabilities['Draw']*100:.1f}%, Away={probabilities['Away']*100:.1f}%")
+                            
+                            # If model1_confidence is absent, calculate it from these recalculated probabilities
+                            if model1_confidence is None:
+                                try:
+                                    max_prob = max(probabilities.values())
+                                    model1_confidence = f"{max_prob * 100:.1f}%"
+                                    logger.info(f"[RESULT VIEW] Calculated confidence from recalculated probabilities: {model1_confidence}")
+                                except:
+                                    pass
                         else:
                             logger.warning("Historical probabilities returned None, using fallback")
                             probabilities = {'Home': 0.333, 'Draw': 0.334, 'Away': 0.333}
@@ -2880,20 +3021,54 @@ def result(request):
         has_valid_historical_prob = False
         logger.info("No historical probabilities available")
     
-    # Save prediction to database if not already saved (backup save in result view)
-    # Check if prediction already exists to avoid duplicates
+    # DISABLED: Prediction saving in result view to prevent duplicates
+    # api_predict already saves predictions, so this is redundant and causes duplicates
+    # If you need backup saving, ensure proper duplicate checking with database transactions
+    
+    # Original code commented out to prevent duplicate predictions:
+    """
     try:
         from django.core.cache import cache
         from django.utils import timezone
         from datetime import timedelta
         
+        # Ensure session exists for anonymous users FIRST (before duplicate check)
+        if not request.user.is_authenticated:
+            # Force session creation by setting a value
+            if not request.session.session_key:
+                request.session['_init'] = True
+                request.session.save()  # Explicitly save to ensure session_key is created
+            
+            session_key = request.session.session_key
+            logger.info(f"Result view - Session key for anonymous user: {session_key}")
+            if not session_key:
+                logger.error("CRITICAL: Failed to get session_key in result view!")
+        else:
+            session_key = None
+        
         # Only save if prediction doesn't exist in last 5 minutes (avoid duplicates)
-        # Use timezone-aware datetime
-        recent_prediction = Prediction.objects.filter(
-            home_team=home_team,
-            away_team=away_team,
-            prediction_date__gte=timezone.now() - timedelta(minutes=5)
-        ).first()
+        # Check by user/session AND teams to prevent duplicates
+        recent_time = timezone.now() - timedelta(minutes=5)
+        clean_home = clean_team_name(home_team)
+        clean_away = clean_team_name(away_team)
+        
+        # Build duplicate check query
+        if request.user.is_authenticated:
+            recent_prediction = Prediction.objects.filter(
+                user=request.user,
+                home_team=clean_home,
+                away_team=clean_away,
+                prediction_date__gte=recent_time
+            ).first()
+        elif session_key:
+            recent_prediction = Prediction.objects.filter(
+                session_key=session_key,
+                home_team=clean_home,
+                away_team=clean_away,
+                prediction_date__gte=recent_time
+            ).first()
+        else:
+            recent_prediction = None
         
         if not recent_prediction and home_team and away_team:
             # Use calculated probabilities or get from URL
@@ -2903,20 +3078,6 @@ def result(request):
             
             # Calculate confidence from probabilities
             confidence_val = max(prob_home_val, prob_draw_val, prob_away_val)
-            
-            # Ensure session exists for anonymous users
-            if not request.user.is_authenticated:
-                # Force session creation by setting a value
-                if not request.session.session_key:
-                    request.session['_init'] = True
-                    request.session.save()  # Explicitly save to ensure session_key is created
-                
-                session_key = request.session.session_key
-                logger.info(f"Result view - Session key for anonymous user: {session_key}")
-                if not session_key:
-                    logger.error("CRITICAL: Failed to get session_key in result view!")
-            else:
-                session_key = None
             
             prediction = Prediction.objects.create(
                 home_team=clean_team_name(home_team),
@@ -2949,9 +3110,16 @@ def result(request):
                 cache.delete('recent_predictions')
             except Exception as cache_error:
                 logger.warning(f"Cache clear failed (Redis may be unavailable): {cache_error}")
+        else:
+            # Duplicate detected - don't save again
+            if recent_prediction:
+                logger.info(f"Duplicate prediction prevented in result view: {clean_home} vs {clean_away} (existing ID: {recent_prediction.id})")
+            else:
+                logger.warning(f"Skipping prediction save in result view: missing team data")
     except Exception as save_error:
         logger.error(f"Error saving backup prediction in result view: {save_error}")
         # Don't fail the whole request if cache fails
+    """
     
     # Note: outcome comes from the MODEL prediction (passed in URL parameters)
     # Historical probabilities are displayed separately for reference only
@@ -3036,6 +3204,8 @@ def result(request):
                         today = datetime.now()
                         
                         # Convert Date column to datetime for filtering
+                        # Create a copy to avoid SettingWithCopyWarning
+                        h2h = h2h.copy()
                         h2h['Date_parsed'] = pd.to_datetime(h2h['Date'], errors='coerce')
                         
                         # Only include matches before today (already played)
@@ -3418,16 +3588,33 @@ def result(request):
     elif outcome == '12':
         prediction_outcome = f'{home_team.upper()} OR {away_team.upper()}'
     
+    elif outcome == '12':
+        prediction_outcome = f'{home_team.upper()} OR {away_team.upper()}'
+    
+    # Format probabilities for template display to avoid filter issues
+    if probabilities:
+        prob_home_pct = f"{probabilities['Home']*100:.1f}"
+        prob_draw_pct = f"{probabilities['Draw']*100:.1f}"
+        prob_away_pct = f"{probabilities['Away']*100:.1f}"
+    else:
+        prob_home_pct = "33.3"
+        prob_draw_pct = "33.4"
+        prob_away_pct = "33.3"
+    
     context = {
         'home_team': home_team,
         'away_team': away_team,
         'home_score': home_score,
         'away_score': away_score,
         'category': category,
+        'league': league,
         'outcome': outcome,
         'prediction_outcome': prediction_outcome,
         'prediction_number': prediction_number,
         'probabilities': probabilities,
+        'prob_home_pct': prob_home_pct,
+        'prob_draw_pct': prob_draw_pct,
+        'prob_away_pct': prob_away_pct,
         'historical_probabilities': historical_probabilities if 'historical_probabilities' in locals() else probabilities,
         'model1_prediction': model1_prediction if is_real_prediction else 'Fallback',
         'model1_probs': None,
@@ -3449,6 +3636,7 @@ def result(request):
         'has_sufficient_h2h': has_sufficient_h2h,
         'has_valid_form': has_valid_form,
         'has_valid_historical_prob': has_valid_historical_prob,
+        'has_valid_history': has_sufficient_h2h,  # Mapping for template compatibility
         'show_no_data_message': not (has_sufficient_h2h or has_valid_form or has_valid_historical_prob)
     }
     
