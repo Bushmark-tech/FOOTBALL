@@ -24,7 +24,7 @@ This is the most critical step. You must add the following **Environment Variabl
 
 | Key | Value | Notes |
 |-----|-------|-------|
-| `DATABASE_URL` | `postgresql://football_pro_user:dECkrRNA8SJGJdb6MR3r6A1KKE6l87n8@dpg-d5chogv5r7bs73b1m410-a/football_pro` | **Use the Internal URL** from your screenshot if in the same region. |
+| `DATABASE_URL` | `postgresql://...` | **Required for persistent data**. If omitted, app will run with a temporary SQLite DB (data lost on restart). |
 | `SECRET_KEY` | *(Generate a random string)* | You like `django-insecure-...` for dev, but use a strong random string here. |
 | `DEBUG` | `False` | Essential for production security. |
 | `PYTHON_VERSION` | `3.11.0` | Or `3.10.11` matching your local environment. |
