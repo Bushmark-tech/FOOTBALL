@@ -3547,9 +3547,27 @@ def result(request):
     # Calculate prediction statistics
     total_predictions_count = all_predictions.count()
     logger.info(f"Found {total_predictions_count} previous predictions for {home_team_clean} vs {away_team_clean}")
-    home_predictions = all_predictions.filter(outcome='Home').count()
-    draw_predictions = all_predictions.filter(outcome='Draw').count()
-    away_predictions = all_predictions.filter(outcome='Away').count()
+    # Calculate statistics manually in Python to ensure accuracy
+    home_predictions = 0
+    draw_predictions = 0
+    away_predictions = 0
+    
+    # Iterate through outcomes (more robust than DB filtering for stats)
+    for pred in all_predictions:
+        o = str(pred.outcome).strip() # specific handling for potential whitespace
+        if o == 'Home':
+            home_predictions += 1
+        elif o == 'Draw':
+            draw_predictions += 1
+        elif o == 'Away':
+            away_predictions += 1
+        elif o in ['1X', 'X2', '12']:
+            # Handle double chance if they exist (count towards primary option)
+            # This is a fallback as these shouldn't be the primary outcome stored
+            pass
+    
+    logger.info(f"Stats Calculated (Python) - Home: {home_predictions}, Draw: {draw_predictions}, Away: {away_predictions} (Total: {total_predictions_count})")
+
     
     # Calculate average scores
     if total_predictions_count > 0:
@@ -3570,6 +3588,9 @@ def result(request):
         'home_percentage': (home_predictions / total_predictions_count * 100) if total_predictions_count > 0 else 0,
         'draw_percentage': (draw_predictions / total_predictions_count * 100) if total_predictions_count > 0 else 0,
         'away_percentage': (away_predictions / total_predictions_count * 100) if total_predictions_count > 0 else 0,
+        'home_percentage_fmt': f"{(home_predictions / total_predictions_count * 100):.0f}" if total_predictions_count > 0 else "0",
+        'draw_percentage_fmt': f"{(draw_predictions / total_predictions_count * 100):.0f}" if total_predictions_count > 0 else "0",
+        'away_percentage_fmt': f"{(away_predictions / total_predictions_count * 100):.0f}" if total_predictions_count > 0 else "0",
         'avg_home_score': round(avg_home_score, 1),
         'avg_away_score': round(avg_away_score, 1),
         'avg_confidence': round(avg_confidence * 100, 1) if avg_confidence <= 1 else round(avg_confidence, 1)
