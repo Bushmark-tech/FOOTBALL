@@ -497,17 +497,54 @@
 
             if (category && league && leaguesData[category] && leaguesData[category][league]) {
                 const teams = leaguesData[category][league];
-                teams.forEach(team => {
-                    const homeOption = document.createElement('option');
-                    homeOption.value = team;
-                    homeOption.textContent = team;
-                    homeTeamSelect.appendChild(homeOption);
+                // Use DocumentFragment for performance
+                const fragment = document.createDocumentFragment();
 
-                    const awayOption = document.createElement('option');
-                    awayOption.value = team;
-                    awayOption.textContent = team;
-                    awayTeamSelect.appendChild(awayOption);
+                // Add default option
+                const defaultOption = document.createElement('option');
+                defaultOption.value = "";
+                defaultOption.textContent = "Select Team"; // Ensure default matches initial state
+                fragment.appendChild(defaultOption);
+
+                teams.forEach(team => {
+                    const option = document.createElement('option');
+                    option.value = team;
+                    option.textContent = team;
+                    fragment.appendChild(option);
                 });
+
+                // Clear and append clone for Home Team
+                homeTeamSelect.innerHTML = '';
+                // Since we created a default option in fragment, it will be the first child
+                // However, "Select Home Team" and "Select Away Team" were the original defaults. 
+                // We should respect the placeholders.
+
+                // Re-create specific placeholders
+                const homePlaceholder = document.createElement('option');
+                homePlaceholder.value = "";
+                homePlaceholder.textContent = "Select Home Team";
+                homeTeamSelect.appendChild(homePlaceholder);
+
+                // Append teams (skipping the generic "Select Team" from fragment if we want specific)
+                // Actually, let's just append the teams part.
+                // Re-building fragment without default for cleaner logic
+
+                const teamFragment = document.createDocumentFragment();
+                teams.forEach(team => {
+                    const option = document.createElement('option');
+                    option.value = team;
+                    option.textContent = team;
+                    teamFragment.appendChild(option);
+                });
+
+                homeTeamSelect.appendChild(teamFragment.cloneNode(true));
+
+                const awayPlaceholder = document.createElement('option');
+                awayPlaceholder.value = "";
+                awayPlaceholder.textContent = "Select Away Team";
+                awayTeamSelect.appendChild(awayPlaceholder);
+
+                awayTeamSelect.appendChild(teamFragment);
             }
         });
 

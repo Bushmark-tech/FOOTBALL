@@ -487,32 +487,58 @@
         });
 
         // League change handler
-        leagueSelect.addEventListener('change', async function () {
+        leagueSelect.addEventListener('change', function () {
             const category = categorySelect.value;
             const league = this.value;
             const currentHomeTeam = homeTeamSelect.value;
-            const currentAwayTeam = awayTeamSelect.value;
+            const currentAwayTeam = awayTeamSelect.value; // Fixed duplicate variable assignment warning
 
-            homeTeamSelect.innerHTML = '<option value="">Loading...</option>';
-            awayTeamSelect.innerHTML = '<option value="">Loading...</option>';
-
+            // Direct data access - no async/await for instant response
             let teams = [];
-
-            if (category && league && leaguesData[category] && leaguesData[category][league] && leaguesData[category][league].length > 0) {
+            if (category && league && leaguesData[category] && leaguesData[category][league]) {
                 teams = leaguesData[category][league];
-            } else if (category && league) {
-                teams = await fetchTeamsFromAPI(category, league);
+            } else {
+                // Try to find league case-insensitively if exact match fails
+                if (category && leaguesData[category]) {
+                    const leagueKey = Object.keys(leaguesData[category]).find(k => k.toLowerCase() === league.toLowerCase());
+                    if (leagueKey) {
+                        teams = leaguesData[category][leagueKey];
+                    }
+                }
+            }
+
+            // Console log for debugging
+            if (!teams || teams.length === 0) {
+                console.warn(`No teams found for category: ${category}, league: ${league}`);
+            } else {
+                console.log(`Loaded ${teams.length} teams instantly for ${league}`);
             }
 
             if (teams && teams.length > 0) {
-                let options = '<option value="">Select Team</option>';
-                teams.forEach(team => {
-                    const escapedTeam = team.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-                    options += `<option value="${escapedTeam}">${team}</option>`;
-                });
+                // Use DocumentFragment for faster DOM insertion
+                const fragment = document.createDocumentFragment();
 
-                homeTeamSelect.innerHTML = options;
-                awayTeamSelect.innerHTML = options;
+                // Add default option
+                const defaultOption = document.createElement('option');
+                defaultOption.value = "";
+                defaultOption.textContent = "Select Team";
+                fragment.appendChild(defaultOption);
+
+                // Create options efficiently
+                for (let i = 0, len = teams.length; i < len; i++) {
+                    const option = document.createElement('option');
+                    option.value = teams[i];
+                    option.textContent = teams[i];
+                    fragment.appendChild(option);
+                }
+
+                // Clear and append clone for Home Team
+                homeTeamSelect.innerHTML = '';
+                homeTeamSelect.appendChild(fragment.cloneNode(true));
+
+                // Clear and append original for Away Team
+                awayTeamSelect.innerHTML = '';
+                awayTeamSelect.appendChild(fragment);
 
                 if (currentHomeTeam) {
                     homeTeamSelect.value = currentHomeTeam;

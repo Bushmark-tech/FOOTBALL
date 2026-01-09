@@ -159,6 +159,22 @@ class _LazyNumpy:
 pd = _LazyPandas()
 np = _LazyNumpy()
 
+# Define EmptyDataFrame class globally to avoid duplication and scope issues
+class EmptyDataFrame:
+    """Mock empty DataFrame for fallback scenarios."""
+    def __init__(self):
+        self.empty = True
+        self.columns = []
+    def __bool__(self):
+        return False
+    def __getitem__(self, key):
+        # Return empty DataFrame-like object for column access
+        return EmptyDataFrame()
+    def copy(self):
+        return self
+    def __iter__(self):
+        return iter([])
+
 # For sklearn, we'll import when needed in functions
 RandomForestClassifier = None
 StandardScaler = None
@@ -512,131 +528,13 @@ def calculate_probabilities_model2(home, away, data, version="v2"):
         return None
 
 
-def get_head_to_head_history_model2(home, away, data, version="v2"):
-    """
-    Get head-to-head history for Model2 using lGIC logic.
-    """
-    pd = safe_import_pandas()
-    home_col, away_col, result_col = get_column_names(version)
-    
-    try:
-        h2h = data[(data[home_col] == home) & (data[away_col] == away)]
-        if 'Date' in h2h.columns:
-            h2h['Date'] = pd.to_datetime(h2h['Date'], errors='coerce')
-        return h2h[['Date', result_col]].dropna()
-    except Exception as e:
-        logger.warning(f"Error getting H2H history for Model2: {e}")
-        return pd.DataFrame()
 
 
-def get_recent_team_form_model2(home, away, data, version="v2"):
-    """
-    Get recent team form for Model2 using lGIC logic.
-    Returns home_form, away_form as strings.
-    Auto-detects data format (v1 or v2).
-    """
-    pd = safe_import_pandas()
-    
-    # Auto-detect version from data columns
-    if 'Home' in data.columns and 'Away' in data.columns and 'Res' in data.columns:
-        actual_version = "v2"
-    elif 'HomeTeam' in data.columns and 'AwayTeam' in data.columns and 'FTR' in data.columns:
-        actual_version = "v1"
-    else:
-        actual_version = version
-    
-    home_col, away_col, result_col = get_column_names(actual_version)
-    
-    try:
-        if 'Date' not in data.columns:
-            return "-----", "-----"
-        
-        # OPTIMIZATION: Filter first, then sort (more efficient than sorting entire dataframe)
-        home_mask = data[home_col] == home
-        away_mask = data[away_col] == away
-        
-        # Convert results to W/D/L format based on team perspective
-        def convert_result_to_form(result, is_home_team):
-            """Convert H/D/A to W/D/L based on team perspective."""
-            if pd.isna(result) or result == "-":
-                return "-"
-            result_str = str(result).upper()
-            if result_str == "D":
-                return "D"
-            elif is_home_team:
-                # When team is home: H=Win, A=Loss
-                return "W" if result_str == "H" else "L"
-            else:
-                # When team is away: H=Loss (home won), A=Win (away won)
-                return "L" if result_str == "H" else "W"
-        
-        if home_mask.any():
-            home_matches = data[home_mask].sort_values(by='Date', ascending=False).head(5)
-            # Convert results: when home team is home, H=W, D=D, A=L
-            home_form_chars = [
-                convert_result_to_form(result, is_home_team=True)
-                for result in home_matches[result_col].fillna("-").values
-            ]
-            home_form = "".join(home_form_chars)
-        else:
-            home_form = "-----"
-            
-        if away_mask.any():
-            away_matches = data[away_mask].sort_values(by='Date', ascending=False).head(5)
-            # Convert results: when away team is away, H=L (home won), D=D, A=W (away won)
-            away_form_chars = [
-                convert_result_to_form(result, is_home_team=False)
-                for result in away_matches[result_col].fillna("-").values
-            ]
-            away_form = "".join(away_form_chars)
-        else:
-            away_form = "-----"
-            
-        return home_form, away_form
-    except Exception as e:
-        logger.warning(f"Error getting recent form for Model2: {e}")
-        return "-----", "-----"
 
 
-def get_head_to_head_form_model2(home_team, away_team, data, version="v2"):
-    """
-    Get head-to-head form for Model2 using lGIC logic.
-    Returns home_form, away_form as strings.
-    Auto-detects data format (v1 or v2).
-    """
-    pd = safe_import_pandas()
-    
-    # Auto-detect version from data columns
-    if 'Home' in data.columns and 'Away' in data.columns and 'Res' in data.columns:
-        actual_version = "v2"
-    elif 'HomeTeam' in data.columns and 'AwayTeam' in data.columns and 'FTR' in data.columns:
-        actual_version = "v1"
-    else:
-        actual_version = version
-    
-    home_col, away_col, result_col = get_column_names(actual_version)
-    
-    try:
-        if 'Date' not in data.columns:
-            return "-----", "-----"
-        df = data[[home_col, away_col, result_col, "Date"]].copy()
-        df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
-        df = df.dropna(subset=["Date"])
-        h2h = df[((df[home_col] == home_team) & (df[away_col] == away_team)) |
-                 ((df[home_col] == away_team) & (df[away_col] == home_team))].sort_values("Date", ascending=False).head(5)
 
-        home_form, away_form = [], []
-        for _, row in h2h.iterrows():
-            result = row[result_col]
-            h, a = row[home_col], row[away_col]
-            home_form.append("W" if ((home_team == h and result == "H") or (home_team == a and result == "A"))
-                             else "D" if result == "D" else "L")
-            away_form.append("W" if ((away_team == h and result == "H") or (away_team == a and result == "A"))
-                             else "D" if result == "D" else "L")
-        return "".join(home_form), "".join(away_form)
-    except Exception as e:
-        logger.warning(f"Error getting H2H form for Model2: {e}")
-        return "-----", "-----"
+
+
 
 
 def get_team_recent_form_model2(team_name, data, version="v2"):
@@ -973,13 +871,7 @@ def calculate_probabilities_original(home, away, data, version="v1"):
                 "Away Team Win": 30.0,
             }
 
-def get_head_to_head_history_original(home, away, data, version="v1"):
-    """Get head-to-head history (original logic)."""
-    home_col, away_col, result_col = get_column_names(version)
-    h2h = data[(data[home_col] == home) & (data[away_col] == away)]
-    if 'Date' in h2h.columns:
-        h2h['Date'] = pd.to_datetime(h2h['Date'], errors='coerce')
-    return h2h[['Date', result_col]].dropna()
+
 
 def get_team_result_in_match(row, team_name, version="v1"):
     """
@@ -1752,36 +1644,10 @@ def load_football_data(dataset=1, use_cache=True):
     except ImportError as e:
         logger.error(f"Cannot import pandas (package may be corrupted): {e}")
         # Return a mock empty DataFrame-like object
-        class EmptyDataFrame:
-            def __init__(self):
-                self.empty = True
-                self.columns = []
-            def __bool__(self):
-                return False
-            def __getitem__(self, key):
-                # Return empty DataFrame-like object for column access
-                return EmptyDataFrame()
-            def copy(self):
-                return self
-            def __iter__(self):
-                return iter([])
         return EmptyDataFrame()
     except Exception as e:
         logger.error(f"Error loading football data: {e}")
         # Return a mock empty DataFrame-like object
-        class EmptyDataFrame:
-            def __init__(self):
-                self.empty = True
-                self.columns = []
-            def __bool__(self):
-                return False
-            def __getitem__(self, key):
-                # Return empty DataFrame-like object for column access
-                return EmptyDataFrame()
-            def copy(self):
-                return self
-            def __iter__(self):
-                return iter([])
         return EmptyDataFrame()
 
 def clear_data_cache(dataset=None):
