@@ -209,8 +209,12 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # Allauth Settings
-ACCOUNT_LOGIN_METHODS = {'email', 'username'}
-ACCOUNT_SIGNUP_FIELDS = ['email', 'username*', 'password1*', 'password2*']
+# Allauth Settings
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_QUERY_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
