@@ -3555,12 +3555,24 @@ def result(request):
     # Iterate through outcomes (more robust than DB filtering for stats)
     for pred in all_predictions:
         o = str(pred.outcome).strip() # specific handling for potential whitespace
+        # Standard outcomes
         if o == 'Home':
             home_predictions += 1
         elif o == 'Draw':
             draw_predictions += 1
         elif o == 'Away':
             away_predictions += 1
+        # Handle "Team Win" format if present in DB (legacy/alternate format)
+        elif home_team and (f"{home_team} Win" in o or f"{home_team} WIN" in o or o == f"{home_team} Win"):
+            home_predictions += 1
+        elif away_team and (f"{away_team} Win" in o or f"{away_team} WIN" in o or o == f"{away_team} Win"):
+            away_predictions += 1
+        # Fallback partial matching for case variations
+        elif 'Win' in o or 'WIN' in o:
+            if home_team and home_team.lower() in o.lower():
+                home_predictions += 1
+            elif away_team and away_team.lower() in o.lower():
+                away_predictions += 1
         elif o in ['1X', 'X2', '12']:
             # Handle double chance if they exist (count towards primary option)
             # This is a fallback as these shouldn't be the primary outcome stored

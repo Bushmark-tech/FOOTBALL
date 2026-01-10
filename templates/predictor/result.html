@@ -922,6 +922,79 @@
         transform: translateY(-1px);
         box-shadow: 0 5px 15px rgba(0, 212, 170, 0.4);
     }
+
+    /* Team Form Grid System */
+    .team-form-grid {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 30px;
+        align-items: center;
+        width: 100%;
+    }
+
+    .team-form-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .form-ball {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 1rem;
+        color: white;
+        margin: 0 4px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        cursor: help;
+        position: relative;
+    }
+
+    .form-ball:hover {
+        transform: scale(1.2) translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+        z-index: 10;
+    }
+
+    /* Desktop Enhancements for Form */
+    @media (min-width: 992px) {
+        .team-form-item.home {
+            flex-direction: row;
+            justify-content: flex-end;
+            text-align: right;
+        }
+
+        .team-form-item.away {
+            flex-direction: row-reverse;
+            justify-content: flex-start;
+            text-align: left;
+        }
+
+        .team-form-item.home .form-balls-container {
+            order: 2;
+        }
+
+        .team-form-item.home .team-name-display {
+            order: 1;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .team-form-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .vs-divider {
+            display: none !important;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -1061,7 +1134,7 @@
                         {% if not has_valid_form %}
                         <!-- No Data Found Message -->
                         <div
-                            style="text-align: center; padding: 30px 20px; background: rgba(245, 158, 11, 0.1); border: 2px dashed #f59e0b; border-radius: 10px;">
+                            style="text-align: center; padding: 30px 20px; background: rgba(245, 158, 11, 0.1); border: 2px dashed #f59e0b; border-radius: 10px; margin-bottom: 20px;">
                             <i class="fas fa-info-circle"
                                 style="font-size: 2.5rem; color: #f59e0b; margin-bottom: 15px;"></i>
                             <h4 style="color: #f59e0b; margin-bottom: 10px; font-size: 1.2rem;">Limited Form Data</h4>
@@ -1071,68 +1144,68 @@
                             </p>
                         </div>
                         {% endif %}
-                        <div
-                            style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: center;">
+
+                        <div class="team-form-grid">
                             <!-- Home Team Form -->
-                            <div style="text-align: center;">
-                                <div style="color: #00d4aa; font-weight: 700; margin-bottom: 12px; font-size: 1rem;">{{
-                                    home_team }}</div>
-                                <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 6px;">
+                            <div class="team-form-item home">
+                                <div class="team-name-display"
+                                    style="color: #00d4aa; font-weight: 700; font-size: 1.1rem; min-width: 100px;">
+                                    {{ home_team }}
+                                </div>
+                                <div class="form-balls-container"
+                                    style="display: flex; justify-content: center; flex-wrap: nowrap; gap: 6px;">
                                     {% for result in home_team_form %}
                                     {% if result == 'W' %}
-                                    <div style="width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1rem; color: white; margin: 0 4px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); transition: all 0.3s ease; cursor: help;"
-                                        onmouseover="this.style.transform='scale(1.2) translateY(-5px)'; this.style.boxShadow='0 8px 20px rgba(0, 0, 0, 0.6)';"
-                                        onmouseout="this.style.transform='scale(1) translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.4)';"
+                                    <div class="form-ball"
+                                        style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);"
                                         title="Win">W</div>
                                     {% elif result == 'D' %}
-                                    <div style="width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1rem; color: white; margin: 0 4px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); transition: all 0.3s ease; cursor: help;"
-                                        onmouseover="this.style.transform='scale(1.2) translateY(-5px)'; this.style.boxShadow='0 8px 20px rgba(0, 0, 0, 0.6)';"
-                                        onmouseout="this.style.transform='scale(1) translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.4)';"
+                                    <div class="form-ball"
+                                        style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);"
                                         title="Draw">D</div>
                                     {% elif result == 'L' %}
-                                    <div style="width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1rem; color: white; margin: 0 4px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); transition: all 0.3s ease; cursor: help;"
-                                        onmouseover="this.style.transform='scale(1.2) translateY(-5px)'; this.style.boxShadow='0 8px 20px rgba(0, 0, 0, 0.6)';"
-                                        onmouseout="this.style.transform='scale(1) translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.4)';"
+                                    <div class="form-ball"
+                                        style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);"
                                         title="Loss">L</div>
                                     {% else %}
-                                    <div style="width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #64748b 0%, #475569 100%); display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1rem; color: white; margin: 0 4px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);"
+                                    <div class="form-ball"
+                                        style="background: linear-gradient(135deg, #64748b 0%, #475569 100%);"
                                         title="Unknown">-</div>
                                     {% endif %}
                                     {% endfor %}
                                 </div>
                             </div>
+
                             <!-- VS Divider -->
-                            <div style="color: #666; font-weight: 700; font-size: 1.2rem; padding: 0 15px;">
-                                <i class="fas fa-vs" style="color: #94a3b8;"></i>
+                            <div class="vs-divider"
+                                style="color: #666; font-weight: 700; font-size: 1.2rem; padding: 0 10px;">
+                                <i class="fas fa-arrow-right-arrow-left" style="color: #94a3b8;"></i>
                             </div>
+
                             <!-- Away Team Form -->
-                            <div style="text-align: center;">
-                                <div style="color: #ff6b35; font-weight: 700; margin-bottom: 12px; font-size: 1rem;">{{
-                                    away_team }}</div>
-                                <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 6px;">
+                            <div class="team-form-item away">
+                                <div class="team-name-display"
+                                    style="color: #ff6b35; font-weight: 700; font-size: 1.1rem; min-width: 100px;">
+                                    {{ away_team }}
+                                </div>
+                                <div class="form-balls-container"
+                                    style="display: flex; justify-content: center; flex-wrap: nowrap; gap: 6px;">
                                     {% for result in away_team_form %}
                                     {% if result == 'W' %}
-                                    <div style="width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1rem; color: white; margin: 0 4px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); transition: all 0.3s ease; cursor: help;"
-                                        onmouseover="this.style.transform='scale(1.2) translateY(-5px)'; this.style.boxShadow='0 8px 20px rgba(0, 0, 0, 0.6)';"
-                                        onmouseout="this.style.transform='scale(1) translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.4)';"
+                                    <div class="form-ball"
+                                        style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);"
                                         title="Win">W</div>
                                     {% elif result == 'D' %}
-                                    <div style="width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1rem; color: white; margin: 0 4px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); transition: all 0.3s ease; cursor: help;"
-                                        onmouseover="this.style.transform='scale(1.2) translateY(-5px)'; this.style.boxShadow='0 8px 20px rgba(0, 0, 0, 0.6)';"
-                                        onmouseout="this.style.transform='scale(1) translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.4)';"
-                                        title="Win">W</div>
-                                    {% elif result == 'D' %}
-                                    <div style="width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1rem; color: white; margin: 0 4px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); transition: all 0.3s ease; cursor: help;"
-                                        onmouseover="this.style.transform='scale(1.2) translateY(-5px)'; this.style.boxShadow='0 8px 20px rgba(0, 0, 0, 0.6)';"
-                                        onmouseout="this.style.transform='scale(1) translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.4)';"
+                                    <div class="form-ball"
+                                        style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);"
                                         title="Draw">D</div>
                                     {% elif result == 'L' %}
-                                    <div style="width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1rem; color: white; margin: 0 4px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); transition: all 0.3s ease; cursor: help;"
-                                        onmouseover="this.style.transform='scale(1.2) translateY(-5px)'; this.style.boxShadow='0 8px 20px rgba(0, 0, 0, 0.6)';"
-                                        onmouseout="this.style.transform='scale(1) translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.4)';"
+                                    <div class="form-ball"
+                                        style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);"
                                         title="Loss">L</div>
                                     {% else %}
-                                    <div style="width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #64748b 0%, #475569 100%); display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1rem; color: white; margin: 0 4px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);"
+                                    <div class="form-ball"
+                                        style="background: linear-gradient(135deg, #64748b 0%, #475569 100%);"
                                         title="Unknown">-</div>
                                     {% endif %}
                                     {% endfor %}
@@ -1197,216 +1270,213 @@
                             </p>
                         </div>
                         {% endif %}
-                </div>
-                </details>
-                {% else %}
-                <!-- No H2H Matches Found -->
-                <div class="analytics-card"
-                    style="margin-top: 30px; padding: 20px; background: rgba(0, 0, 0, 0.3); border-radius: 12px;">
-                    <h5
-                        style="color: #00d4aa; margin-bottom: 20px; text-align: center; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                        <i class="fas fa-history"></i>
-                        <span>Past Meetings</span>
-                    </h5>
-                    <div
-                        style="text-align: center; padding: 30px 20px; background: rgba(100, 116, 139, 0.1); border: 2px dashed #64748b; border-radius: 10px;">
-                        <i class="fas fa-search" style="font-size: 2.5rem; color: #64748b; margin-bottom: 15px;"></i>
-                        <h4 style="color: #64748b; margin-bottom: 10px; font-size: 1.2rem;">No Head-to-Head Data</h4>
-                        <p style="color: #94a3b8; margin: 0; font-size: 0.95rem;">
-                            These teams have not met in our historical database.<br>
-                            Predictions are based on overall team performance and statistics.
-                        </p>
+                    </details>
+                    {% else %}
+                    <!-- No H2H Matches Found -->
+                    <div class="analytics-card"
+                        style="margin-top: 30px; padding: 20px; background: rgba(0, 0, 0, 0.3); border-radius: 12px;">
+                        <h5
+                            style="color: #00d4aa; margin-bottom: 20px; text-align: center; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <i class="fas fa-history"></i>
+                            <span>Past Meetings</span>
+                        </h5>
+                        <div
+                            style="text-align: center; padding: 30px 20px; background: rgba(100, 116, 139, 0.1); border: 2px dashed #64748b; border-radius: 10px;">
+                            <i class="fas fa-search"
+                                style="font-size: 2.5rem; color: #64748b; margin-bottom: 15px;"></i>
+                            <h4 style="color: #64748b; margin-bottom: 10px; font-size: 1.2rem;">No Head-to-Head Data
+                            </h4>
+                            <p style="color: #94a3b8; margin: 0; font-size: 0.95rem;">
+                                These teams have not met in our historical database.<br>
+                                Predictions are based on overall team performance and statistics.
+                            </p>
+                        </div>
                     </div>
+                    {% endif %}
+
+                    <!-- Upcoming Matches - Collapsible -->
+                    {% if upcoming_matches %}
+                    <details class="analytics-card" style="margin-top: 30px; cursor: pointer;">
+                        <summary
+                            style="list-style: none; cursor: pointer; padding: 15px; background: rgba(59, 130, 246, 0.1); border-radius: 10px; margin-bottom: 20px;">
+                            <h4
+                                style="color: #3b82f6; margin: 0; display: inline-flex; align-items: center; gap: 10px;">
+                                <span>Future Matches</span>
+                                <span
+                                    style="font-size: 0.9rem; color: #94a3b8; font-weight: normal; margin-left: 10px;">Scheduled
+                                    games</span>
+                                <span style="margin-left: auto; font-size: 1.2rem;">▼</span>
+                            </h4>
+                        </summary>
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; color: #ffffff;">
+                                <thead>
+                                    <tr style="background: #2a2a2a; border-bottom: 2px solid #00d4aa;">
+                                        <th style="padding: 12px; text-align: left; font-weight: 600;">Date</th>
+                                        <th style="padding: 12px; text-align: center; font-weight: 600;">Match</th>
+                                        <th style="padding: 12px; text-align: center; font-weight: 600;">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for match in upcoming_matches %}
+                                    <tr style="border-bottom: 1px solid #333333; transition: background 0.2s ease;">
+                                        <td style="padding: 12px;">{{ match.date }}</td>
+                                        <td style="padding: 12px; text-align: center; font-weight: 600;">
+                                            {{ home_team }} vs {{ away_team }}
+                                        </td>
+                                        <td style="padding: 12px; text-align: center;">
+                                            <span
+                                                style="color: #3b82f6; font-weight: 600; background: rgba(59, 130, 246, 0.1); padding: 4px 12px; border-radius: 12px;">
+                                                <i class="fas fa-clock me-1"></i>{{ match.status }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div
+                            style="margin-top: 15px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; border-radius: 4px;">
+                            <p style="margin: 0; color: #94a3b8; font-size: 0.9rem;">
+                                <i class="fas fa-info-circle me-2"></i>
+                                These matches are scheduled but haven't been played yet. Check back after the match date
+                                for
+                                actual results.
+                            </p>
+                        </div>
                 </div>
                 {% endif %}
 
-                <!-- Upcoming Matches - Collapsible -->
-                {% if upcoming_matches %}
-                <details class="analytics-card" style="margin-top: 30px; cursor: pointer;">
+                <!-- All Predictions for This Matchup - Collapsible -->
+                {% if all_predictions %}
+                <details class="analytics-card" style="margin-top: 30px; cursor: pointer;" open>
                     <summary
-                        style="list-style: none; cursor: pointer; padding: 15px; background: rgba(59, 130, 246, 0.1); border-radius: 10px; margin-bottom: 20px;">
-                        <h4 style="color: #3b82f6; margin: 0; display: inline-flex; align-items: center; gap: 10px;">
-                            <span>Future Matches</span>
-                            <span
-                                style="font-size: 0.9rem; color: #94a3b8; font-weight: normal; margin-left: 10px;">Scheduled
-                                games</span>
+                        style="list-style: none; cursor: pointer; padding: 15px; background: rgba(139, 92, 246, 0.1); border-radius: 10px; margin-bottom: 20px;">
+                        <h4 style="color: #8b5cf6; margin: 0; display: inline-flex; align-items: center; gap: 10px;">
+                            <span>Your Prediction History</span>
+                            <span style="font-size: 0.9rem; color: #94a3b8; font-weight: normal; margin-left: 10px;">All
+                                predictions for this matchup</span>
                             <span style="margin-left: auto; font-size: 1.2rem;">▼</span>
                         </h4>
                     </summary>
+
+                    <!-- Unified Prediction Statistics -->
+                    <div style="padding: 20px; background: rgba(0, 0, 0, 0.2);">
+                        <div
+                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                            <!-- Home Stats -->
+                            <div
+                                style="text-align: center; padding: 10px; background: rgba(0, 212, 170, 0.1); border-radius: 8px; border: 1px solid rgba(0, 212, 170, 0.3);">
+                                <div style="color: #00d4aa; font-size: 0.9rem; margin-bottom: 5px;">Home Win</div>
+                                <div style="font-size: 1.2rem; font-weight: bold; color: white;">{{ prediction_stats.home_count|default:"0" }}</div>
+                                <div style="font-size: 0.8rem; color: #94a3b8;">{{ prediction_stats.home_percentage_fmt|default:"0.0" }}%</div>
+                            </div>
+
+                            <!-- Draw Stats -->
+                            <div
+                                style="text-align: center; padding: 10px; background: rgba(245, 158, 11, 0.1); border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.3);">
+                                <div style="color: #f59e0b; font-size: 0.9rem; margin-bottom: 5px;">Draw</div>
+                                <div style="font-size: 1.2rem; font-weight: bold; color: white;">{{ prediction_stats.draw_count|default:"0" }}</div>
+                                <div style="font-size: 0.8rem; color: #94a3b8;">{{ prediction_stats.draw_percentage_fmt|default:"0.0" }}%</div>
+                            </div>
+
+                            <!-- Away Stats -->
+                            <div
+                                style="text-align: center; padding: 10px; background: rgba(255, 107, 53, 0.1); border-radius: 8px; border: 1px solid rgba(255, 107, 53, 0.3);">
+                                <div style="color: #ff6b35; font-size: 0.9rem; margin-bottom: 5px;">Away Win</div>
+                                <div style="font-size: 1.2rem; font-weight: bold; color: white;">{{ prediction_stats.away_count|default:"0" }}</div>
+                                <div style="font-size: 0.8rem; color: #94a3b8;">{{ prediction_stats.away_percentage_fmt|default:"0.0" }}%</div>
+                            </div>
+                        </div>
+
+                        <div
+                            style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; border-top: 1px solid #333; padding-top: 15px;">
+                            <div style="text-align: center;">
+                                <div style="color: #94a3b8; font-size: 0.8rem;">Avg Home Goals</div>
+                                <div style="color: white; font-weight: bold;">{{ prediction_stats.avg_home_score|default:"0" }}</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="color: #94a3b8; font-size: 0.8rem;">Avg Away Goals</div>
+                                <div style="color: white; font-weight: bold;">{{ prediction_stats.avg_away_score|default:"0" }}</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="color: #94a3b8; font-size: 0.8rem;">Avg Ability</div>
+                                <div style="color: white; font-weight: bold;">{{ prediction_stats.avg_confidence|default:"0" }}%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Predictions Table -->
                     <div style="overflow-x: auto;">
                         <table style="width: 100%; border-collapse: collapse; color: #ffffff;">
                             <thead>
                                 <tr style="background: #2a2a2a; border-bottom: 2px solid #00d4aa;">
                                     <th style="padding: 12px; text-align: left; font-weight: 600;">Date</th>
                                     <th style="padding: 12px; text-align: center; font-weight: 600;">Match</th>
-                                    <th style="padding: 12px; text-align: center; font-weight: 600;">Status</th>
+                                    <th style="padding: 12px; text-align: center; font-weight: 600;">Outcome</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for match in upcoming_matches %}
-                                <tr style="border-bottom: 1px solid #333333; transition: background 0.2s ease;">
-                                    <td style="padding: 12px;">{{ match.date }}</td>
+                                {% for pred in all_predictions %}
+                                <tr style="border-bottom: 1px solid #333333; transition: background 0.2s ease;"
+                                    onmouseover="this.style.background='#2a2a2a'"
+                                    onmouseout="this.style.background='transparent'">
+                                    <td style="padding: 12px;">{{ pred.prediction_date|date:"M d, Y H:i" }}</td>
                                     <td style="padding: 12px; text-align: center; font-weight: 600;">
-                                        {{ home_team }} vs {{ away_team }}
+                                        {{ pred.home_team }} vs {{ pred.away_team }}
                                     </td>
                                     <td style="padding: 12px; text-align: center;">
+                                        {% if pred.outcome == "Home" %}
                                         <span
-                                            style="color: #3b82f6; font-weight: 600; background: rgba(59, 130, 246, 0.1); padding: 4px 12px; border-radius: 12px;">
-                                            <i class="fas fa-clock me-1"></i>{{ match.status }}
+                                            style="color: #00d4aa; font-weight: 600; background: rgba(0, 212, 170, 0.1); padding: 4px 12px; border-radius: 12px;">
+                                            {{ home_team }} Win
                                         </span>
+                                        {% elif pred.outcome == "Away" %}
+                                        <span
+                                            style="color: #ff6b35; font-weight: 600; background: rgba(255, 107, 53, 0.1); padding: 4px 12px; border-radius: 12px;">
+                                            {{ away_team }} Win
+                                        </span>
+                                        {% elif pred.outcome == "Draw" %}
+                                        <span
+                                            style="color: #f59e0b; font-weight: 600; background: rgba(245, 158, 11, 0.1); padding: 4px 12px; border-radius: 12px;">
+                                            Draw
+                                        </span>
+                                        {% else %}
+                                        <!-- For double chance or other predictions, show the actual outcome text -->
+                                        <span
+                                            style="color: #8b5cf6; font-weight: 600; background: rgba(139, 92, 246, 0.1); padding: 4px 12px; border-radius: 12px;">
+                                            {{ pred.outcome }}
+                                        </span>
+                                        {% endif %}
                                     </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
-                    <div
-                        style="margin-top: 15px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; border-radius: 4px;">
-                        <p style="margin: 0; color: #94a3b8; font-size: 0.9rem;">
-                            <i class="fas fa-info-circle me-2"></i>
-                            These matches are scheduled but haven't been played yet. Check back after the match date for
-                            actual results.
-                        </p>
+
+                    {% if prediction_stats.total_count > 10 %}
+                    <div style="margin-top: 15px; text-align: center; color: #94a3b8; font-size: 0.9rem;">
+                        Showing last 10 of {{ prediction_stats.total_count }} predictions
                     </div>
+                    {% endif %}
             </div>
+            </details>
             {% endif %}
 
-            <!-- All Predictions for This Matchup - Collapsible -->
-            {% if all_predictions %}
-            <details class="analytics-card" style="margin-top: 30px; cursor: pointer;" open>
-                <summary
-                    style="list-style: none; cursor: pointer; padding: 15px; background: rgba(139, 92, 246, 0.1); border-radius: 10px; margin-bottom: 20px;">
-                    <h4 style="color: #8b5cf6; margin: 0; display: inline-flex; align-items: center; gap: 10px;">
-                        <span>Your Prediction History</span>
-                        <span style="font-size: 0.9rem; color: #94a3b8; font-weight: normal; margin-left: 10px;">All
-                            predictions for this matchup</span>
-                        <span style="margin-left: auto; font-size: 1.2rem;">▼</span>
-                    </h4>
-                </summary>
-
-                <!-- Unified Prediction Statistics -->
-                <div style="padding: 20px; background: rgba(0, 0, 0, 0.2);">
-                    <div
-                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 15px; margin-bottom: 20px;">
-                        <!-- Home Stats -->
-                        <div
-                            style="text-align: center; padding: 10px; background: rgba(0, 212, 170, 0.1); border-radius: 8px; border: 1px solid rgba(0, 212, 170, 0.3);">
-                            <div style="color: #00d4aa; font-size: 0.9rem; margin-bottom: 5px;">Home Win</div>
-                            <div style="font-size: 1.2rem; font-weight: bold; color: white;">{{
-                                prediction_stats.home_count }}</div>
-                            <div style="font-size: 0.8rem; color: #94a3b8;">{{ prediction_stats.home_percentage_fmt }}%
-                            </div>
-                        </div>
-
-                        <!-- Draw Stats -->
-                        <div
-                            style="text-align: center; padding: 10px; background: rgba(245, 158, 11, 0.1); border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.3);">
-                            <div style="color: #f59e0b; font-size: 0.9rem; margin-bottom: 5px;">Draw</div>
-                            <div style="font-size: 1.2rem; font-weight: bold; color: white;">{{
-                                prediction_stats.draw_count }}</div>
-                            <div style="font-size: 0.8rem; color: #94a3b8;">{{ prediction_stats.draw_percentage_fmt }}%
-                            </div>
-                        </div>
-
-                        <!-- Away Stats -->
-                        <div
-                            style="text-align: center; padding: 10px; background: rgba(255, 107, 53, 0.1); border-radius: 8px; border: 1px solid rgba(255, 107, 53, 0.3);">
-                            <div style="color: #ff6b35; font-size: 0.9rem; margin-bottom: 5px;">Away Win</div>
-                            <div style="font-size: 1.2rem; font-weight: bold; color: white;">{{
-                                prediction_stats.away_count }}</div>
-                            <div style="font-size: 0.8rem; color: #94a3b8;">{{ prediction_stats.away_percentage_fmt }}%
-                            </div>
-                        </div>
-                    </div>
-
-                    <div
-                        style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; border-top: 1px solid #333; padding-top: 15px;">
-                        <div style="text-align: center;">
-                            <div style="color: #94a3b8; font-size: 0.8rem;">Avg Home Goals</div>
-                            <div style="color: white; font-weight: bold;">{{ prediction_stats.avg_home_score }}</div>
-                        </div>
-                        <div style="text-align: center;">
-                            <div style="color: #94a3b8; font-size: 0.8rem;">Avg Away Goals</div>
-                            <div style="color: white; font-weight: bold;">{{ prediction_stats.avg_away_score }}</div>
-                        </div>
-                        <div style="text-align: center;">
-                            <div style="color: #94a3b8; font-size: 0.8rem;">Avg Ability</div>
-                            <div style="color: white; font-weight: bold;">{{ prediction_stats.avg_confidence }}%</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Predictions Table -->
-                <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse; color: #ffffff;">
-                        <thead>
-                            <tr style="background: #2a2a2a; border-bottom: 2px solid #00d4aa;">
-                                <th style="padding: 12px; text-align: left; font-weight: 600;">Date</th>
-                                <th style="padding: 12px; text-align: center; font-weight: 600;">Match</th>
-                                <th style="padding: 12px; text-align: center; font-weight: 600;">Outcome</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for pred in all_predictions %}
-                            <tr style="border-bottom: 1px solid #333333; transition: background 0.2s ease;"
-                                onmouseover="this.style.background='#2a2a2a'"
-                                onmouseout="this.style.background='transparent'">
-                                <td style="padding: 12px;">{{ pred.prediction_date|date:"M d, Y H:i" }}</td>
-                                <td style="padding: 12px; text-align: center; font-weight: 600;">
-                                    {{ pred.home_team }} vs {{ pred.away_team }}
-                                </td>
-                                <td style="padding: 12px; text-align: center;">
-                                    {% if pred.outcome == "Home" %}
-                                    <span
-                                        style="color: #00d4aa; font-weight: 600; background: rgba(0, 212, 170, 0.1); padding: 4px 12px; border-radius: 12px;">
-                                        {{ home_team }} Win
-                                    </span>
-                                    {% elif pred.outcome == "Away" %}
-                                    <span
-                                        style="color: #ff6b35; font-weight: 600; background: rgba(255, 107, 53, 0.1); padding: 4px 12px; border-radius: 12px;">
-                                        {{ away_team }} Win
-                                    </span>
-                                    {% elif pred.outcome == "Draw" %}
-                                    <span
-                                        style="color: #f59e0b; font-weight: 600; background: rgba(245, 158, 11, 0.1); padding: 4px 12px; border-radius: 12px;">
-                                        Draw
-                                    </span>
-                                    {% else %}
-                                    <!-- For double chance or other predictions, show the actual outcome text -->
-                                    <span
-                                        style="color: #8b5cf6; font-weight: 600; background: rgba(139, 92, 246, 0.1); padding: 4px 12px; border-radius: 12px;">
-                                        {{ pred.outcome }}
-                                    </span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-
-                {% if prediction_stats.total_count > 10 %}
-                <div style="margin-top: 15px; text-align: center; color: #94a3b8; font-size: 0.9rem;">
-                    Showing last 10 of {{ prediction_stats.total_count }} predictions
-                </div>
-                {% endif %}
-        </div>
-        </details>
-        {% endif %}
-
-        <!-- Action Buttons -->
-        <div class="action-buttons" style="margin-top: 40px;">
-            <a href="{% url 'predictor:predict' %}" class="btn-action" id="new-prediction-btn">
-                <i class="fas fa-plus"></i>
-                New Prediction
-            </a>
-            <a href="{% url 'predictor:home' %}" class="btn-secondary">
-                <i class="fas fa-home"></i>
-                Dashboard
-            </a>
+            <!-- Action Buttons -->
+            <div class="action-buttons" style="margin-top: 40px;">
+                <a href="{% url 'predictor:predict' %}" class="btn-action" id="new-prediction-btn">
+                    <i class="fas fa-plus"></i>
+                    New Prediction
+                </a>
+                <a href="{% url 'predictor:home' %}" class="btn-secondary">
+                    <i class="fas fa-home"></i>
+                    Dashboard
+                </a>
+            </div>
         </div>
     </div>
-</div>
 </div>
 </div>
 </div>
