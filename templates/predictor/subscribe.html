@@ -439,33 +439,11 @@
 
         <!-- Subscription Plans Grid -->
         <div class="plans-grid">
-            <!-- Trial Plan -->
-            <div class="plan-card">
-                <div class="plan-icon">🆓</div>
-                <h3 class="plan-name">Trial Plan</h3>
-                <div class="plan-price">
-                    <div class="amount">Free</div>
-                </div>
-                <ul class="plan-features">
-                    <li>
-                        <i class="fas fa-check-circle"></i>
-                        <span>1 match only</span>
-                    </li>
-                    <li>
-                        <i class="fas fa-check-circle"></i>
-                        <span>Basic predictions</span>
-                    </li>
-                </ul>
-                <button class="plan-button secondary" disabled>
-                    Current Plan
-                </button>
-            </div>
-
-            <!-- Basic Plan -->
+            <!-- Standard Plan -->
             <div class="plan-card popular">
                 <div class="plan-badge">POPULAR</div>
                 <div class="plan-icon">🟢</div>
-                <h3 class="plan-name">Basic Plan</h3>
+                <h3 class="plan-name">Standard Plan</h3>
                 <div class="plan-price">
                     <div class="amount">KSh 200</div>
                     <span class="period">per month</span>
@@ -473,7 +451,7 @@
                 <ul class="plan-features">
                     <li>
                         <i class="fas fa-check-circle"></i>
-                        <span>10 matches per day</span>
+                        <span>7 matches per day</span>
                     </li>
                     <li>
                         <i class="fas fa-check-circle"></i>
@@ -488,7 +466,7 @@
                         <span>All leagues access</span>
                     </li>
                 </ul>
-                <button class="plan-button primary" onclick="selectPlan('Basic Plan', 200, 'basic')">
+                <button class="plan-button primary" onclick="selectPlan('Standard Plan', 200, 'standard')">
                     <i class="fas fa-crown"></i> Select Plan
                 </button>
             </div>
@@ -504,11 +482,11 @@
                 <ul class="plan-features">
                     <li>
                         <i class="fas fa-check-circle"></i>
-                        <span>50 matches per day</span>
+                        <span>20 matches per day</span>
                     </li>
                     <li>
                         <i class="fas fa-check-circle"></i>
-                        <span>1,500 matches per month</span>
+                        <span>600 matches per month</span>
                     </li>
                     <li>
                         <i class="fas fa-check-circle"></i>
@@ -524,11 +502,11 @@
                 </button>
             </div>
 
-            <!-- Unlimited Plan -->
+            <!-- VIP Plan -->
             <div class="plan-card premium">
                 <div class="plan-badge premium">BEST VALUE</div>
                 <div class="plan-icon">♾️</div>
-                <h3 class="plan-name">Unlimited Plan</h3>
+                <h3 class="plan-name">VIP Plan</h3>
                 <div class="plan-price">
                     <div class="amount" style="color: #fbbf24;">KSh 1,000</div>
                     <span class="period">per month</span>
@@ -555,7 +533,7 @@
                         <span>Exclusive features</span>
                     </li>
                 </ul>
-                <button class="plan-button premium" onclick="selectPlan('Unlimited Plan', 1000, 'unlimited')">
+                <button class="plan-button premium" onclick="selectPlan('VIP Plan', 1000, 'vip')">
                     <i class="fas fa-infinity"></i> Select Plan
                 </button>
             </div>
@@ -568,13 +546,13 @@
             </div>
 
             <div class="selected-plan-info" id="selectedPlanInfo">
-                <div class="plan-name-display" id="selectedPlanName">Basic Plan</div>
+                <div class="plan-name-display" id="selectedPlanName">Standard Plan</div>
                 <div class="plan-price-display" id="selectedPlanPrice">KSh 200/month</div>
             </div>
 
             <form method="post" id="paymentForm" action="{% url 'predictor:mpesa_payment' %}">
                 {% csrf_token %}
-                <input type="hidden" name="plan_type" id="planType" value="basic">
+                <input type="hidden" name="plan_type" id="planType" value="standard">
                 <input type="hidden" name="amount" id="planAmount" value="200">
 
                 <div class="form-group">
@@ -604,7 +582,7 @@
                 <h2><i class="fas fa-credit-card"></i> Processing Payment</h2>
                 <p>Please wait while we process your payment request...</p>
                 <p style="color: #00d9a3; font-weight: 600; margin-top: 1rem;">
-                    <span id="modalPlanName">Basic Plan</span> - <span id="modalAmount">KSh 200</span>
+                    <span id="modalPlanName">Standard Plan</span> - <span id="modalAmount">KSh 200</span>
                 </p>
 
                 <div class="payment-steps">

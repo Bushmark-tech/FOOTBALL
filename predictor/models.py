@@ -377,11 +377,18 @@ class Subscription(models.Model):
         ('stripe', 'Stripe'),
     ]
     
+    PLAN_TYPE_CHOICES = [
+        ('standard', 'Standard Plan'),
+        ('starter', 'Starter Plan'),
+        ('vip', 'VIP Plan'),
+    ]
+    
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='subscriptions')
     status = models.CharField(max_length=20, choices=SUBSCRIPTION_STATUS_CHOICES, default='pending')
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, default='mpesa')
+    plan_type = models.CharField(max_length=20, choices=PLAN_TYPE_CHOICES, default='standard')
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    currency = models.CharField(max_length=3, default='USD')  # USD or KSH
+    currency = models.CharField(max_length=3, default='KSH')  # USD or KSH
     mpesa_number = models.CharField(max_length=20, blank=True, null=True)
     mpesa_transaction_id = models.CharField(max_length=100, blank=True, null=True)
     start_date = models.DateTimeField(null=True, blank=True)
@@ -408,6 +415,25 @@ class Subscription(models.Model):
         self.start_date = timezone.now()
         self.end_date = timezone.now() + timedelta(days=duration_days)
         self.save()
+    
+    def get_daily_limit(self):
+        """Get daily prediction limit based on plan type."""
+        plan_limits = {
+            'standard': 7,
+            'starter': 20,
+            'vip': 100,
+        }
+        return plan_limits.get(self.plan_type, 7)
+    
+    def get_monthly_limit(self):
+        """Get monthly prediction limit based on plan type."""
+        plan_limits = {
+            'standard': 300,
+            'starter': 600,
+            'vip': 1500,
+        }
+        return plan_limits.get(self.plan_type, 300)
+
     
     class Meta:
         ordering = ['-created_at']

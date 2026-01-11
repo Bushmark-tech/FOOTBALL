@@ -15,7 +15,7 @@ import requests
 import base64
 import json
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
 
@@ -43,10 +43,31 @@ def check_subscription_status(user):
     ).first()
     
     if active_subscription and active_subscription.is_active():
+        # Check daily limit for subscription
+        today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        today_predictions = Prediction.objects.filter(
+            user=user,
+            prediction_date__gte=today_start
+        ).count()
+        
+        daily_limit = active_subscription.get_daily_limit()
+        
+        if today_predictions >= daily_limit:
+            return {
+                'has_access': False,
+                'reason': 'daily_limit_reached',
+                'daily_limit': daily_limit,
+                'used_today': today_predictions,
+                'subscription': active_subscription
+            }
+        
         return {
             'has_access': True,
             'reason': 'subscription',
-            'subscription': active_subscription
+            'subscription': active_subscription,
+            'daily_limit': daily_limit,
+            'used_today': today_predictions,
+            'remaining_today': daily_limit - today_predictions
         }
     
     # SECURITY FIX: Count ALL predictions (including archived) to prevent bypass
@@ -106,7 +127,20 @@ def use_prediction_credit(user):
     ).first()
     
     if active_subscription and active_subscription.is_active():
-        return True  # Subscription users have unlimited access
+        # Check daily limit for subscription
+        today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        today_predictions = Prediction.objects.filter(
+            user=user,
+            prediction_date__gte=today_start
+        ).count()
+        
+        daily_limit = active_subscription.get_daily_limit()
+        
+        if today_predictions >= daily_limit:
+            logger.info(f"User {user.username} has reached daily limit: {today_predictions}/{daily_limit}")
+            return False
+        
+        return True  # Subscription users have access within daily limit
     
     # SECURITY FIX: Count ALL predictions (including archived) to prevent bypass
     total_predictions = Prediction.objects.filter(user=user).count()
@@ -299,20 +333,32 @@ def initiate_mpesa_payment(request):
     
     try:
         mpesa_number = request.POST.get('mpesa_number')
-        currency = request.POST.get('currency', 'USD')
+        plan_type = request.POST.get('plan_type', 'standard')
+        amount = request.POST.get('amount')
 
         if not mpesa_number and request.body:
              try:
                  import json
                  data = json.loads(request.body)
                  mpesa_number = data.get('mpesa_number')
-                 currency = data.get('currency', 'USD')
+                 plan_type = data.get('plan_type', 'standard')
+                 amount = data.get('amount')
              except json.JSONDecodeError:
                  pass
         
         if not mpesa_number:
             print("DEBUG: Number is missing after extraction")
             return JsonResponse({'error': 'M-Pesa number is required'}, status=400)
+        
+        if not amount:
+            print("DEBUG: Amount is missing")
+            return JsonResponse({'error': 'Amount is required'}, status=400)
+        
+        # Convert amount to decimal
+        try:
+            amount = float(amount)
+        except (ValueError, TypeError):
+            return JsonResponse({'error': 'Invalid amount'}, status=400)
         
         # Validate M-Pesa number
         mpesa_number = mpesa_number.replace(' ', '').replace('-', '')
@@ -327,19 +373,14 @@ def initiate_mpesa_payment(request):
             print(f"DEBUG: Invalid Length {len(mpesa_number)}")
             return JsonResponse({'error': 'Invalid M-Pesa number format'}, status=400)
         
-        # Determine amount based on currency
-        if currency == 'KSH':
-            amount = settings.SUBSCRIPTION_PRICE_KSH
-        else:
-            amount = settings.SUBSCRIPTION_PRICE_USD
-        
         # Create pending subscription
         subscription = Subscription.objects.create(
             user=request.user,
             status='pending',
             payment_method='mpesa',
+            plan_type=plan_type,
             amount=amount,
-            currency=currency,
+            currency='KSH',
             mpesa_number=mpesa_number
         )
         

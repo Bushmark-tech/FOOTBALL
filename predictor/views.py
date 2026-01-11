@@ -546,13 +546,32 @@ def predict(request):
     # Check subscription status - user is authenticated due to @login_required
     status = check_subscription_status(request.user)
     if not status['has_access']:
-        messages.warning(request, 'You have used all your free matches. Please subscribe to continue making predictions.')
+        if status.get('reason') == 'daily_limit_reached':
+            # Show plan-specific daily limit message
+            plan_name = status['subscription'].get_plan_type_display()
+            messages.warning(
+                request, 
+                f'You have reached your daily limit of {status["daily_limit"]} predictions for your {plan_name}. '
+                f'Please try again tomorrow or upgrade to a higher plan for more predictions.'
+            )
+        else:
+            messages.warning(request, 'You have used all your free matches. Please subscribe to continue making predictions.')
         return redirect('predictor:subscribe')
     
     if request.method == 'POST':
         # Check subscription before processing prediction
         if not use_prediction_credit(request.user):
-            messages.warning(request, 'You have used all your free matches. Please subscribe to continue.')
+            # Get status again to check reason
+            status = check_subscription_status(request.user)
+            if status.get('reason') == 'daily_limit_reached':
+                plan_name = status['subscription'].get_plan_type_display()
+                messages.warning(
+                    request,
+                    f'You have reached your daily limit of {status["daily_limit"]} predictions for your {plan_name}. '
+                    f'Please try again tomorrow or upgrade to a higher plan.'
+                )
+            else:
+                messages.warning(request, 'You have used all your free matches. Please subscribe to continue.')
             return redirect('predictor:subscribe')
         
         home_team = request.POST.get('home_team')
