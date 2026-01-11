@@ -160,7 +160,7 @@ def admin_users(request):
             default=0
         ),
         total_spent=Sum('subscriptions__amount')
-    ).select_related('profile').order_by('-date_joined')
+    ).select_related('profile').prefetch_related('subscriptions').order_by('-date_joined')
     
     # Filtering
     filter_type = request.GET.get('filter', 'all')
@@ -206,10 +206,20 @@ def admin_users(request):
     per_page = 50
     total = users.count()
     start = (page - 1) * per_page
-    users_page = users[start:start + per_page]
+    
+    # Slice returns QuerySet, cast to list to evaluate and cache results
+    # This prevents re-evaluation in template which would lose the attached attributes
+    users_list = list(users[start:start + per_page])
+    
+    # Add active subscription to each user using python filtering on prefetched data
+    for user in users_list:
+        # Use .all() to hit the prefetch cache, filter in memory
+        # This avoids N+1 DB queries which can timeout or lock
+        active_subs = [s for s in user.subscriptions.all() if s.status == 'active']
+        user.active_subscription = active_subs[0] if active_subs else None
     
     context = {
-        'users': users_page,
+        'users': users_list,
         'total': total,
         'page': page,
         'has_next': (start + per_page) < total,
