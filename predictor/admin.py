@@ -345,14 +345,18 @@ class UserProfileAdmin(admin.ModelAdmin):
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
     """Enhanced admin for subscription management"""
-    list_display = ['user', 'status_display', 'amount_display', 'payment_method', 'start_date', 'end_date', 'days_remaining']
-    list_filter = ['status', 'payment_method', 'currency', 'created_at', 'start_date']
+    list_display = ['user', 'plan_type_display', 'status_display', 'amount_display', 'payment_method', 'limits_display', 'start_date', 'end_date', 'days_remaining']
+    list_filter = ['status', 'plan_type', 'payment_method', 'currency', 'created_at', 'start_date']
     search_fields = ['user__username', 'mpesa_transaction_id', 'mpesa_number']
-    readonly_fields = ['created_at', 'updated_at', 'days_remaining_info']
+    readonly_fields = ['created_at', 'updated_at', 'days_remaining_info', 'plan_limits_info']
     
     fieldsets = (
         ('Subscription Information', {
-            'fields': ('user', 'status', 'payment_method')
+            'fields': ('user', 'status', 'plan_type', 'payment_method')
+        }),
+        ('Plan Limits', {
+            'fields': ('plan_limits_info',),
+            'description': 'Daily and monthly prediction limits based on plan type'
         }),
         ('Payment Details', {
             'fields': ('amount', 'currency')
@@ -361,7 +365,7 @@ class SubscriptionAdmin(admin.ModelAdmin):
             'fields': ('start_date', 'end_date', 'days_remaining_info')
         }),
         ('Payment Reference', {
-            'fields': ('mpesa_number', 'mpesa_transaction_id', 'mpesa_wallet'),
+            'fields': ('mpesa_number', 'mpesa_transaction_id'),
             'classes': ('collapse',)
         }),
         ('Timestamps', {
@@ -372,6 +376,54 @@ class SubscriptionAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_at'
     actions = ['activate_subscriptions', 'cancel_subscriptions', 'extend_subscriptions']
     
+    # Make the list view responsive
+    list_per_page = 25
+    list_max_show_all = 100
+    
+    def plan_type_display(self, obj):
+        """Display plan type with color coding"""
+        colors = {
+            'standard': '#00d9a3',  # Green
+            'starter': '#fbbf24',   # Gold
+            'vip': '#8b5cf6'        # Purple
+        }
+        icons = {
+            'standard': '🟢',
+            'starter': '⭐',
+            'vip': '♾️'
+        }
+        color = colors.get(obj.plan_type, '#6b7280')
+        icon = icons.get(obj.plan_type, '📦')
+        return format_html(
+            '<span style="color: {}; font-weight: bold; font-size: 14px;">{} {}</span>',
+            color, icon, obj.get_plan_type_display()
+        )
+    plan_type_display.short_description = "Plan"
+    plan_type_display.admin_order_field = 'plan_type'
+    
+    def limits_display(self, obj):
+        """Display daily and monthly limits"""
+        daily = obj.get_daily_limit()
+        monthly = obj.get_monthly_limit()
+        return format_html(
+            '<span style="font-size: 12px;"><strong>{}</strong>/day<br/><span style="color: #6b7280;">{}/month</span></span>',
+            daily, monthly
+        )
+    limits_display.short_description = "Limits"
+    
+    def plan_limits_info(self, obj):
+        """Detailed plan limits information"""
+        daily = obj.get_daily_limit()
+        monthly = obj.get_monthly_limit()
+        return format_html(
+            '<div style="padding: 10px; background: #f3f4f6; border-radius: 8px;">'
+            '<p style="margin: 5px 0;"><strong>Daily Limit:</strong> {} predictions per day</p>'
+            '<p style="margin: 5px 0;"><strong>Monthly Limit:</strong> {} predictions per month</p>'
+            '</div>',
+            daily, monthly
+        )
+    plan_limits_info.short_description = "Plan Limits"
+    
     def status_display(self, obj):
         """Display status with color coding"""
         colors = {'active': 'green', 'expired': 'red', 'cancelled': 'gray', 'pending': 'orange'}
@@ -381,27 +433,38 @@ class SubscriptionAdmin(admin.ModelAdmin):
             color, obj.get_status_display()
         )
     status_display.short_description = "Status"
+    status_display.admin_order_field = 'status'
     
     def amount_display(self, obj):
         """Display amount with currency"""
-        return f"{obj.currency} {obj.amount}"
+        return format_html(
+            '<span style="font-weight: bold;">{} {}</span>',
+            obj.currency, obj.amount
+        )
     amount_display.short_description = "Amount"
     
     def days_remaining(self, obj):
         """Display days remaining"""
         if obj.status == 'active' and obj.end_date:
             days = (obj.end_date - timezone.now().date()).days
+            if days > 7:
+                color = 'green'
+            elif days > 0:
+                color = 'orange'
+            else:
+                color = 'red'
+            
             if days > 0:
                 return format_html(
-                    '<span style="color: green; font-weight: bold;">{} days</span>',
-                    days
+                    '<span style="color: {}; font-weight: bold;">{} days</span>',
+                    color, days
                 )
             else:
                 return format_html(
                     '<span style="color: red; font-weight: bold;">Expired</span>'
                 )
         return "-"
-    days_remaining.short_description = "Days Remaining"
+    days_remaining.short_description = "Days Left"
     
     def days_remaining_info(self, obj):
         """Info display for days remaining"""
@@ -415,13 +478,13 @@ class SubscriptionAdmin(admin.ModelAdmin):
         """Activate selected subscriptions"""
         count = queryset.update(status='active')
         self.message_user(request, f"{count} subscriptions activated.")
-    activate_subscriptions.short_description = "Activate selected subscriptions"
+    activate_subscriptions.short_description = "✓ Activate selected subscriptions"
     
     def cancel_subscriptions(self, request, queryset):
         """Cancel selected subscriptions"""
         count = queryset.update(status='cancelled')
         self.message_user(request, f"{count} subscriptions cancelled.")
-    cancel_subscriptions.short_description = "Cancel selected subscriptions"
+    cancel_subscriptions.short_description = "✗ Cancel selected subscriptions"
     
     def extend_subscriptions(self, request, queryset):
         """Extend subscriptions by 30 days"""
@@ -433,10 +496,10 @@ class SubscriptionAdmin(admin.ModelAdmin):
                 subscription.end_date = timezone.now().date() + timedelta(days=30)
             subscription.save()
         self.message_user(request, f"Extended {queryset.count()} subscriptions by 30 days.")
-    extend_subscriptions.short_description = "Extend by 30 days"
+    extend_subscriptions.short_description = "⏰ Extend by 30 days"
 
 
 # Customize admin site
-admin.site.site_header = "Football Predictor Admin"
-admin.site.site_title = "Admin Dashboard"
-admin.site.index_title = "Welcome to Football Predictor Administration" 
+admin.site.site_header = "LEON GAMES PRO Admin"
+admin.site.site_title = "LEON GAMES PRO"
+admin.site.index_title = "Welcome to LEON GAMES PRO Administration"
