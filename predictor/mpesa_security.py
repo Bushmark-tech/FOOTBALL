@@ -20,6 +20,7 @@ MPESA_ALLOWED_IPS = [
     '196.201.214.206',
     '196.201.214.207',
     '196.201.214.208',
+    '196.201.212.129',  # New IP seen in logs
     # Add more M-Pesa IPs as needed
 ]
 
