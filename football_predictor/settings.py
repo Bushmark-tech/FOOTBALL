@@ -52,6 +52,7 @@ INSTALLED_APPS.extend([
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'football_predictor.security_middleware.ScannerBlockerMiddleware', # Custom Bot Blocker
     'whitenoise.middleware.WhiteNoiseMiddleware',  # Serve static files on Render
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
