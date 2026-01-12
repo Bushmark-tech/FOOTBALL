@@ -426,7 +426,7 @@ def initiate_stk_push(phone_number, amount, subscription_id, base_url=None):
             settings.MPESA_CONSUMER_KEY != 'your-mpesa-consumer-key'
         )
         
-        is_production = getattr(settings, 'MPESA_ENVIRONMENT', 'sandbox') == 'production'
+        is_production = getattr(settings, 'MPESA_ENVIRONMENT', 'sandbox') == 'production' or not settings.DEBUG or getattr(settings, 'IS_RENDER', False)
         
         # MOCK MODE: Only allowed if NOT in production and credentials are missing
         if not mpesa_configured:
