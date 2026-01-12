@@ -703,29 +703,51 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    // Hide modal
-                    paymentModal.classList.remove('active');
-
                     if (data.success) {
                         // Show success message with different text for mock vs real
-                        let successMessage = '✅ Payment Successful!\n\n';
+                        let successMessage = '✅ Payment Request Sent!\n\n';
 
                         if (data.is_mock) {
+                            // Hide modal immediately for mock
+                            paymentModal.classList.remove('active');
+
                             successMessage += '🎉 TEST MODE: Your subscription has been activated!\n\n';
                             successMessage += '✨ You now have unlimited access to all features.\n';
                             successMessage += '💡 Note: This is a test payment - no actual charge was made.\n\n';
                             successMessage += 'To use real M-PESA payments, configure your API credentials in the .env file.';
+
+                            alert(successMessage);
+
+                            // Redirect to home after 2 seconds
+                            setTimeout(() => {
+                                window.location.href = '/';
+                            }, 2000);
                         } else {
-                            successMessage += data.message || 'Your subscription has been activated. You now have unlimited access to all features!';
+                            // Real M-Pesa: Keep modal open for 40 seconds
+                            successMessage = '📱 Check Your Phone!\n\n';
+                            successMessage += 'An M-PESA payment request has been sent to ' + formattedPhone + '.\n\n';
+                            successMessage += '⏱️ You have 40 seconds to:\n';
+                            successMessage += '1. Check your phone for the M-PESA prompt\n';
+                            successMessage += '2. Enter your M-PESA PIN\n';
+                            successMessage += '3. Confirm the payment\n\n';
+                            successMessage += 'Please complete the payment now...';
+
+                            alert(successMessage);
+
+                            // Keep modal open for 40 seconds
+                            setTimeout(() => {
+                                paymentModal.classList.remove('active');
+                                submitButton.disabled = false;
+                                submitButton.innerHTML = originalText;
+
+                                alert('⏰ Payment Window Closed\n\nIf you completed the payment, your subscription will be activated shortly.\n\nIf not, please try again.');
+                                window.location.reload();
+                            }, 40000); // 40 seconds
                         }
-
-                        alert(successMessage);
-
-                        // Redirect to home after 2 seconds
-                        setTimeout(() => {
-                            window.location.href = '/';
-                        }, 2000);
                     } else {
+                        // Hide modal on error
+                        paymentModal.classList.remove('active');
+
                         alert('❌ Payment Failed\n\n' + (data.error || 'Payment initiation failed. Please try again.'));
                         submitButton.disabled = false;
                         submitButton.innerHTML = originalText;
