@@ -30,7 +30,7 @@ print(f"Passkey: {'SET' if settings.MPESA_PASSKEY else 'NOT SET'}")
 # Check 2: Till Number Verification
 print("\n[2] TILL NUMBER VERIFICATION")
 print("-" * 60)
-expected_till = "3040653"
+expected_till = "3049053"
 actual_till = settings.MPESA_SHORTCODE
 
 if actual_till == expected_till:
@@ -85,7 +85,7 @@ print("  DEPLOYMENT CHECKLIST")
 print("="*60)
 
 checklist = [
-    ("Till Number set to 3040653", actual_till == expected_till),
+    ("Till Number set to 3049053", actual_till == expected_till),
     ("Transaction Type is CustomerBuyGoodsOnline", 'CustomerBuyGoodsOnline' in content),
     ("Consumer Key configured", bool(settings.MPESA_CONSUMER_KEY)),
     ("Consumer Secret configured", bool(settings.MPESA_CONSUMER_SECRET)),

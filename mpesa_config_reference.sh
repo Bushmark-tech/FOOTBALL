@@ -9,7 +9,7 @@
 # Get these from: https://developer.safaricom.co.ke/
 MPESA_CONSUMER_KEY=your_consumer_key_from_daraja_portal
 MPESA_CONSUMER_SECRET=your_consumer_secret_from_daraja_portal
-MPESA_SHORTCODE=3040653
+MPESA_SHORTCODE=3049053
 MPESA_PASSKEY=your_passkey_from_daraja_portal
 
 # Environment: 'sandbox' for testing, 'production' for live
@@ -67,6 +67,6 @@ MPESA_ENVIRONMENT=production
 # [ ] Tested with real payment (small amount)
 # [ ] Monitoring logs for callbacks
 
-echo "M-Pesa Till Number: 3040653"
+echo "M-Pesa Till Number: 3049053"
 echo "Transaction Type: CustomerBuyGoodsOnline"
 echo "Callback URL: https://leon-football.com/api/mpesa/callback/"

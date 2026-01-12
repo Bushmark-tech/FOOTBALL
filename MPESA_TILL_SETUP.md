@@ -1,7 +1,7 @@
 # M-Pesa Till Number Integration Guide
 
 ## Overview
-Your Football Prediction App is now configured to use **Till Number 3040653** for M-Pesa payments.
+Your Football Prediction App is now configured to use **Till Number 3049053** for M-Pesa payments.
 
 ## What Changed
 
@@ -10,7 +10,7 @@ Your Football Prediction App is now configured to use **Till Number 3040653** fo
 - **After**: `CustomerBuyGoodsOnline` (for Till numbers)
 
 ### 2. **Shortcode Configuration**
-- **Till Number**: `3040653`
+- **Till Number**: `3049053`
 - **Location**: `settings.py` and `auth_views.py`
 
 ## Key Differences: Till Number vs Paybill
@@ -31,7 +31,7 @@ You need to obtain these from the [Safaricom Daraja Portal](https://developer.sa
 1. **Consumer Key** - Your API consumer key
 2. **Consumer Secret** - Your API consumer secret
 3. **Passkey** - Your Lipa Na M-Pesa Online Passkey
-4. **Till Number** - `3040653` (already configured)
+4. **Till Number** - `3049053` (already configured)
 
 ### Step 2: Set Environment Variables
 
@@ -41,7 +41,7 @@ Add these to your `.env` file (or Render environment variables):
 # M-Pesa Configuration
 MPESA_CONSUMER_KEY=your_actual_consumer_key_here
 MPESA_CONSUMER_SECRET=your_actual_consumer_secret_here
-MPESA_SHORTCODE=3040653
+MPESA_SHORTCODE=3049053
 MPESA_PASSKEY=your_actual_passkey_here
 MPESA_ENVIRONMENT=production  # Use 'sandbox' for testing
 ```
@@ -104,13 +104,13 @@ https://leon-football.com/api/mpesa/callback/
 ### 2. `football_predictor/settings.py` (Line 255)
 ```python
 # Updated default shortcode to Till Number
-MPESA_SHORTCODE = os.environ.get('MPESA_SHORTCODE', '3040653')
+MPESA_SHORTCODE = os.environ.get('MPESA_SHORTCODE', '3049053')
 ```
 
 ### 3. `env.example` (Line 42)
 ```bash
 # Updated example configuration
-MPESA_SHORTCODE=3040653  # Till Number
+MPESA_SHORTCODE=3049053  # Till Number
 ```
 
 ## Troubleshooting
@@ -166,5 +166,5 @@ MPESA_SHORTCODE=3040653  # Till Number
 ---
 
 **Last Updated**: January 12, 2026
-**Till Number**: 3040653
+**Till Number**: 3049053
 **Transaction Type**: CustomerBuyGoodsOnline
