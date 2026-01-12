@@ -703,36 +703,53 @@
             })
                 .then(response => response.json())
                 .then(data => {
+                    const modalContent = paymentModal.querySelector('.payment-modal-content');
                     if (data.success) {
-                        // Show success message with different text for mock vs real
-                        let successMessage = '✅ Payment Request Sent!\n\n';
-
                         if (data.is_mock) {
-                            // Hide modal immediately for mock
-                            paymentModal.classList.remove('active');
+                            // Update modal content for mock success
+                            modalContent.innerHTML = `
+                                <div class="payment-spinner" style="border-color: #00d9a3 transparent #00d9a3 transparent;"></div>
+                                <h2><i class="fas fa-check-circle" style="color: #00d9a3;"></i> Payment Successful!</h2>
+                                <p style="color: #00d9a3; font-weight: 600; margin-top: 1rem;">
+                                    Your subscription has been activated.
+                                </p>
+                                <p style="margin-top: 1rem; font-size: 0.9rem; color: #6b7280;">
+                                    <i class="fas fa-info-circle"></i> This was a test payment. No actual charge was made.
+                                </p>
+                                <p style="margin-top: 0.5rem; font-size: 0.9rem; color: #6b7280;">
+                                    Redirecting to home...
+                                </p>
+                            `;
 
-                            successMessage += '🎉 TEST MODE: Your subscription has been activated!\n\n';
-                            successMessage += '✨ You now have unlimited access to all features.\n';
-                            successMessage += '💡 Note: This is a test payment - no actual charge was made.\n\n';
-                            successMessage += 'To use real M-PESA payments, configure your API credentials in the .env file.';
-
-                            alert(successMessage);
-
-                            // Redirect to home after 2 seconds
+                            // Redirect to home after 3 seconds
                             setTimeout(() => {
+                                paymentModal.classList.remove('active');
                                 window.location.href = '/';
-                            }, 2000);
+                            }, 3000);
                         } else {
-                            // Real M-Pesa: Keep modal open for 40 seconds
-                            successMessage = '📱 Check Your Phone!\n\n';
-                            successMessage += 'An M-PESA payment request has been sent to ' + formattedPhone + '.\n\n';
-                            successMessage += '⏱️ You have 40 seconds to:\n';
-                            successMessage += '1. Check your phone for the M-PESA prompt\n';
-                            successMessage += '2. Enter your M-PESA PIN\n';
-                            successMessage += '3. Confirm the payment\n\n';
-                            successMessage += 'Please complete the payment now...';
+                            // Real M-Pesa: Update modal content and keep it visible
+                            modalContent.innerHTML = `
+                                <div class="payment-spinner"></div>
+                                <h2><i class="fas fa-mobile-alt"></i> Check Your Phone</h2>
+                                <p style="color: #00d9a3; font-weight: 600; font-size: 1.2rem; margin: 1rem 0;">
+                                    Payment request sent to ${formattedPhone}
+                                </p>
+                                <p style="color: #e5e7eb;">Please enter your M-PESA PIN to complete the payment.</p>
 
-                            alert(successMessage);
+                                <div class="payment-steps">
+                                    <h3><i class="fas fa-info-circle"></i> Complete Payment Now</h3>
+                                    <ol>
+                                        <li>Check your phone for the M-PESA prompt</li>
+                                        <li>Enter your M-PESA PIN</li>
+                                        <li>Confirm the payment</li>
+                                        <li>Wait for confirmation SMS</li>
+                                    </ol>
+                                </div>
+
+                                <p style="margin-top: 2rem; font-size: 0.9rem; color: #6b7280;">
+                                    <i class="fas fa-clock"></i> Processing... This window will close automatically.
+                                </p>
+                            `;
 
                             // Keep modal open for 40 seconds
                             setTimeout(() => {
@@ -740,17 +757,27 @@
                                 submitButton.disabled = false;
                                 submitButton.innerHTML = originalText;
 
-                                alert('⏰ Payment Window Closed\n\nIf you completed the payment, your subscription will be activated shortly.\n\nIf not, please try again.');
+                                // Reload to check subscription status
                                 window.location.reload();
                             }, 40000); // 40 seconds
                         }
                     } else {
-                        // Hide modal on error
-                        paymentModal.classList.remove('active');
-
-                        alert('❌ Payment Failed\n\n' + (data.error || 'Payment initiation failed. Please try again.'));
-                        submitButton.disabled = false;
-                        submitButton.innerHTML = originalText;
+                        // Update modal content for error
+                        modalContent.innerHTML = `
+                            <h2><i class="fas fa-times-circle" style="color: #ef4444;"></i> Payment Failed</h2>
+                            <p style="color: #ef4444; font-weight: 600; margin-top: 1rem;">
+                                ${data.error || 'Payment initiation failed. Please try again.'}
+                            </p>
+                            <p style="margin-top: 1rem; font-size: 0.9rem; color: #6b7280;">
+                                Please try again or contact support if the issue persists.
+                            </p>
+                        `;
+                        // Hide modal after a short delay to allow user to read error
+                        setTimeout(() => {
+                            paymentModal.classList.remove('active');
+                            submitButton.disabled = false;
+                            submitButton.innerHTML = originalText;
+                        }, 3000); // 3 seconds
                     }
                 })
                 .catch(error => {
