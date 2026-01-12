@@ -390,10 +390,12 @@ def initiate_mpesa_payment(request):
         profile.save()
         
         # Initiate M-Pesa STK Push
-        result = initiate_stk_push(mpesa_number, amount, subscription.id)
+        # Pass the current scheme and host to ensure callback comes back to this server
+        base_url = f"{request.scheme}://{request.get_host()}"
+        result = initiate_stk_push(mpesa_number, amount, subscription.id, base_url=base_url)
         
         if result.get('success'):
-            # Use message from result (will be different for mock vs real)
+            # Use message from result
             message = result.get('data', {}).get('CustomerMessage', 'Payment request sent to your phone. Please complete the payment.')
             
             return JsonResponse({
@@ -414,8 +416,8 @@ def initiate_mpesa_payment(request):
         return JsonResponse({'error': 'Payment initiation failed'}, status=500)
 
 
-def initiate_stk_push(phone_number, amount, subscription_id):
-    """Initiate M-Pesa STK Push payment with mock mode for testing."""
+def initiate_stk_push(phone_number, amount, subscription_id, base_url=None):
+    """Initiate M-Pesa STK Push payment."""
     try:
         # Check if M-PESA credentials are configured
         mpesa_configured = (
@@ -424,8 +426,16 @@ def initiate_stk_push(phone_number, amount, subscription_id):
             settings.MPESA_CONSUMER_KEY != 'your-mpesa-consumer-key'
         )
         
-        # MOCK MODE: If M-PESA not configured, simulate successful payment
+        is_production = getattr(settings, 'MPESA_ENVIRONMENT', 'sandbox') == 'production'
+        
+        # MOCK MODE: Only allowed if NOT in production and credentials are missing
         if not mpesa_configured:
+            if is_production:
+                return {
+                    'success': False, 
+                    'error': 'M-Pesa credentials not configured in Production. Please set MPESA_CONSUMER_KEY and MPESA_CONSUMER_SECRET.'
+                }
+                
             logger.info(f"MOCK PAYMENT MODE: Simulating successful payment for subscription {subscription_id}")
             
             # Simulate a successful payment
@@ -434,8 +444,6 @@ def initiate_stk_push(phone_number, amount, subscription_id):
             subscription.mpesa_transaction_id = f'MOCK-{subscription_id}-{datetime.now().strftime("%Y%m%d%H%M%S")}'
             subscription.activate(duration_days=getattr(settings, 'SUBSCRIPTION_DURATION_DAYS', 30))
             subscription.save()
-            
-            logger.info(f"MOCK PAYMENT: Subscription {subscription_id} activated successfully")
             
             return {
                 'success': True, 
@@ -448,16 +456,13 @@ def initiate_stk_push(phone_number, amount, subscription_id):
                 'mock': True
             }
         
-        # REAL M-PESA MODE: Use actual M-PESA API
-        # Get access token
+        # REAL M-PESA MODE
         access_token = get_mpesa_access_token()
         if not access_token:
-            return {'success': False, 'error': 'Failed to get access token'}
+            return {'success': False, 'error': 'Failed to authenticate with M-Pesa'}
         
         # STK Push URL
-        url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
-        if settings.MPESA_ENVIRONMENT == 'production':
-            url = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
+        url = settings.MPESA_STK_PUSH_URL
         
         # Generate timestamp and password
         timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
@@ -465,13 +470,17 @@ def initiate_stk_push(phone_number, amount, subscription_id):
             (settings.MPESA_SHORTCODE + settings.MPESA_PASSKEY + timestamp).encode()
         ).decode()
         
-        # Get callback URL (need to construct from request or settings)
-        from django.contrib.sites.models import Site
-        try:
-            current_site = Site.objects.get_current()
-            callback_url = f"https://{current_site.domain}/api/mpesa/callback/"
-        except:
-            callback_url = "https://yourdomain.com/api/mpesa/callback/"
+        # specific callback URL handling
+        if base_url:
+            callback_url = f"{base_url}/api/mpesa/callback/"
+        else:
+            # Fallback to Site framework
+            from django.contrib.sites.models import Site
+            try:
+                current_site = Site.objects.get_current()
+                callback_url = f"https://{current_site.domain}/api/mpesa/callback/"
+            except:
+                callback_url = "https://yourdomain.com/api/mpesa/callback/"
         
         # Request payload
         payload = {
@@ -507,7 +516,8 @@ def initiate_stk_push(phone_number, amount, subscription_id):
             else:
                 return {'success': False, 'error': data.get('CustomerMessage', 'Payment failed')}
         else:
-            return {'success': False, 'error': f'Payment request failed: {response.status_code} - {response.text}'}
+            logger.error(f"M-Pesa API Error: {response.text}")
+            return {'success': False, 'error': 'Unable to initiate payment (Provider Error)'}
     
     except Exception as e:
         logger.error(f"Error in STK Push: {e}")
