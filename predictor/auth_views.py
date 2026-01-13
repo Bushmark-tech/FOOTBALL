@@ -269,10 +269,18 @@ def register_view(request):
             )
             
             # Create user profile with 3 free matches
-            UserProfile.objects.create(user=user, free_matches_limit=3)
+            profile = UserProfile.objects.create(user=user, free_matches_limit=3)
+            
+            # Send verification email
+            from .email_utils import send_verification_email
+            email_sent = send_verification_email(user, request)
+            
+            if email_sent:
+                messages.success(request, f'Account created! A verification email has been sent to {email}. please check your inbox.')
+            else:
+                messages.warning(request, f'Account created, but failed to send verification email. Please contact support.')
             
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            messages.success(request, f'Welcome! Account created for {email}.')
             return redirect('predictor:home')
             
         except Exception as e:
