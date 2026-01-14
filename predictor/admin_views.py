@@ -798,11 +798,54 @@ def admin_api_stats(request):
             Subscription.objects.filter(status='active').aggregate(
                 total=Sum('amount')
             )['total'] or 0
-        ),
-        'timestamp': timezone.now().isoformat()
+        )
     }
     
     return JsonResponse(stats)
+
+
+@admin_required
+def debug_email(request):
+    """
+    Debug view to test email configuration in production.
+    Sends a test email to the current superuser.
+    """
+    if not request.user.is_superuser:
+        messages.error(request, "Only superusers can test email configuration.")
+        return redirect('predictor:admin_system')
+        
+    from django.core.mail import send_mail
+    from django.conf import settings
+    import socket
+    
+    context = {
+        'email_backend': settings.EMAIL_BACKEND,
+        'email_host': settings.EMAIL_HOST,
+        'email_port': settings.EMAIL_PORT,
+        'email_use_tls': settings.EMAIL_USE_TLS,
+        'email_host_user': settings.EMAIL_HOST_USER,
+        'default_from_email': settings.DEFAULT_FROM_EMAIL,
+        'hostname': socket.gethostname(),
+    }
+    
+    if request.method == 'POST':
+        target_email = request.POST.get('email', request.user.email)
+        try:
+            send_mail(
+                'Debug Test Email - Football Predictor',
+                f'This is a test email sent from {socket.gethostname()} by {request.user.username}.',
+                settings.DEFAULT_FROM_EMAIL,
+                [target_email],
+                fail_silently=False,
+            )
+            messages.success(request, f"Test email sent successfully to {target_email}!")
+            context['result'] = 'Success'
+        except Exception as e:
+            messages.error(request, f"Failed to send email: {str(e)}")
+            context['result'] = f"Error: {str(e)}"
+            context['error'] = str(e)
+            
+    return render(request, 'admin/debug_email.html', context)
 
 
 @admin_required

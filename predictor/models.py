@@ -306,7 +306,7 @@ class UserProfile(models.Model):
     """Extended user profile with subscription and free matches tracking."""
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     free_matches_used = models.IntegerField(default=0)
-    free_matches_limit = models.IntegerField(default=3)
+    free_matches_limit = models.IntegerField(default=1)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     mpesa_number = models.CharField(max_length=20, blank=True, null=True)
     
