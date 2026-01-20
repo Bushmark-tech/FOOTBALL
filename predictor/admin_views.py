@@ -286,12 +286,30 @@ def admin_user_action(request, user_id):
             logger.info(f"Admin {request.user.username} reset password for {user.username}")
         
         elif action == 'grant_free_access':
-            days = int(request.POST.get('days', 30))
-            profile, _ = UserProfile.objects.get_or_create(user=user)
-            profile.free_access_until = timezone.now() + timedelta(days=days)
-            profile.save()
-            messages.success(request, f'Granted {days} days free access to {user.username}')
+            # Create a free/admin-granted subscription
+            from .models import Subscription
+            days = int(request.POST.get('days', 7))
+            
+            Subscription.objects.create(
+                user=user,
+                status='active',
+                payment_method='mpesa', # Fallback to allowed choice
+                plan_type='vip',
+                amount=0,
+                currency='KSH',
+                start_date=timezone.now(),
+                end_date=timezone.now() + timedelta(days=days)
+            )
+            messages.success(request, f'Granted {days} days VIP access to {user.username}')
             logger.info(f"Admin {request.user.username} granted {days} days to {user.username}")
+
+        elif action == 'set_free_quota':
+            limit = int(request.POST.get('limit', 1))
+            profile, _ = UserProfile.objects.get_or_create(user=user)
+            profile.free_matches_limit = limit
+            profile.save()
+            messages.success(request, f'Free match quota set to {limit} for {user.username}')
+
         
         elif action == 'reset_free_quota':
             profile = UserProfile.objects.get_or_create(user=user)[0]

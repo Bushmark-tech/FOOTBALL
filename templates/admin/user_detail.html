@@ -133,10 +133,12 @@
                                     </td>
                                     <td class="fw-bold">{{ sub.currency }} {{ sub.amount }}</td>
                                     <td>
-                                        <span class="badge bg-light text-dark border">{{ sub.payment_method|upper }}</span>
+                                        <span class="badge bg-light text-dark border">{{ sub.payment_method|upper
+                                            }}</span>
                                     </td>
                                     <td class="small text-muted">
-                                        {{ sub.start_date|date:"M d, Y" }} — {{ sub.end_date|date:"M d, Y"|default:"..." }}
+                                        {{ sub.start_date|date:"M d, Y" }} — {{ sub.end_date|date:"M d, Y"|default:"..."
+                                        }}
                                     </td>
                                     <td class="pe-4 text-end">
                                         <a href="{% url 'predictor:admin_billing' %}?subscription_id={{ sub.id }}"
@@ -185,7 +187,9 @@
                                     </td>
                                     <td>
                                         <span class="badge bg-light text-dark border">
-                                            {% if pred.prob_home > pred.prob_away and pred.prob_home > pred.prob_draw %}Home{% elif pred.prob_away > pred.prob_home and pred.prob_away > pred.prob_draw %}Away{% else %}Draw{% endif %}
+                                            {% if pred.prob_home > pred.prob_away and pred.prob_home > pred.prob_draw
+                                            %}Home{% elif pred.prob_away > pred.prob_home and pred.prob_away >
+                                            pred.prob_draw %}Away{% else %}Draw{% endif %}
                                         </span>
                                     </td>
                                     <td>
@@ -251,13 +255,26 @@
                     <h6 class="m-0 fw-bold">Operational Controls</h6>
                 </div>
                 <div class="card-body">
+                    <!-- Free Quota Control -->
+                    <form method="post" action="{% url 'predictor:admin_user_action' user.id %}" class="mb-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="set_free_quota">
+                        <label class="small text-muted fw-bold mb-2">Free Match Quota</label>
+                        <div class="input-group">
+                            <input type="number" name="limit" class="form-control bg-light border-0"
+                                value="{{ profile.free_matches_limit }}" min="1">
+                            <button type="submit" class="btn btn-outline-primary">Set Limit</button>
+                        </div>
+                    </form>
+
                     <form method="post" action="{% url 'predictor:admin_user_action' user.id %}" class="mb-3">
                         {% csrf_token %}
                         <input type="hidden" name="action" value="reset_free_quota">
                         <button type="submit"
                             class="btn btn-light border w-100 text-start d-flex justify-content-between align-items-center p-3 hover-shadow">
                             <span>
-                                <i class="fas fa-redo text-secondary me-2"></i> Reset Free Quota
+                                <i class="fas fa-redo text-secondary me-2"></i> Reset Usage (0/{{
+                                profile.free_matches_limit }})
                             </span>
                             <i class="fas fa-chevron-right small text-muted"></i>
                         </button>
@@ -292,11 +309,11 @@
                     <form method="post" action="{% url 'predictor:admin_user_action' user.id %}">
                         {% csrf_token %}
                         <input type="hidden" name="action" value="grant_free_access">
-                        <label class="small text-muted fw-bold mb-2">Grant Premium Access</label>
+                        <label class="small text-muted fw-bold mb-2">Grant VIP (Subscription)</label>
                         <div class="input-group">
                             <input type="number" name="days" class="form-control bg-light border-0" value="7" min="1"
                                 placeholder="Days">
-                            <button type="submit" class="btn btn-primary">Apply</button>
+                            <button type="submit" class="btn btn-primary">Add Time</button>
                         </div>
                     </form>
                 </div>
