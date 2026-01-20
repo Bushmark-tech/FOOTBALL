@@ -268,8 +268,8 @@ def register_view(request):
                 password=password
             )
             
-            # Create user profile with 3 free matches
-            profile = UserProfile.objects.create(user=user, free_matches_limit=3)
+            # Create user profile with 1 free match
+            profile = UserProfile.objects.create(user=user, free_matches_limit=1)
             
             # Send verification email
             from .email_utils import send_verification_email
