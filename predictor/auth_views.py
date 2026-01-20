@@ -498,15 +498,15 @@ def initiate_stk_push(phone_number, amount, subscription_id, base_url=None):
                 callback_url = "https://yourdomain.com/api/mpesa/callback/"
         
         # Request payload
-        # For Till Numbers, use CustomerBuyGoodsOnline transaction type
+        # For Lipa na M-Pesa Online, use CustomerPayBillOnline transaction type
         payload = {
             "BusinessShortCode": settings.MPESA_SHORTCODE,
             "Password": password,
             "Timestamp": timestamp,
-            "TransactionType": "CustomerBuyGoodsOnline",  # Changed for Till Number
+            "TransactionType": "CustomerPayBillOnline",  # Correct type for Lipa na M-Pesa Online
             "Amount": int(amount),
             "PartyA": phone_number,
-            "PartyB": settings.MPESA_SHORTCODE,  # Till Number goes here
+            "PartyB": settings.MPESA_SHORTCODE,
             "PhoneNumber": phone_number,
             "CallBackURL": callback_url,
             "AccountReference": f"SUB{subscription_id}",
