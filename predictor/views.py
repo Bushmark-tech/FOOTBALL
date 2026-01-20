@@ -494,21 +494,8 @@ def home(request):
     
     # Cap displayed count at free limit for non-subscribed users
     # This handles cases where users made predictions before the limit was enforced
-    profile = getattr(request.user, 'profile', None)
-    if profile:
-        # Check if user has active subscription
-        has_subscription = Subscription.objects.filter(
-            user=request.user,
-            status='active'
-        ).exists()
-        
-        if not has_subscription:
-            # Cap at free limit for display purposes
-            display_predictions = min(total_predictions, profile.free_matches_limit)
-        else:
-            display_predictions = total_predictions
-    else:
-        display_predictions = total_predictions
+    # Show actual total predictions without capping
+    display_predictions = total_predictions
     
     # Calculate accuracy rate (assuming we have some way to track accuracy)
     # For now, we'll use a realistic estimate based on total predictions

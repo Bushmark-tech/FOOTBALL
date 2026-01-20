@@ -1025,10 +1025,7 @@
                                 style="color: #00d4aa; font-size: 2.2rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; font-weight: 800; text-shadow: 0 0 20px rgba(0, 212, 170, 0.3);">
                                 {{ prediction_outcome }}
                             </h2>
-                            <p
-                                style="color: #94a3b8; margin: 15px 0 0 0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 500;">
-                                Recommended Bet
-                            </p>
+                            <!-- Label removed as requested -->
                         </div>
 
                         <!-- Quick Action Button -->
@@ -1368,24 +1365,30 @@
                             <div
                                 style="text-align: center; padding: 10px; background: rgba(0, 212, 170, 0.1); border-radius: 8px; border: 1px solid rgba(0, 212, 170, 0.3);">
                                 <div style="color: #00d4aa; font-size: 0.9rem; margin-bottom: 5px;">Home Win</div>
-                                <div style="font-size: 1.2rem; font-weight: bold; color: white;">{{ prediction_stats.home_count|default:"0" }}</div>
-                                <div style="font-size: 0.8rem; color: #94a3b8;">{{ prediction_stats.home_percentage_fmt|default:"0.0" }}%</div>
+                                <div style="font-size: 1.2rem; font-weight: bold; color: white;">{{
+                                    prediction_stats.home_count|default:"0" }}</div>
+                                <div style="font-size: 0.8rem; color: #94a3b8;">{{
+                                    prediction_stats.home_percentage_fmt|default:"0.0" }}%</div>
                             </div>
 
                             <!-- Draw Stats -->
                             <div
                                 style="text-align: center; padding: 10px; background: rgba(245, 158, 11, 0.1); border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.3);">
                                 <div style="color: #f59e0b; font-size: 0.9rem; margin-bottom: 5px;">Draw</div>
-                                <div style="font-size: 1.2rem; font-weight: bold; color: white;">{{ prediction_stats.draw_count|default:"0" }}</div>
-                                <div style="font-size: 0.8rem; color: #94a3b8;">{{ prediction_stats.draw_percentage_fmt|default:"0.0" }}%</div>
+                                <div style="font-size: 1.2rem; font-weight: bold; color: white;">{{
+                                    prediction_stats.draw_count|default:"0" }}</div>
+                                <div style="font-size: 0.8rem; color: #94a3b8;">{{
+                                    prediction_stats.draw_percentage_fmt|default:"0.0" }}%</div>
                             </div>
 
                             <!-- Away Stats -->
                             <div
                                 style="text-align: center; padding: 10px; background: rgba(255, 107, 53, 0.1); border-radius: 8px; border: 1px solid rgba(255, 107, 53, 0.3);">
                                 <div style="color: #ff6b35; font-size: 0.9rem; margin-bottom: 5px;">Away Win</div>
-                                <div style="font-size: 1.2rem; font-weight: bold; color: white;">{{ prediction_stats.away_count|default:"0" }}</div>
-                                <div style="font-size: 0.8rem; color: #94a3b8;">{{ prediction_stats.away_percentage_fmt|default:"0.0" }}%</div>
+                                <div style="font-size: 1.2rem; font-weight: bold; color: white;">{{
+                                    prediction_stats.away_count|default:"0" }}</div>
+                                <div style="font-size: 0.8rem; color: #94a3b8;">{{
+                                    prediction_stats.away_percentage_fmt|default:"0.0" }}%</div>
                             </div>
                         </div>
 
@@ -1393,15 +1396,18 @@
                             style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; border-top: 1px solid #333; padding-top: 15px;">
                             <div style="text-align: center;">
                                 <div style="color: #94a3b8; font-size: 0.8rem;">Avg Home Goals</div>
-                                <div style="color: white; font-weight: bold;">{{ prediction_stats.avg_home_score|default:"0" }}</div>
+                                <div style="color: white; font-weight: bold;">{{
+                                    prediction_stats.avg_home_score|default:"0" }}</div>
                             </div>
                             <div style="text-align: center;">
                                 <div style="color: #94a3b8; font-size: 0.8rem;">Avg Away Goals</div>
-                                <div style="color: white; font-weight: bold;">{{ prediction_stats.avg_away_score|default:"0" }}</div>
+                                <div style="color: white; font-weight: bold;">{{
+                                    prediction_stats.avg_away_score|default:"0" }}</div>
                             </div>
                             <div style="text-align: center;">
                                 <div style="color: #94a3b8; font-size: 0.8rem;">Avg Ability</div>
-                                <div style="color: white; font-weight: bold;">{{ prediction_stats.avg_confidence|default:"0" }}%</div>
+                                <div style="color: white; font-weight: bold;">{{
+                                    prediction_stats.avg_confidence|default:"0" }}%</div>
                             </div>
                         </div>
                     </div>
