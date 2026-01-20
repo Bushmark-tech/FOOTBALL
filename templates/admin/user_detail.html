@@ -187,9 +187,15 @@
                                     </td>
                                     <td>
                                         <span class="badge bg-light text-dark border">
-                                            {% if pred.prob_home > pred.prob_away and pred.prob_home > pred.prob_draw
-                                            %}Home{% elif pred.prob_away > pred.prob_home and pred.prob_away >
-                                            pred.prob_draw %}Away{% else %}Draw{% endif %}
+                                            {% if pred.prob_home > pred.prob_away and pred.prob_home > pred.prob_draw %}
+                                            Home
+                                            {% else %}
+                                            {% if pred.prob_away > pred.prob_home and pred.prob_away > pred.prob_draw %}
+                                            Away
+                                            {% else %}
+                                            Draw
+                                            {% endif %}
+                                            {% endif %}
                                         </span>
                                     </td>
                                     <td>
@@ -273,8 +279,8 @@
                         <button type="submit"
                             class="btn btn-light border w-100 text-start d-flex justify-content-between align-items-center p-3 hover-shadow">
                             <span>
-                                <i class="fas fa-redo text-secondary me-2"></i> Reset Usage (0/{{
-                                profile.free_matches_limit }})
+                                <i class="fas fa-redo text-secondary me-2"></i>
+                                Reset Usage (0/{{ profile.free_matches_limit }})
                             </span>
                             <i class="fas fa-chevron-right small text-muted"></i>
                         </button>
