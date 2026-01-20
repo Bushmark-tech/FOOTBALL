@@ -1,0 +1,50 @@
+Inspecting IDs in Dataset 1...
+Top 20 Team IDs in DF:
+HomeTeam
+68     152
+243    152
+359    151
+54     151
+302    151
+241    151
+300    151
+354    150
+397    146
+394    143
+262    143
+334    138
+76     138
+342    137
+409    136
+263    136
+212    136
+273    135
+244    135
+226    134
+Name: count, dtype: int64
+
+Checking Mapping against Top IDs:
+ID 68: Bristol City (Matches: 152)
+ID 243: Millwall (Matches: 152)
+ID 359: Swansea (Matches: 151)
+ID 54: Blackburn (Matches: 151)
+ID 302: QPR (Matches: 151)
+ID 241: Middlesbrough (Matches: 151)
+ID 300: Preston (Matches: 151)
+ID 354: Stoke (Matches: 150)
+ID 397: West Brom (Matches: 146)
+ID 394: Watford (Matches: 143)
+ID 262: Norwich (Matches: 143)
+ID 334: Sheffield United (Matches: 138)
+ID 76: Pari NN (Matches: 138)
+ID 342: Sp Gijon (Matches: 137)
+ID 409: Zaragoza (Matches: 136)
+ID 263: Nott'm Forest (Matches: 136)
+ID 212: Leeds (Matches: 136)
+ID 273: Oviedo (Matches: 135)
+ID 244: Mirandes (Matches: 135)
+ID 226: Man United (Matches: 134)
+
+Liverpool Mapped ID: 220
+  Liverpool ID 220 FOUND in dataset.
+Sample valid IDs: [np.int64(152), np.int64(318), np.int64(261), np.int64(254), np.int64(167), np.int64(95), np.int64(87), np.int64(5), np.int64(356), np.int64(337)]

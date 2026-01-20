@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up | Leon Games Pro</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --glass-bg: rgba(22, 27, 34, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --neon-teal: #00f2ea;
+            --neon-blue: #4facfe;
+            --dark-bg: #0d1117;
+            --text-primary: #ffffff;
+            --text-secondary: #8b949e;
+            --input-bg: rgba(13, 17, 23, 0.6);
+            --gradient-primary: linear-gradient(135deg, #00f2ea 0%, #4facfe 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--dark-bg);
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(0, 242, 234, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(79, 172, 254, 0.08) 0%, transparent 40%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 15px;
+        }
+
+        .auth-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 30px 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-teal), transparent);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .app-logo {
+            font-size: 2.5rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        .auth-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .auth-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-control {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px 45px 12px 45px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--neon-teal);
+            box-shadow: 0 0 0 3px rgba(0, 242, 234, 0.1);
+            background: rgba(13, 17, 23, 0.8);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 1rem;
+            transition: color 0.3s;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            cursor: pointer;
+            z-index: 10;
+            transition: color 0.3s;
+        }
+
+        .password-toggle:hover {
+            color: var(--neon-teal);
+        }
+
+        .form-control:focus+.input-icon {
+            color: var(--neon-teal);
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: var(--gradient-primary);
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #000;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 242, 234, 0.4);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 25px 0;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--glass-border);
+        }
+
+        .divider span {
+            padding: 0 10px;
+        }
+
+        .btn-google {
+            width: 100%;
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 12px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-google:hover {
+            border-color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .footer-link {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .footer-link a {
+            color: var(--neon-teal);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer-link a:hover {
+            text-decoration: underline;
+        }
+
+        .alert-box {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #ff6b6b;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 576px) {
+            .auth-container {
+                padding: 15px;
+                max-width: 100%;
+            }
+
+            .auth-card {
+                padding: 30px 20px;
+                border-radius: 20px;
+            }
+
+            .app-logo {
+                font-size: 2rem;
+                margin-bottom: 10px;
+            }
+
+            .auth-title {
+                font-size: 1.5rem;
+            }
+
+            .form-control {
+                font-size: 16px;
+                /* Prevent zoom on iOS */
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="app-logo">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h1 class="auth-title">Create Account</h1>
+                <p class="auth-subtitle">Join Leon Games Pro to start predicting</p>
+            </div>
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert-box">
+                <i class="fas fa-exclamation-circle"></i> {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <input type="text" name="username" class="form-control" placeholder="Choose a Username" required
+                        autofocus>
+                    <i class="fas fa-user input-icon"></i>
+                </div>
+
+                <div class="form-group">
+                    <input type="email" name="email" class="form-control" placeholder="Email Address" required>
+                    <i class="fas fa-envelope input-icon"></i>
+                </div>
+
+                <div class="form-group">
+                    <input type="password" name="password1" class="form-control" placeholder="Create Password" required>
+                    <i class="fas fa-lock input-icon"></i>
+                    <i class="fas fa-eye password-toggle" onclick="togglePassword(this)"></i>
+                </div>
+
+                <div class="form-group">
+                    <input type="password" name="password2" class="form-control" placeholder="Confirm Password"
+                        required>
+                    <i class="fas fa-key input-icon"></i>
+                    <i class="fas fa-eye password-toggle" onclick="togglePassword(this)"></i>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    Sign Up
+                </button>
+            </form>
+
+            <div class="divider">
+                <span>OR REGISTER WITH</span>
+            </div>
+
+            <a href="/accounts/google/login/?process=login" class="btn-google">
+                <i class="fab fa-google"></i> Google
+            </a>
+
+            <div class="footer-link">
+                Already have an account? <a href="{% url 'predictor:login' %}">Sign In</a>
+                <br>
+                <a href="/accounts/password/reset/"
+                    style="color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; display: inline-block; margin-top: 8px;">Forgot
+                    Password?</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword(icon) {
+            const input = icon.parentElement.querySelector('input');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
+</body>
+
+</html>

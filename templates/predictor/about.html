@@ -1,0 +1,442 @@
+{% extends 'predictor/base.html' %}
+
+{% block title %}About - LEON GAMES PRO{% endblock %}
+
+{% block extra_css %}
+<style>
+    .about-container {
+        background: #000000;
+        min-height: 100vh;
+        padding: 2rem 1rem;
+    }
+
+    .about-hero {
+        background: linear-gradient(135deg, #1a1f2e 0%, #2a3142 100%);
+        border: 2px solid #00d9a3;
+        border-radius: 20px;
+        color: white;
+        padding: 3rem 2rem;
+        text-align: center;
+        margin-bottom: 3rem;
+        box-shadow: 0 10px 40px rgba(0, 217, 163, 0.2);
+    }
+
+    .about-hero h1 {
+        color: #00d9a3;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .about-hero p {
+        color: #9ca3af;
+        font-size: 1.2rem;
+        margin: 0;
+    }
+
+    .section-title {
+        text-align: center;
+        color: #00d9a3;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 3rem;
+    }
+
+    .section-title i {
+        margin-right: 0.5rem;
+    }
+
+    .feature-card {
+        background: #1a1f2e;
+        border: 2px solid #2a3142;
+        border-radius: 15px;
+        padding: 2rem;
+        height: 100%;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+
+    .feature-card:hover {
+        border-color: #00d9a3;
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0, 217, 163, 0.3);
+    }
+
+    .feature-icon {
+        font-size: 4rem;
+        color: #00d9a3;
+        margin-bottom: 1.5rem;
+        display: block;
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover .feature-icon {
+        transform: scale(1.2) rotate(5deg);
+    }
+
+    .feature-card h5 {
+        color: #ffffff;
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .feature-card p {
+        color: #9ca3af;
+        line-height: 1.8;
+        margin: 0;
+    }
+
+    .process-step {
+        background: linear-gradient(135deg, #1a1f2e 0%, #2a3142 100%);
+        border: 2px solid #2a3142;
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .process-step::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(0, 217, 163, 0.1), transparent);
+        transition: left 0.6s;
+    }
+
+    .process-step:hover::before {
+        left: 100%;
+    }
+
+    .process-step:hover {
+        border-color: #00d9a3;
+        transform: translateY(-8px);
+        box-shadow: 0 12px 35px rgba(0, 217, 163, 0.25);
+    }
+
+    .process-icon {
+        font-size: 3.5rem;
+        color: #00d9a3;
+        margin-bottom: 1.5rem;
+        display: block;
+        transition: all 0.3s ease;
+    }
+
+    .process-step:hover .process-icon {
+        transform: scale(1.15) rotate(5deg);
+    }
+
+    .process-step h5 {
+        color: #ffffff;
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .process-step p {
+        color: #9ca3af;
+        line-height: 1.8;
+        margin: 0;
+    }
+
+    .stats-section {
+        background: linear-gradient(135deg, #1a1f2e 0%, #2a3142 100%);
+        border: 2px solid #2a3142;
+        border-radius: 20px;
+        padding: 3rem 2rem;
+        margin: 3rem 0;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 1.5rem;
+    }
+
+    .stat-number {
+        font-size: 3rem;
+        font-weight: 700;
+        color: #00d9a3;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .stat-label {
+        color: #9ca3af;
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    .disclaimer-card {
+        background: #1a1f2e;
+        border: 2px solid #2a3142;
+        border-radius: 15px;
+        padding: 2rem;
+        height: 100%;
+        transition: all 0.3s ease;
+    }
+
+    .disclaimer-card:hover {
+        border-color: #fbbf24;
+        box-shadow: 0 10px 30px rgba(251, 191, 36, 0.2);
+    }
+
+    .disclaimer-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .disclaimer-icon {
+        font-size: 2rem;
+        color: #fbbf24;
+        margin-right: 1rem;
+    }
+
+    .disclaimer-header h5 {
+        color: #ffffff;
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .disclaimer-card p {
+        color: #9ca3af;
+        line-height: 1.8;
+        margin: 0;
+    }
+
+    .cta-section {
+        text-align: center;
+        margin: 4rem 0 2rem 0;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #00d9a3 0%, #00b388 100%);
+        border: none;
+        color: #000;
+        padding: 1rem 2.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 217, 163, 0.3);
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 217, 163, 0.4);
+        color: #000;
+    }
+
+    .btn-outline-primary {
+        background: transparent;
+        border: 2px solid #00d9a3;
+        color: #00d9a3;
+        padding: 1rem 2.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-outline-primary:hover {
+        background: #00d9a3;
+        color: #000;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 217, 163, 0.4);
+    }
+
+    @media (max-width: 768px) {
+        .about-hero {
+            padding: 2rem 1.5rem;
+        }
+
+        .about-hero h1 {
+            font-size: 2rem;
+        }
+
+        .about-hero p {
+            font-size: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .feature-card,
+        .process-step,
+        .disclaimer-card {
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+        }
+
+        .btn-primary,
+        .btn-outline-primary {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="about-container">
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="about-hero">
+            <h1><i class="fas fa-info-circle"></i> About LEON GAMES PRO</h1>
+            <p>AI-powered football predictions with advanced analytics</p>
+        </div>
+
+        <!-- Features Section -->
+        <section class="mb-5">
+            <h3 class="section-title">
+                <i class="fas fa-star"></i>Why Choose Us
+            </h3>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <i class="fas fa-brain feature-icon"></i>
+                        <h5>AI-Powered Analysis</h5>
+                        <p>Advanced machine learning algorithms analyze thousands of data points to generate accurate
+                            predictions</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <i class="fas fa-chart-line feature-icon"></i>
+                        <h5>Real-Time Data</h5>
+                        <p>Access to up-to-date team statistics, form, and historical performance data</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <i class="fas fa-shield-alt feature-icon"></i>
+                        <h5>Proven Accuracy</h5>
+                        <p>Our models are continuously refined to improve prediction accuracy and reliability</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works Section -->
+        <section class="mb-5">
+            <h3 class="section-title">
+                <i class="fas fa-magic"></i>How It Works
+            </h3>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="process-step">
+                        <i class="fas fa-futbol process-icon"></i>
+                        <h5>1. Select Teams</h5>
+                        <p>Choose home and away teams from our comprehensive database of leagues worldwide</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="process-step">
+                        <i class="fas fa-robot process-icon"></i>
+                        <h5>2. AI Analysis</h5>
+                        <p>Our AI models analyze historical data, current form, and head-to-head statistics</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="process-step">
+                        <i class="fas fa-trophy process-icon"></i>
+                        <h5>3. Get Results</h5>
+                        <p>Receive detailed predictions with confidence scores and probability breakdowns</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="stats-section">
+            <div class="row">
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <span class="stat-number">10K+</span>
+                        <div class="stat-label">Predictions Made</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <span class="stat-number">75%</span>
+                        <div class="stat-label">Accuracy Rate</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <span class="stat-number">50+</span>
+                        <div class="stat-label">Leagues Covered</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <span class="stat-number">24/7</span>
+                        <div class="stat-label">Available</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Disclaimers Section -->
+        <section class="mb-5">
+            <h3 class="section-title">
+                <i class="fas fa-exclamation-triangle"></i>Important Information
+            </h3>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="disclaimer-card">
+                        <div class="disclaimer-header">
+                            <i class="fas fa-exclamation-triangle disclaimer-icon"></i>
+                            <h5>Disclaimer</h5>
+                        </div>
+                        <p>
+                            Predictions are based on statistical analysis and machine learning algorithms.
+                            They should not be used as the sole basis for betting decisions.
+                            Football is unpredictable and actual results may vary significantly from predictions.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="disclaimer-card">
+                        <div class="disclaimer-header">
+                            <i class="fas fa-copyright disclaimer-icon"></i>
+                            <h5>Terms of Use</h5>
+                        </div>
+                        <p>
+                            This application is for entertainment and educational purposes only.
+                            Users are responsible for their own decisions and actions.
+                            We do not guarantee the accuracy of predictions.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Call to Action -->
+        <section class="cta-section">
+            <a href="{% url 'predictor:predict' %}" class="btn-primary me-3 mb-3">
+                <i class="fas fa-rocket me-2"></i>Start Predicting
+            </a>
+            <a href="{% url 'predictor:home' %}" class="btn-outline-primary mb-3">
+                <i class="fas fa-home me-2"></i>Back to Dashboard
+            </a>
+        </section>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,193 @@
+
+import os
+
+path = r"c:\Users\user\Desktop\FOOTBALL-PREDICTION-APP-main\templates\admin\users.html"
+
+new_content = """<!-- FIX APPLIED -->
+{% extends 'admin/dashboard_base.html' %}
+
+{% block title %}User Infrastructure - LEON GAMES PRO Admin{% endblock %}
+{% block page_title %}Network Infrastructure: Users{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Analysis & Filters -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3 align-items-center">
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-0"><i class="fas fa-search text-muted"></i></span>
+                        <input type="text" name="search" class="form-control border-0 bg-light"
+                            placeholder="Trace user by ID, username or email..." value="{{ search_query }}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select name="filter" class="form-select border-0 bg-light fw-bold">
+                        <option value="all" {% if filter_type == 'all' %}selected{% endif %}>Show All Nodes</option>
+                        <option value="active" {% if filter_type == 'active' %}selected{% endif %}>Active (7d Pulse)
+                        </option>
+                        <option value="inactive" {% if filter_type == 'inactive' %}selected{% endif %}>Offline (30d+)
+                        </option>
+                        <option value="subscribed" {% if filter_type == 'subscribed' %}selected{% endif %}>Premium Linked
+                        </option>
+                        <option value="staff" {% if filter_type == 'staff' %}selected{% endif %}>Core Staff Only</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Synchronize</button>
+                </div>
+                <div class="col-md-2 text-end">
+                    <span class="text-muted small fw-bold">Nodes: {{ total|default:0 }}</span>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Nodes Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Identity</th>
+                        <th>Connection detail</th>
+                        <th>Social link</th>
+                        <th>Activity metrics</th>
+                        <th>Node status</th>
+                        <th class="pe-4 text-end">Operations</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-sm bg-soft-primary text-primary rounded me-3 d-flex align-items-center justify-content-center"
+                                    style="width: 38px; height: 38px; font-weight: 700;">
+                                    {{ u.username.0|upper }}
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark">{{ u.username }}</div>
+                                    <small class="text-muted">UID: #00{{ u.id }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex flex-column">
+                                <span class="small fw-medium">{{ u.email }}</span>
+                                <small class="text-muted">Joined {{ u.date_joined|date:"M d, Y" }}</small>
+                            </div>
+                        </td>
+                        <td>
+                            {% if u.socialaccount_set.all %}
+                            <span class="badge bg-primary-soft text-primary"><i class="fab fa-google me-1"></i>
+                                Google</span>
+                            {% else %}
+                            <span class="badge bg-secondary-soft text-secondary"><i class="fas fa-envelope me-1"></i>
+                                Email</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex flex-column">
+                                <span class="small fw-bold">{{ u.prediction_count|default:0 }} predictions</span>
+                                <div class="progress mt-1" style="height: 4px; width: 60px;">
+                                    <div class="progress-bar" style="width: {{ u.prediction_count|default:0 }}%"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if u.is_active %}
+                            <span class="badge bg-success-soft text-success"><i class="fas fa-circle-check me-1"></i>
+                                Active</span>
+                            {% else %}
+                            <span class="badge bg-danger-soft text-danger"><i class="fas fa-circle-xmark me-1"></i>
+                                Deactivated</span>
+                            {% endif %}
+                            {% if u.is_staff %}<span class="badge bg-warning-soft text-warning ms-1">Root</span>{% endif %}
+                        </td>
+                        <td class="pe-4 text-end">
+                            <div class="btn-group">
+                                <a href="{% url 'predictor:admin_user_detail' u.id %}"
+                                    class="btn btn-sm btn-light border px-3">Trace</a>
+                                <button type="button"
+                                    class="btn btn-sm btn-light border dropdown-toggle dropdown-toggle-split"
+                                    data-bs-toggle="dropdown"></button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                    <li><a class="dropdown-item"
+                                            href="{% url 'predictor:admin_user_detail' u.id %}">Complete Dossier</a>
+                                    </li>
+                                    <li><a class="dropdown-item"
+                                            href="/system-core-database/auth/user/{{ u.id }}/change/"
+                                            target="_blank">Direct DB Access</a></li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li><a class="dropdown-item text-danger" href="#">Terminate Node</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="fas fa-user-slash fa-3x mb-3 opacity-25"></i>
+                                <p class="fw-medium">No system nodes matching the specified trace parameters</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if has_next or has_prev %}
+        <div class="card-footer bg-white border-0 py-3">
+            <nav class="d-flex justify-content-between align-items-center">
+                <span class="text-muted small">Viewing page <strong>{{ page }}</strong></span>
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item {% if not has_prev %}disabled{% endif %}">
+                        <a class="page-link" href="?page={{ page|add:'-1' }}&filter={{ filter_type }}&search={{ search_query }}">Network Prev</a>
+                    </li>
+                    <li class="page-item {% if not has_next %}disabled{% endif %}">
+                        <a class="page-link" href="?page={{ page|add:1 }}&filter={{ filter_type }}&search={{ search_query }}">Network Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .bg-primary-soft {
+        background-color: rgba(37, 99, 235, 0.1);
+    }
+
+    .bg-secondary-soft {
+        background-color: rgba(100, 116, 139, 0.1);
+    }
+
+    .bg-success-soft {
+        background-color: rgba(34, 197, 94, 0.1);
+    }
+
+    .bg-danger-soft {
+        background-color: rgba(239, 68, 68, 0.1);
+    }
+
+    .bg-warning-soft {
+        background-color: rgba(245, 158, 11, 0.1);
+    }
+
+    .bg-soft-primary {
+        background-color: #eff6ff;
+    }
+</style>
+{% endblock %}
+"""
+
+with open(path, "w", encoding="utf-8") as f:
+    f.write(new_content)
+
+print(f"File overwritten successfully at {path}")

@@ -1,0 +1,236 @@
+{% extends 'admin/dashboard_base.html' %}
+
+{% block title %}Manage Predictions - Admin Dashboard{% endblock %}
+{% block page_title %}Predictions Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-number">{{ total_predictions }}</div>
+                <div class="stat-label">Total Predictions</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-number">{{ accuracy_rate|floatformat:1 }}%</div>
+                <div class="stat-label">Accuracy Rate</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="stat-number">{{ leagues|length }}</div>
+                <div class="stat-label">Active Leagues</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-filter"></i> Filters
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="GET" class="search-bar">
+                <select name="league" class="form-select" style="flex: 1;">
+                    <option value="">All Leagues</option>
+                    {% for league in leagues %}
+                    <option value="{{ league }}" {% if selected_league == league %}selected{% endif %}>
+                        {{ league }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <select name="outcome" class="form-select" style="flex: 1;">
+                    <option value="">All Outcomes</option>
+                    <option value="Home" {% if selected_outcome == 'Home' %}selected{% endif %}>Home Win</option>
+                    <option value="Draw" {% if selected_outcome == 'Draw' %}selected{% endif %}>Draw</option>
+                    <option value="Away" {% if selected_outcome == 'Away' %}selected{% endif %}>Away Win</option>
+                </select>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Predictions Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-crystal-ball"></i> Predictions List ({{ predictions|length }})
+            </h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Match</th>
+                        <th>Confidence</th>
+                        <th>Outcome</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if predictions %}{% for prediction in predictions %}
+                    <tr>
+                        <td>
+                            <strong>{{ prediction.home_team }}</strong> vs <strong>{{ prediction.away_team }}</strong>
+                        </td>
+                        <td>
+                            <div class="progress" style="height: 20px; width: 100px;">
+                                <div class="progress-bar" role="progressbar"
+                                    style="width: {{ prediction.confidence_percentage|default:0 }}%; background-color: #10b981;"
+                                    aria-valuenow="{{ prediction.confidence_percentage }}" aria-valuemin="0"
+                                    aria-valuemax="100">
+                                    {{ prediction.confidence_percentage }}%
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if prediction.outcome %}<span class="badge badge-active">
+                                <i class="fas fa-check"></i> {{ prediction.outcome }}
+                            </span>
+                            {% else %}
+                            <span class="badge badge-pending">
+                                <i class="fas fa-hourglass-half"></i> Pending
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>{{ prediction.prediction_date|date:"M d, Y H:i" }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info" data-bs-toggle="modal"
+                                data-bs-target="#predModal{{ prediction.id }}">
+                                <i class="fas fa-eye"></i> Details
+                            </button>
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+                    {% endif %}
+                    {% if not predictions %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="fas fa-clipboard-list fa-3x mb-3 opacity-25"></i>
+                                <p class="fw-medium">No predictions found matching the specified criteria</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Prediction Modals (Rendered outside table) -->
+    {% if predictions %}
+    {% for prediction in predictions %}
+    <div class="modal fade" id="predModal{{ prediction.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        {{ prediction.home_team }} vs {{ prediction.away_team }}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Teams</strong></label>
+                        <p>{{ prediction.home_team }} vs {{ prediction.away_team }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Score</strong></label>
+                        <p>{{ prediction.home_score }} - {{ prediction.away_score }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>League</strong></label>
+                        <p>{{ prediction.league|default:"Not specified" }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Confidence Level</strong></label>
+                        <div class="progress" style="height: 25px;">
+                            <div class="progress-bar" role="progressbar"
+                                style="width: {{ prediction.confidence_percentage|default:0 }}%; background-color: #10b981;"
+                                aria-valuenow="{{ prediction.confidence_percentage }}" aria-valuemin="0"
+                                aria-valuemax="100">
+                                {{ prediction.confidence_percentage }}%
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Probabilities</strong></label>
+                        <div>
+                            Home: <strong>{{ prediction.prob_home|floatformat:1 }}%</strong> |
+                            Draw: <strong>{{ prediction.prob_draw|floatformat:1 }}%</strong> |
+                            Away: <strong>{{ prediction.prob_away|floatformat:1 }}%</strong>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Model Type</strong></label>
+                        <p>{{ prediction.model_type|default:"Standard" }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Outcome</strong></label>
+                        <p>
+                            {% if prediction.outcome %}<span class="badge badge-active">{{ prediction.outcome }}</span>
+                            {% else %}
+                            <span class="badge badge-pending">Pending</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Prediction Date</strong></label>
+                        <p>{{ prediction.prediction_date|date:"M d, Y H:i:s" }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>User</strong></label>
+                        <p>
+                            {% if prediction.user %}
+                            <span class="fw-bold">{{ prediction.user.username }}</span>
+                            {% else %}
+                            <span class="text-muted">Anonymous (Session: {{ prediction.session_key|truncatechars:20
+                                }})</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <!-- Admin Actions -->
+                    <form method="POST" action="{% url 'predictor:admin_prediction_action' prediction.id %}"
+                        class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="delete">
+                        <button type="submit" class="btn btn-danger text-white"
+                            onclick="return confirm('Permanently delete this prediction?');">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+</div>
+
+<style>
+    .progress {
+        background-color: #e5e7eb;
+    }
+</style>
+{% endblock %}

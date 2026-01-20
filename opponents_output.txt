@@ -1,0 +1,39 @@
+﻿Active Database Engine: django.db.backends.sqlite3
+Loading football data and team mapping...
+python : 
+INFO:predictor.analytics:Loaded team 
+mapping with 379 teams
+At line:1 char:1
++ python show_opponents.py 2>&1 | 
+Out-File -FilePath opponents_output.t 
+...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpeci 
+   fied: (INFO:predictor.... with 379  
+   teams:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCo 
+   mmandError
+ 
+
+Burnley ID: 70
+Man United ID: 226
+
+====================================================================================================
+BURNLEY - Last 5 Matches (with opponent names)
+====================================================================================================
+2026-01-03 00:00:00 | AWAY vs Brighton             | Result: Home Win   | Burnley: L
+2025-12-30 00:00:00 | HOME vs Newcastle            | Result: Away Win   | Burnley: L
+2025-12-27 00:00:00 | HOME vs Everton              | Result: Draw       | Burnley: D
+2025-12-20 00:00:00 | AWAY vs Bournemouth          | Result: Draw       | Burnley: D
+2025-12-13 00:00:00 | HOME vs Fulham               | Result: Away Win   | Burnley: L
+
+====================================================================================================
+MAN UNITED - Last 5 Matches (with opponent names)
+====================================================================================================
+2025-05-03 00:00:00 | AWAY vs West Brom            | Result: Home Win   | Man Utd: L
+2025-04-26 00:00:00 | HOME vs Coventry             | Result: Home Win   | Man Utd: W
+2025-04-21 00:00:00 | HOME vs Bristol City         | Result: Home Win   | Man Utd: W
+2025-04-18 00:00:00 | AWAY vs Derby                | Result: Away Win   | Man Utd: W
+2025-04-12 00:00:00 | HOME vs Blackburn            | Result: Away Win   | Man Utd: L
+
+====================================================================================================

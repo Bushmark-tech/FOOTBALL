@@ -1,0 +1,181 @@
+﻿Active Database Engine: django.db.backends.sqlite3
+Loading football data...
+python : 
+INFO:predictor.analytics:Loaded team 
+mapping with 379 teams
+At line:1 char:1
++ python check_all_manutd_opponents.py 
+2>&1 | Out-File -FilePath manutd ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~
+    + CategoryInfo          : NotSpeci 
+   fied: (INFO:predictor.... with 379  
+   teams:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCo 
+   mmandError
+ 
+Man United ID: 226
+
+Total Man United matches: 268
+Date range: 2019-08-02 00:00:00 to 2025-05-03 00:00:00
+
+====================================================================================================
+ALL TEAMS MAN UNITED PLAYED AGAINST (50 unique teams)
+====================================================================================================
+  - Arsenal
+  - Aston Villa
+  - Birmingham
+  - Blackburn
+  - Bournemouth
+  - Brentford
+  - Brighton
+  - Bristol City
+  - Burnley
+  - Charlton
+  - Chelsea
+  - Coventry
+  - Crystal Palace
+  - Derby
+  - Everton
+  - Fulham
+  - Hull
+  - Krylya Sovetov
+  - Leeds
+  - Liverpool
+  - Man City
+  - Middlesbrough
+  - Millwall
+  - Newcastle
+  - Norwich
+  - Nott'm Forest
+  - Oxford
+  - Pari NN
+  - Portsmouth
+  - Preston
+  - QPR
+  - Sheffield United
+  - Sheffield Weds
+  - Stoke
+  - Sunderland
+  - Swansea
+  - Team 181
+  - Team 234
+  - Team 292
+  - Team 294
+  - Team 308
+  - Team 321
+  - Team 400
+  - Team 406
+  - Team 43
+  - Tottenham
+  - Watford
+  - West Brom
+  - West Ham
+  - Wolves
+
+====================================================================================================
+ANALYZING OPPONENT LEAGUES
+====================================================================================================
+
+Premier League teams (17):
+  Γ£à Arsenal
+  Γ£à Aston Villa
+  Γ£à Bournemouth
+  Γ£à Brentford
+  Γ£à Brighton
+  Γ£à Burnley
+  Γ£à Chelsea
+  Γ£à Crystal Palace
+  Γ£à Everton
+  Γ£à Fulham
+  Γ£à Liverpool
+  Γ£à Man City
+  Γ£à Newcastle
+  Γ£à Sheffield United
+  Γ£à Tottenham
+  Γ£à West Ham
+  Γ£à Wolves
+
+Championship teams (9):
+  ≡ƒƒí Blackburn
+  ≡ƒƒí Bristol City
+  ≡ƒƒí Coventry
+  ≡ƒƒí Derby
+  ≡ƒƒí Hull
+  ≡ƒƒí Leeds
+  ≡ƒƒí Middlesbrough
+  ≡ƒƒí Stoke
+  ≡ƒƒí West Brom
+
+Other teams (24):
+  ΓÜ¬ Birmingham
+  ΓÜ¬ Charlton
+  ΓÜ¬ Krylya Sovetov
+  ΓÜ¬ Millwall
+  ΓÜ¬ Norwich
+  ΓÜ¬ Nott'm Forest
+  ΓÜ¬ Oxford
+  ΓÜ¬ Pari NN
+  ΓÜ¬ Portsmouth
+  ΓÜ¬ Preston
+  ΓÜ¬ QPR
+  ΓÜ¬ Sheffield Weds
+  ΓÜ¬ Sunderland
+  ΓÜ¬ Swansea
+  ΓÜ¬ Team 181
+  ΓÜ¬ Team 234
+  ΓÜ¬ Team 292
+  ΓÜ¬ Team 294
+  ΓÜ¬ Team 308
+  ΓÜ¬ Team 321
+  ΓÜ¬ Team 400
+  ΓÜ¬ Team 406
+  ΓÜ¬ Team 43
+  ΓÜ¬ Watford
+
+====================================================================================================
+MAN UNITED MATCHES BY YEAR
+====================================================================================================
+2025: 22 matches
+2024: 43 matches
+2023: 41 matches
+2022: 48 matches
+2021: 46 matches
+2020: 43 matches
+2019: 25 matches
+
+====================================================================================================
+MOST RECENT 20 MAN UNITED MATCHES
+====================================================================================================
+2025-05-03 | AWAY vs West Brom                
+2025-04-26 | HOME vs Coventry                 
+2025-04-21 | HOME vs Bristol City             
+2025-04-18 | AWAY vs Derby                    
+2025-04-12 | HOME vs Blackburn                
+2025-04-08 | AWAY vs Stoke                    
+2025-04-05 | HOME vs Leeds                    
+2025-03-29 | AWAY vs Hull                     
+2025-03-15 | HOME vs Middlesbrough            
+2025-03-11 | AWAY vs Pari NN                  
+2025-03-08 | AWAY vs Burnley                  
+2025-03-01 | HOME vs Portsmouth               
+2025-02-23 | AWAY vs Watford                  
+2025-02-19 | HOME vs Team 294                 
+2025-02-15 | HOME vs Sheffield United         
+2025-02-12 | AWAY vs Sunderland               
+2025-02-01 | AWAY vs Sheffield Weds           
+2025-01-25 | HOME vs Millwall                 
+2025-01-21 | AWAY vs Oxford                   
+2025-01-18 | HOME vs Preston                  
+
+====================================================================================================
+CONCLUSION:
+====================================================================================================
+Man United played against 50 different teams
+  - Premier League teams: 17
+  - Championship teams: 9
+  - Other teams: 24
+
+Most recent match: 2025-05-03 00:00:00
+ΓÜá∩╕Å  This is 8 months old! Database needs updating.
+====================================================================================================

@@ -1,0 +1,358 @@
+{% extends 'admin/dashboard_base.html' %}
+
+{% block title %}{{ user.username }} - Admin Dashboard{% endblock %}
+{% block page_title %}User Dossier: {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Quick Actions Row -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar-lg bg-soft-primary text-primary rounded-circle d-flex align-items-center justify-content-center me-3"
+                            style="width: 64px; height: 64px; font-size: 1.5rem; font-weight: 700;">
+                            {{ user.username.0|upper }}
+                        </div>
+                        <div>
+                            <h4 class="mb-0 fw-bold">{{ user.username }}</h4>
+                            <p class="text-muted mb-0 small">UID #{{ user.id }} • {{ user.email }}</p>
+                            <div class="mt-1">
+                                <span
+                                    class="badge {% if user.is_active %}bg-success-soft text-success{% else %}bg-danger-soft text-danger{% endif %} rounded-pill px-3">
+                                    {% if user.is_active %}Active Node{% else %}Deactivated Node{% endif %}
+                                </span>
+                                {% if user.is_superuser %}
+                                <span class="badge bg-danger-soft text-danger rounded-pill px-3 ms-1">Root Access</span>
+                                {% elif user.is_staff %}
+                                <span class="badge bg-warning-soft text-warning rounded-pill px-3 ms-1">Staff
+                                    Access</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="/system-core-database/auth/user/{{ user.id }}/change/" target="_blank"
+                            class="btn btn-light border fw-bold text-muted">
+                            <i class="fas fa-database me-2"></i> DB Record
+                        </a>
+                        <form method="post" action="{% url 'predictor:admin_user_action' user.id %}" class="d-inline"
+                            onsubmit="return confirm('Are you certain about toggling this user status?');">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="toggle_active">
+                            {% if user.is_active %}
+                            <button type="submit" class="btn btn-outline-danger fw-bold">
+                                <i class="fas fa-ban me-2"></i> Suspend
+                            </button>
+                            {% else %}
+                            <button type="submit" class="btn btn-outline-success fw-bold">
+                                <i class="fas fa-check-circle me-2"></i> Reactivate
+                            </button>
+                            {% endif %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left Column: Vital Stats & Subs -->
+        <div class="col-lg-8">
+            <!-- User Vitals -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3 border-0">
+                    <h6 class="m-0 fw-bold">User Vitals</h6>
+                </div>
+                <div class="card-body pt-0">
+                    <div class="row g-4">
+                        <div class="col-sm-6 col-md-3">
+                            <div class="p-3 bg-light rounded text-center">
+                                <div class="text-muted small mb-1">Total Predictions</div>
+                                <div class="h3 fw-bold mb-0 text-primary">{{ prediction_count }}</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="p-3 bg-light rounded text-center">
+                                <div class="text-muted small mb-1">Account Age</div>
+                                <div class="h3 fw-bold mb-0 text-dark">{{ user.date_joined|timesince }}</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="p-3 bg-light rounded text-center">
+                                <div class="text-muted small mb-1">Free Matches</div>
+                                <div
+                                    class="h3 fw-bold mb-0 {% if profile.free_matches_used >= profile.free_matches_limit %}text-danger{% else %}text-success{% endif %}">
+                                    {{ profile.free_matches_used }}/{{ profile.free_matches_limit }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="p-3 bg-light rounded text-center">
+                                <div class="text-muted small mb-1">Last Sync</div>
+                                <div class="h3 fw-bold mb-0 text-secondary"
+                                    style="font-size: 1rem; line-height: 2.5rem;">
+                                    {{ user.last_login|date:"M d"|default:"Never" }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subscription History -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 fw-bold">Subscription Intelligence</h6>
+                </div>
+                <div class="card-body p-0">
+                    {% if subscriptions %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4">Status</th>
+                                    <th>Plan Amount</th>
+                                    <th>Gateway</th>
+                                    <th>Duration</th>
+                                    <th class="pe-4 text-end">Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sub in subscriptions %}
+                                <tr>
+                                    <td class="ps-4">
+                                        {% if sub.status == 'active' %}
+                                        <span class="badge bg-success-soft text-success">Active</span>
+                                        {% elif sub.status == 'expired' %}
+                                        <span class="badge bg-secondary-soft text-secondary">Expired</span>
+                                        {% else %}
+                                        <span class="badge bg-warning-soft text-warning">{{ sub.status|title }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="fw-bold">{{ sub.currency }} {{ sub.amount }}</td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border">{{ sub.payment_method|upper }}</span>
+                                    </td>
+                                    <td class="small text-muted">
+                                        {{ sub.start_date|date:"M d, Y" }} — {{ sub.end_date|date:"M d, Y"|default:"..." }}
+                                    </td>
+                                    <td class="pe-4 text-end">
+                                        <a href="{% url 'predictor:admin_billing' %}?subscription_id={{ sub.id }}"
+                                            class="btn btn-sm btn-light border">
+                                            Inspect
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="p-5 text-center text-muted">
+                        <i class="fas fa-receipt fa-2x mb-3 opacity-25"></i>
+                        <p>No subscription history found for this user.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recent Interactions -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 border-0">
+                    <h6 class="m-0 fw-bold">Recent Prediction Activity</h6>
+                </div>
+                <div class="card-body p-0">
+                    {% if predictions %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4">Match</th>
+                                    <th>Prediction</th>
+                                    <th>Confidence</th>
+                                    <th>League</th>
+                                    <th>Result</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pred in predictions %}
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="fw-bold text-dark mb-0 small">{{ pred.home_team }}</div>
+                                        <div class="text-muted small">vs {{ pred.away_team }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border">
+                                            {% if pred.prob_home > pred.prob_away and pred.prob_home > pred.prob_draw %}Home{% elif pred.prob_away > pred.prob_home and pred.prob_away > pred.prob_draw %}Away{% else %}Draw{% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress flex-grow-1 me-2" style="height: 4px; width: 60px;">
+                                                <div class="progress-bar {% if pred.confidence >= 80 %}bg-success{% elif pred.confidence >= 60 %}bg-warning{% else %}bg-danger{% endif %}"
+                                                    style="width: {{ pred.confidence|default:0 }}%"></div>
+                                            </div>
+                                            <small class="fw-bold">{{ pred.confidence|floatformat:0 }}%</small>
+                                        </div>
+                                    </td>
+                                    <td class="small text-muted">{{ pred.league|default:"—"|truncatechars:15 }}</td>
+                                    <td>
+                                        {% if pred.outcome %}
+                                        <span class="badge bg-success-soft text-success">Logged</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary-soft text-secondary">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="p-5 text-center text-muted">
+                        <i class="fas fa-crystal-ball fa-2x mb-3 opacity-25"></i>
+                        <p>No system activity recorded.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Controls -->
+        <div class="col-lg-4">
+            <!-- Payment Profile -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3 border-0">
+                    <h6 class="m-0 fw-bold">Payment Profile</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="small text-muted fw-bold uppercase">M-Pesa Contact</label>
+                        <div class="d-flex align-items-center mt-1">
+                            <div class="bg-light rounded p-2 me-2"><i class="fas fa-mobile-alt text-muted"></i></div>
+                            <span class="fw-medium">{{ profile.mpesa_number|default:"Not configured" }}</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="small text-muted fw-bold uppercase">M-Pesa Wallet</label>
+                        <div class="d-flex align-items-center mt-1">
+                            <div class="bg-light rounded p-2 me-2"><i class="fas fa-wallet text-muted"></i></div>
+                            <span class="fw-medium">{{ profile.mpesa_wallet|default:"Not configured" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Operational Controls -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3 border-0">
+                    <h6 class="m-0 fw-bold">Operational Controls</h6>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'predictor:admin_user_action' user.id %}" class="mb-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="reset_free_quota">
+                        <button type="submit"
+                            class="btn btn-light border w-100 text-start d-flex justify-content-between align-items-center p-3 hover-shadow">
+                            <span>
+                                <i class="fas fa-redo text-secondary me-2"></i> Reset Free Quota
+                            </span>
+                            <i class="fas fa-chevron-right small text-muted"></i>
+                        </button>
+                    </form>
+
+                    <form method="post" action="{% url 'predictor:admin_user_action' user.id %}" class="mb-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="reset_password">
+                        <label class="small text-muted fw-bold mb-2">Reset Password</label>
+                        <div class="input-group">
+                            <input type="text" name="new_password" class="form-control bg-light border-0"
+                                placeholder="New Password" value="TempPass123!">
+                            <button type="submit" class="btn btn-warning text-white"
+                                onclick="return confirm('Reset user password?');">Reset</button>
+                        </div>
+                    </form>
+
+                    <form method="post" action="{% url 'predictor:admin_user_action' user.id %}" class="mb-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="toggle_staff">
+                        <button type="submit"
+                            class="btn btn-light border w-100 text-start d-flex justify-content-between align-items-center p-3 hover-shadow">
+                            <span>
+                                <i class="fas fa-user-shield text-warning me-2"></i> Toggle Staff Access
+                            </span>
+                            <i class="fas fa-chevron-right small text-muted"></i>
+                        </button>
+                    </form>
+
+                    <hr class="my-3 opacity-10">
+
+                    <form method="post" action="{% url 'predictor:admin_user_action' user.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="grant_free_access">
+                        <label class="small text-muted fw-bold mb-2">Grant Premium Access</label>
+                        <div class="input-group">
+                            <input type="number" name="days" class="form-control bg-light border-0" value="7" min="1"
+                                placeholder="Days">
+                            <button type="submit" class="btn btn-primary">Apply</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="card border-0 shadow-sm border-danger-subtle">
+                <div class="card-header bg-danger-soft py-3 border-0">
+                    <h6 class="m-0 fw-bold text-danger">Danger Zone</h6>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted mb-3">Permanent actions that cannot be undone.</p>
+                    <form method="post" action="{% url 'predictor:admin_user_action' user.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="delete_user">
+                        <button type="submit" class="btn btn-outline-danger w-100"
+                            onclick="return confirm('Are you strictly sure? Data corruption may occur if user has active transactions.');">
+                            <i class="fas fa-trash me-2"></i> Terminate Node
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-primary-soft {
+        background-color: rgba(37, 99, 235, 0.1);
+    }
+
+    .bg-success-soft {
+        background-color: rgba(34, 197, 94, 0.1);
+    }
+
+    .bg-danger-soft {
+        background-color: rgba(239, 68, 68, 0.1);
+    }
+
+    .bg-warning-soft {
+        background-color: rgba(245, 158, 11, 0.1);
+    }
+
+    .bg-secondary-soft {
+        background-color: rgba(100, 116, 139, 0.1);
+    }
+
+    .border-danger-subtle {
+        border-color: rgba(239, 68, 68, 0.2) !important;
+    }
+
+    .hover-shadow:hover {
+        background-color: white !important;
+        box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .05) !important;
+        transform: translateY(-1px);
+        transition: all .2s;
+    }
+</style>
+{% endblock %}
