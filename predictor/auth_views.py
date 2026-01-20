@@ -530,10 +530,19 @@ def initiate_stk_push(phone_number, amount, subscription_id, base_url=None):
                 
                 return {'success': True, 'data': data}
             else:
-                return {'success': False, 'error': data.get('CustomerMessage', 'Payment failed')}
+                error_msg = data.get('CustomerMessage') or data.get('errorMessage') or 'Payment failed'
+                logger.error(f"M-Pesa API Error (Code {data.get('ResponseCode')}): {error_msg}")
+                return {'success': False, 'error': error_msg}
         else:
-            logger.error(f"M-Pesa API Error: {response.text}")
-            return {'success': False, 'error': 'Unable to initiate payment (Provider Error)'}
+            # Try to parse error response
+            try:
+                error_data = response.json()
+                error_msg = error_data.get('errorMessage') or error_data.get('CustomerMessage') or 'Unable to initiate payment'
+                logger.error(f"M-Pesa API Error ({response.status_code}): {error_msg} - Full response: {response.text}")
+                return {'success': False, 'error': f'{error_msg} (Code: {response.status_code})'}
+            except:
+                logger.error(f"M-Pesa API Error ({response.status_code}): {response.text}")
+                return {'success': False, 'error': f'Unable to initiate payment (HTTP {response.status_code})'}
     
     except Exception as e:
         logger.error(f"Error in STK Push: {e}")
