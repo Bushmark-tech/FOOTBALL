@@ -209,11 +209,18 @@ def login_view(request):
         # Try to find user by email if input looks like an email
         if '@' in username_or_email:
             try:
-                user_obj = User.objects.get(email=username_or_email)
-                username_to_auth = user_obj.username
-            except User.DoesNotExist:
-                logger.warning(f"DEBUG: Email {username_or_email} not found in DB.")
-                # Proceed with original string to let authenticate fail naturally
+                # Use filter().first() to avoid MultipleObjectsReturned crash
+                # If multiple users share an email, this picks the first one found.
+                # Ideally users shouldn't share emails, but this prevents 500 errors.
+                user_obj = User.objects.filter(email=username_or_email).first()
+                if user_obj:
+                    username_to_auth = user_obj.username
+                else:
+                    logger.warning(f"DEBUG: Email {username_or_email} not found in DB.")
+            except Exception as e:
+                logger.error(f"Error looking up user by email: {e}")
+                # Proceed with original string
+
         
         user = authenticate(request, username=username_to_auth, password=password)
         
