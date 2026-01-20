@@ -129,7 +129,7 @@ Hello {user.username},
 Your email has been successfully verified!
 
 You can now enjoy:
-✓ 3 Free AI-powered match predictions
+✓ 1 Free AI-powered match prediction
 ✓ Access to historical data and team statistics
 ✓ Multi-match prediction mode
 ✓ Detailed prediction analytics
@@ -153,7 +153,7 @@ Football Predictor Pro Team
         <div style="background-color: #ecf0f1; padding: 20px; border-radius: 5px; margin: 20px 0;">
             <h3 style="margin-top: 0; color: #2c3e50;">What You Get:</h3>
             <ul style="list-style: none; padding: 0;">
-                <li style="padding: 8px 0;">✓ <strong>3 Free Predictions</strong> - AI-powered match analysis</li>
+                <li style="padding: 8px 0;">✓ <strong>1 Free Prediction</strong> - AI-powered match analysis</li>
                 <li style="padding: 8px 0;">✓ <strong>Historical Data</strong> - Access to team statistics</li>
                 <li style="padding: 8px 0;">✓ <strong>Multi-Match Mode</strong> - Predict multiple matches at once</li>
                 <li style="padding: 8px 0;">✓ <strong>Detailed Analytics</strong> - In-depth prediction insights</li>
