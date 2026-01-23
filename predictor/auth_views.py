@@ -628,8 +628,10 @@ def mpesa_callback(request):
                 else:
                     # Payment failed
                     subscription.status = 'cancelled'
-                    logger.warning(f"M-Pesa payment failed for subscription {subscription.id}, code: {result_code}")
+                    error_desc = data.get('Body', {}).get('stkCallback', {}).get('ResultDesc', 'Payment Failed')
+                    logger.warning(f"M-Pesa payment failed for subscription {subscription.id}, code: {result_code}, desc: {error_desc}")
                     log_mpesa_transaction('callback', data, status='failed')
+
                 
                 subscription.save()
             else:
