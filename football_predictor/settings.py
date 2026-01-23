@@ -272,6 +272,8 @@ MPESA_PASSKEY = os.environ.get('MPESA_PASSKEY')
 
 
 MPESA_ENVIRONMENT = os.environ.get('MPESA_ENVIRONMENT', 'sandbox') 
+MPESA_TRANSACTION_TYPE = os.environ.get('MPESA_TRANSACTION_TYPE', 'CustomerBuyGoodsOnline')
+MPESA_TILL_NUMBER = os.environ.get('MPESA_TILL_NUMBER', MPESA_SHORTCODE)
 
 if MPESA_ENVIRONMENT == 'production':
     MPESA_ACCESS_TOKEN_URL = 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
