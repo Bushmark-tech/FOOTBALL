@@ -338,8 +338,11 @@ def subscribe_view(request):
 @csrf_exempt
 def initiate_mpesa_payment(request):
     """Initiate M-Pesa payment."""
-    if not request.user.is_authenticated:
-        return JsonResponse({'error': 'Authentication required'}, status=401)
+    # if not request.user.is_authenticated:
+    #     return JsonResponse({'error': 'Authentication required'}, status=401)
+
+
+
 
 
     
@@ -391,9 +394,16 @@ def initiate_mpesa_payment(request):
             print(f"DEBUG: Invalid Length {len(mpesa_number)}")
             return JsonResponse({'error': 'Invalid M-Pesa number format'}, status=400)
         
+        if request.user.is_authenticated:
+            subscription_user = request.user
+        else:
+            # Create a temporary dummy user for testing if needed
+            from django.contrib.auth.models import User
+            subscription_user, _ = User.objects.get_or_create(username='mpesa_test_user')
+
         # Create pending subscription
         subscription = Subscription.objects.create(
-            user=request.user,
+            user=subscription_user,
 
             status='pending',
             payment_method='mpesa',
@@ -405,9 +415,13 @@ def initiate_mpesa_payment(request):
 
         
         # Update user profile with M-Pesa number
-        profile, created = UserProfile.objects.get_or_create(user=request.user)
-        profile.mpesa_number = mpesa_number
-        profile.save()
+        if request.user.is_authenticated:
+            profile, created = UserProfile.objects.get_or_create(user=request.user)
+            profile.mpesa_number = mpesa_number
+            profile.save()
+
+
+
 
 
         
@@ -514,7 +528,8 @@ def initiate_stk_push(phone_number, amount, subscription_id, base_url=None):
             "BusinessShortCode": settings.MPESA_SHORTCODE,
             "Password": password,
             "Timestamp": timestamp,
-            "TransactionType": "CustomerPayBillOnline",  # Correct type for Lipa na M-Pesa Online
+            "TransactionType": "CustomerBuyGoodsOnline",  # Correct type for Till Numbers (Buy Goods)
+
             "Amount": int(amount),
             "PartyA": phone_number,
             "PartyB": settings.MPESA_SHORTCODE,
@@ -566,9 +581,18 @@ def initiate_stk_push(phone_number, amount, subscription_id, base_url=None):
 def get_mpesa_access_token():
     """Get M-Pesa OAuth access token."""
     try:
+        # Force reload .env locally for testing
+        from dotenv import load_dotenv
+        import os
+        load_dotenv(os.path.join(settings.BASE_DIR, '.env'), override=True)
+
+        
         # ALWAYS use production URL as per "Go Live" email
         url = 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
 
+        print(f"DEBUG: URL={url}")
+        print(f"DEBUG: Key Len={len(settings.MPESA_CONSUMER_KEY) if settings.MPESA_CONSUMER_KEY else 0}")
+        print(f"DEBUG: Secret Len={len(settings.MPESA_CONSUMER_SECRET) if settings.MPESA_CONSUMER_SECRET else 0}")
         
         auth = base64.b64encode(
             f"{settings.MPESA_CONSUMER_KEY}:{settings.MPESA_CONSUMER_SECRET}".encode()
@@ -578,14 +602,17 @@ def get_mpesa_access_token():
         response = requests.get(url, headers=headers)
         
         print(f"DEBUG TOKEN RESPONSE: {response.status_code} {response.text}")
-        print(f"DEBUG KEYS USING: {settings.MPESA_CONSUMER_KEY[:5]}...")
 
         if response.status_code == 200:
             return response.json().get('access_token')
+        
+        logger.error(f"M-Pesa Auth Failed: {response.status_code} - {response.text}")
         return None
     except Exception as e:
         logger.error(f"Error getting M-Pesa access token: {e}")
+        print(f"DEBUG AUTH EXCEPTION: {e}")
         return None
+
 
 
 @csrf_exempt

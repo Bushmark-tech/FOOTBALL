@@ -269,6 +269,8 @@ MPESA_CONSUMER_KEY = os.environ.get('MPESA_CONSUMER_KEY')
 MPESA_CONSUMER_SECRET = os.environ.get('MPESA_CONSUMER_SECRET')
 MPESA_SHORTCODE = os.environ.get('MPESA_SHORTCODE', '5699046')  # Till Number
 MPESA_PASSKEY = os.environ.get('MPESA_PASSKEY')
+
+
 MPESA_ENVIRONMENT = os.environ.get('MPESA_ENVIRONMENT', 'sandbox') 
 
 if MPESA_ENVIRONMENT == 'production':
