@@ -338,8 +338,9 @@ def subscribe_view(request):
 @csrf_exempt
 def initiate_mpesa_payment(request):
     """Initiate M-Pesa payment."""
-    if not request.user.is_authenticated:
-        return JsonResponse({'error': 'Authentication required'}, status=401)
+    # if not request.user.is_authenticated:
+    #     return JsonResponse({'error': 'Authentication required'}, status=401)
+
     
     if request.method != 'POST':
         return JsonResponse({'error': 'Method not allowed'}, status=405)
@@ -391,7 +392,7 @@ def initiate_mpesa_payment(request):
         
         # Create pending subscription
         subscription = Subscription.objects.create(
-            user=request.user,
+            user=request.user if request.user.is_authenticated else None,
             status='pending',
             payment_method='mpesa',
             plan_type=plan_type,
@@ -399,11 +400,14 @@ def initiate_mpesa_payment(request):
             currency='KSH',
             mpesa_number=mpesa_number
         )
+
         
         # Update user profile with M-Pesa number
-        profile, created = UserProfile.objects.get_or_create(user=request.user)
-        profile.mpesa_number = mpesa_number
-        profile.save()
+        if request.user.is_authenticated:
+            profile, created = UserProfile.objects.get_or_create(user=request.user)
+            profile.mpesa_number = mpesa_number
+            profile.save()
+
         
         # Initiate M-Pesa STK Push
         # Pass the current scheme and host to ensure callback comes back to this server
