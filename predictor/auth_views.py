@@ -477,8 +477,9 @@ def initiate_stk_push(phone_number, amount, subscription_id, base_url=None):
         if not access_token:
             return {'success': False, 'error': 'Failed to authenticate with M-Pesa'}
         
-        # STK Push URL
-        url = settings.MPESA_STK_PUSH_URL
+        # STK Push URL (Production)
+        url = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
+
         
         # Generate timestamp and password
         timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
@@ -556,9 +557,9 @@ def initiate_stk_push(phone_number, amount, subscription_id, base_url=None):
 def get_mpesa_access_token():
     """Get M-Pesa OAuth access token."""
     try:
-        url = 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
-        if settings.MPESA_ENVIRONMENT == 'production':
-            url = 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
+        # ALWAYS use production URL as per "Go Live" email
+        url = 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
+
         
         auth = base64.b64encode(
             f"{settings.MPESA_CONSUMER_KEY}:{settings.MPESA_CONSUMER_SECRET}".encode()
