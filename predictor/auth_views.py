@@ -478,7 +478,9 @@ def initiate_stk_push(phone_number, amount, subscription_id, base_url=None):
             return {'success': False, 'error': 'Failed to authenticate with M-Pesa'}
         
         # STK Push URL (Production)
+        # Using the exact URL from the Go Live email validation: https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest
         url = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
+
 
         
         # Generate timestamp and password
@@ -495,9 +497,10 @@ def initiate_stk_push(phone_number, amount, subscription_id, base_url=None):
             from django.contrib.sites.models import Site
             try:
                 current_site = Site.objects.get_current()
-                callback_url = f"https://{current_site.domain}/api/mpesa/callback/"
+                callback_url = "https://leon-football.com/api/mpesa/callback/"
             except:
-                callback_url = "https://yourdomain.com/api/mpesa/callback/"
+                callback_url = "https://leon-football.com/api/mpesa/callback/"
+
         
         # Request payload
         # For Lipa na M-Pesa Online, use CustomerPayBillOnline transaction type
