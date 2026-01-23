@@ -510,8 +510,8 @@ def initiate_stk_push(phone_number, amount, subscription_id, base_url=None):
             "PartyB": settings.MPESA_SHORTCODE,
             "PhoneNumber": phone_number,
             "CallBackURL": callback_url,
-            "AccountReference": f"SUB{subscription_id}",
-            "TransactionDesc": f"Football Predictor Subscription - {subscription_id}"
+            "AccountReference": f"SUB{subscription_id}"[:12],  # Max 12 chars
+            "TransactionDesc": f"Sub {subscription_id}"[:13]   # Max 13 chars
         }
         
         headers = {
@@ -521,6 +521,8 @@ def initiate_stk_push(phone_number, amount, subscription_id, base_url=None):
         
         response = requests.post(url, json=payload, headers=headers)
         
+        logger.info(f"STK Push Request Response: {response.status_code} - {response.text}")
+
         if response.status_code == 200:
             data = response.json()
             if data.get('ResponseCode') == '0':
@@ -530,6 +532,7 @@ def initiate_stk_push(phone_number, amount, subscription_id, base_url=None):
                 subscription.save()
                 
                 return {'success': True, 'data': data}
+
             else:
                 error_msg = data.get('CustomerMessage') or data.get('errorMessage') or 'Payment failed'
                 logger.error(f"M-Pesa API Error (Code {data.get('ResponseCode')}): {error_msg}")
