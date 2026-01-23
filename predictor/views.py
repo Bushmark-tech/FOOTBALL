@@ -3290,7 +3290,7 @@ def result(request):
                 
                 # Check if we have any H2H data at all
                 # This matches the threshold in calculate_probabilities_model2
-                if len(h2h_matches) >= 1:
+                if len(h2h_matches) >= 3:
                     has_sufficient_h2h = True
                     logger.info(f"H2H data found: {len(h2h_matches)} matches")
                 else:
