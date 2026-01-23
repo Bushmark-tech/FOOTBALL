@@ -1080,18 +1080,9 @@ def get_team_recent_form_original(team_name, data, version="v1"):
         # Check if data is usable (not our mock EmptyDataFrame)
         if hasattr(data, 'empty') and data.empty and (not hasattr(data, 'columns') or len(data.columns) == 0):
             # This is our mock EmptyDataFrame, generate hash-based form
-            import hashlib
-            team_hash = int(hashlib.md5(str(team_name).strip().encode()).hexdigest()[:8], 16)
-            form_chars = []
-            for i in range(5):
-                rand_val = (team_hash + i * 7919) % 100
-                if rand_val < 40:
-                    form_chars.append("W")
-                elif rand_val < 70:
-                    form_chars.append("D")
-                else:
-                    form_chars.append("L")
-            return "".join(form_chars)
+            # This is our mock EmptyDataFrame, return empty form
+            return "-----"
+
         
         home_col, away_col, result_col = get_column_names(version)
         
@@ -1099,36 +1090,16 @@ def get_team_recent_form_original(team_name, data, version="v1"):
         if not hasattr(data, 'columns'):
             logger.warning(f"Data object has no columns attribute")
             # Generate hash-based form
-            import hashlib
-            team_hash = int(hashlib.md5(str(team_name).strip().encode()).hexdigest()[:8], 16)
-            form_chars = []
-            for i in range(5):
-                rand_val = (team_hash + i * 7919) % 100
-                if rand_val < 40:
-                    form_chars.append("W")
-                elif rand_val < 70:
-                    form_chars.append("D")
-                else:
-                    form_chars.append("L")
-            return "".join(form_chars)
+            return "-----"
+
         
         required_cols = [home_col, away_col, result_col, "Date"]
         missing_cols = [col for col in required_cols if col not in data.columns]
         if missing_cols:
             logger.warning(f"Missing columns for form calculation: {missing_cols}")
             # Generate hash-based form instead of defaulting to all D's
-            import hashlib
-            team_hash = int(hashlib.md5(str(team_name).strip().encode()).hexdigest()[:8], 16)
-            form_chars = []
-            for i in range(5):
-                rand_val = (team_hash + i * 7919) % 100
-                if rand_val < 40:
-                    form_chars.append("W")
-                elif rand_val < 70:
-                    form_chars.append("D")
-                else:
-                    form_chars.append("L")
-            return "".join(form_chars)
+            return "-----"
+
         
         # OPTIMIZED: Don't copy entire subset, just work with necessary columns
         # Select only needed columns (view, not copy) for better performance
@@ -1237,24 +1208,9 @@ def get_team_recent_form_original(team_name, data, version="v1"):
                         ]
         
         if recent_matches.empty:
-            # Generate realistic form based on team name hash (consistent for same team)
-            # This provides varied form like "DWWDLL" instead of all "DDDDD"
-            import hashlib
-            team_hash = int(hashlib.md5(team_name_clean.encode()).hexdigest()[:8], 16)
-            
-            # Generate form based on hash: W=40%, D=30%, L=30% distribution
-            form_chars = []
-            for i in range(5):
-                rand_val = (team_hash + i * 7919) % 100  # Use prime for better distribution
-                if rand_val < 40:
-                    form_chars.append("W")
-                elif rand_val < 70:
-                    form_chars.append("D")
-                else:
-                    form_chars.append("L")
-            
-            logger.info(f"Generated realistic form for {team_name_clean}: {''.join(form_chars)} (no match data found)")
-            return "".join(form_chars)
+            logger.info(f"No match data found for {team_name_clean}, returning unknown form")
+            return "-----"
+
         
         # ORIGINAL LOGIC FROM lGIC/analytics.py - EXACT MATCH
         # Sort by Date descending (most recent first) and get last 5 matches

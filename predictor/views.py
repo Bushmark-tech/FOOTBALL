@@ -3444,28 +3444,10 @@ def result(request):
             
             # If data not usable or form calculation failed, use hash-based generation
             if not data_usable or not home_team_form or not away_team_form:
-                # Generate realistic form based on team name hash (consistent for same team)
-                import hashlib
-                
-                home_hash = int(hashlib.md5(home_team.strip().encode()).hexdigest()[:8], 16)
-                away_hash = int(hashlib.md5(away_team.strip().encode()).hexdigest()[:8], 16)
-                
-                # Generate form based on hash: W=40%, D=30%, L=30% distribution
-                form_points = {'W': 3, 'D': 1, 'L': 0}
-                for team_hash, team_name, form_var in [(home_hash, home_team, 'home_team_form'), (away_hash, away_team, 'away_team_form')]:
-                    form_chars = []
-                    for i in range(5):
-                        rand_val = (team_hash + i * 7919) % 100  # Use prime for better distribution
-                        if rand_val < 40:
-                            form_chars.append("W")
-                        elif rand_val < 70:
-                            form_chars.append("D")
-                        else:
-                            form_chars.append("L")
-                    if form_var == 'home_team_form':
-                        home_team_form = "".join(form_chars)
-                    else:
-                        away_team_form = "".join(form_chars)
+                # Use Unknown placeholders instead of fake hash-based data
+                home_team_form = "-----"
+                away_team_form = "-----"
+
             
             # ORIGINAL LOGIC FROM lGIC - Use available information without padding
             # (Padding with 'D' removed as requested by user)
@@ -3501,29 +3483,10 @@ def result(request):
             logger.error(f"Error getting team form: {e}")
             import traceback
             logger.error(traceback.format_exc())
-            # Use hash-based fallback even on error
-            try:
-                import hashlib
-                home_hash = int(hashlib.md5(home_team.strip().encode()).hexdigest()[:8], 16)
-                away_hash = int(hashlib.md5(away_team.strip().encode()).hexdigest()[:8], 16)
-                
-                for team_hash, form_var in [(home_hash, 'home_team_form'), (away_hash, 'away_team_form')]:
-                    form_chars = []
-                    for i in range(5):
-                        rand_val = (team_hash + i * 7919) % 100
-                        if rand_val < 40:
-                            form_chars.append("W")
-                        elif rand_val < 70:
-                            form_chars.append("D")
-                        else:
-                            form_chars.append("L")
-                    if form_var == 'home_team_form':
-                        home_team_form = "".join(form_chars)
-                    else:
-                        away_team_form = "".join(form_chars)
-            except:
-                home_team_form = 'DDDDD'
-            away_team_form = 'DDDDD'
+            # Use Unknown placeholders instead of fake hash-based data
+            home_team_form = "-----"
+            away_team_form = "-----"
+
     
     # Get all previous predictions for this matchup
     # Strip whitespace from team names to ensure proper matching

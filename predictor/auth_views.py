@@ -250,10 +250,11 @@ def register_view(request):
         password = request.POST.get('password')
         password_confirm = request.POST.get('password_confirm')
         
-        # Validation: Google Email Only
-        if not email or not email.strip().lower().endswith('@gmail.com'):
-             messages.error(request, 'Registration is restricted to valid Google (@gmail.com) email addresses only.')
+        # Validation: Basic Email Check
+        if not email or '@' not in email:
+             messages.error(request, 'Please enter a valid email address.')
              return render(request, 'predictor/register.html')
+
         
         # Validation: Unique Email
         if User.objects.filter(email=email).exists():

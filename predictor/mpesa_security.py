@@ -14,15 +14,17 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
-# M-Pesa Daraja API IP addresses (update these with actual M-Pesa IPs)
 MPESA_ALLOWED_IPS = [
     '196.201.214.200',
     '196.201.214.206',
     '196.201.214.207',
     '196.201.214.208',
     '196.201.212.129',  # New IP seen in logs
+    '196.201.212.74',   # New IP seen in logs (Jan 2026)
     # Add more M-Pesa IPs as needed
 ]
+
+
 
 
 def get_client_ip(request):
