@@ -1055,712 +1055,608 @@
                     </div>
 
                     <!-- Historical Probabilities -->
+                    <!-- Historical Probabilities -->
+                    {% if has_valid_historical_prob or has_valid_history %}
+                    <div class="analytics-card"
+                        style="margin-top: 30px; margin-bottom: 25px; padding: 25px; background: rgba(0, 0, 0, 0.4); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05);">
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <h4
+                                style="color: #00d4aa; margin: 0; display: inline-flex; align-items: center; gap: 10px; font-size: 1.1rem;">
+                                <i class="fas fa-chart-pie"></i> Historical Probabilities
+                            </h4>
+                        </div>
+
+                        <div
+                            style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; align-items: end; margin-bottom: 15px; padding: 0 10px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.8rem; font-weight: bold; color: #00d4aa; line-height: 1.2;">{{ prob_home_pct }}%</div>
+                                <div
+                                    style="color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 8px;">
+                                    {{ home_team }} Win</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.8rem; font-weight: bold; color: #f59e0b; line-height: 1.2;">{{ prob_draw_pct }}%</div>
+                                <div
+                                    style="color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 8px;">
+                                    Draw</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.8rem; font-weight: bold; color: #ff6b35; line-height: 1.2;">{{ prob_away_pct }}%</div>
+                                <div
+                                    style="color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 8px;">
+                                    {{ away_team }} Win</div>
+                            </div>
+                        </div>
+
+                        <div
+                            style="display: flex; height: 8px; width: 100%; background: #333; border-radius: 4px; overflow: hidden; gap: 2px;">
+                            <div style="width: {{ prob_home_pct }}%; background-color: #00d4aa;"></div>
+                            <div style="width: {{ prob_draw_pct }}%; background-color: #f59e0b;"></div>
+                            <div style="width: {{ prob_away_pct }}%; background-color: #ff6b35;"></div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <!-- Team Form Display -->
                     <div class="analytics-card"
                         style="margin-top: 30px; padding: 20px; background: rgba(0, 0, 0, 0.3); border-radius: 12px;">
                         <h5
                             style="color: #00d4aa; margin-bottom: 20px; text-align: center; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                            <i class="fas fa-chart-pie"></i>
-                            <span>Historical Probabilities</span>
+                            <i class="fas fa-history"></i>
+                            <span>Recent Team Form (Last 5 Matches)</span>
                         </h5>
-                        {% if not has_valid_historical_prob %}
+                        {% if not has_valid_form %}
                         <!-- No Data Found Message -->
                         <div
-                            style="text-align: center; padding: 30px 20px; background: rgba(239, 68, 68, 0.1); border: 2px dashed #ef4444; border-radius: 10px; margin-bottom: 20px;">
-                            <i class="fas fa-exclamation-triangle"
-                                style="font-size: 2.5rem; color: #ef4444; margin-bottom: 15px;"></i>
-                            <h4 style="color: #ef4444; margin-bottom: 10px; font-size: 1.2rem;">Limited Historical Data
-                            </h4>
+                            style="text-align: center; padding: 30px 20px; background: rgba(245, 158, 11, 0.1); border: 2px dashed #f59e0b; border-radius: 10px; margin-bottom: 20px;">
+                            <i class="fas fa-info-circle"
+                                style="font-size: 2.5rem; color: #f59e0b; margin-bottom: 15px;"></i>
+                            <h4 style="color: #f59e0b; margin-bottom: 10px; font-size: 1.2rem;">
+                                Limited Form Data</h4>
                             <p style="color: #94a3b8; margin: 0; font-size: 0.95rem;">
-                                Insufficient historical match data available for these teams.<br>
-                                Probabilities shown are based on general football statistics.
+                                Insufficient recent match data for these teams.<br>
+                                Form shown is generated based on team characteristics.
                             </p>
                         </div>
                         {% endif %}
 
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
-                            <div style="text-align: center;">
-                                <div style="color: #00d4aa; font-size: 1.5rem; font-weight: 800; margin-bottom: 8px;"
-                                    data-prob="{{ historical_probabilities.Home }}">0%</div>
-                                <div
-                                    style="color: #94a3b8; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
-                                    {{ home_team }} Win</div>
-                                <div
-                                    style="background: #333; height: 8px; border-radius: 4px; margin-top: 10px; overflow: hidden;">
-                                    <div class="probability-fill prob-home-hist"
-                                        style="background: linear-gradient(90deg, #00d4aa 0%, #00b894 100%); height: 100%; width: 0%; transition: width 0.8s ease;">
-                                    </div>
+                        <div class="team-form-grid">
+                            <!-- Home Team Form -->
+                            <div class="team-form-item home">
+                                <div class="team-name-display"
+                                    style="color: #00d4aa; font-weight: 700; font-size: 1.1rem; min-width: 100px;">
+                                    {{ home_team }}
                                 </div>
-                            </div>
-                            <div style="text-align: center;">
-                                <div style="color: #f59e0b; font-size: 1.5rem; font-weight: 800; margin-bottom: 8px;"
-                                    data-prob="{{ historical_probabilities.Draw }}">0%</div>
-                                <div
-                                    style="color: #94a3b8; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
-                                    Draw</div>
-                                <div
-                                    style="background: #333; height: 8px; border-radius: 4px; margin-top: 10px; overflow: hidden;">
-                                    <div class="probability-fill prob-draw-hist"
-                                        style="background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%); height: 100%; width: 0%; transition: width 0.8s ease;">
-                                    </div>
-                                </div>
-                            </div>
-                            <div style="text-align: center;">
-                                <div style="color: #ff6b35; font-size: 1.5rem; font-weight: 800; margin-bottom: 8px;"
-                                    data-prob="{{ historical_probabilities.Away }}">0%</div>
-                                <div
-                                    style="color: #94a3b8; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
-                                    {{ away_team }} Win</div>
-                                <div
-                                    style="background: #333; height: 8px; border-radius: 4px; margin-top: 10px; overflow: hidden;">
-                                    <div class="probability-fill prob-away-hist" <!-- Historical Probabilities -->
-                                        {% if has_valid_historical_prob or has_valid_history %}
-                                        <div class="analytics-card"
-                                            style="margin-bottom: 25px; padding: 20px; background: rgba(0, 0, 0, 0.4); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05);">
-                                            <div style="text-align: center; margin-bottom: 15px;">
-                                                <h4
-                                                    style="color: #00d4aa; margin-top: 0; display: inline-flex; align-items: center; gap: 8px;">
-                                                    <i class="fas fa-chart-pie"></i> Historical Probabilities
-                                                </h4>
-                                            </div>
-
-                                            <div
-                                                style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px; padding: 0 10px;">
-                                                <div style="text-align: center; flex: 1;">
-                                                    <div style="font-size: 1.5rem; font-weight: bold; color: #00d4aa;">
-                                                        {{ prob_home_pct }}%</div>
-                                                    <div
-                                                        style="color: #94a3b8; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 5px;">
-                                                        {{ home_team }} Win</div>
-                                                </div>
-                                                <div style="text-align: center; flex: 1;">
-                                                    <div style="font-size: 1.5rem; font-weight: bold; color: #f59e0b;">
-                                                        {{ prob_draw_pct }}%</div>
-                                                    <div
-                                                        style="color: #94a3b8; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 5px;">
-                                                        Draw</div>
-                                                </div>
-                                                <div style="text-align: center; flex: 1;">
-                                                    <div style="font-size: 1.5rem; font-weight: bold; color: #ff6b35;">
-                                                        {{ prob_away_pct }}%</div>
-                                                    <div
-                                                        style="color: #94a3b8; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 5px;">
-                                                        {{ away_team }} Win</div>
-                                                </div>
-                                            </div>
-
-                                            <div
-                                                style="display: flex; height: 6px; width: 100%; background: #333; border-radius: 3px; overflow: hidden; gap: 4px;">
-                                                <div
-                                                    style="width: {{ prob_home_pct }}%; background-color: #00d4aa; border-radius: 3px;">
-                                                </div>
-                                                <div
-                                                    style="width: {{ prob_draw_pct }}%; background-color: #f59e0b; border-radius: 3px;">
-                                                </div>
-                                                <div
-                                                    style="width: {{ prob_away_pct }}%; background-color: #ff6b35; border-radius: 3px;">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {% endif %}
-                                        <!-- Team Form Display -->
-                                        <div class="analytics-card"
-                                            style="margin-top: 30px; padding: 20px; background: rgba(0, 0, 0, 0.3); border-radius: 12px;">
-                                            <h5
-                                                style="color: #00d4aa; margin-bottom: 20px; text-align: center; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                                                <i class="fas fa-history"></i>
-                                                <span>Recent Team Form (Last 5 Matches)</span>
-                                            </h5>
-                                            {% if not has_valid_form %}
-                                            <!-- No Data Found Message -->
-                                            <div
-                                                style="text-align: center; padding: 30px 20px; background: rgba(245, 158, 11, 0.1); border: 2px dashed #f59e0b; border-radius: 10px; margin-bottom: 20px;">
-                                                <i class="fas fa-info-circle"
-                                                    style="font-size: 2.5rem; color: #f59e0b; margin-bottom: 15px;"></i>
-                                                <h4 style="color: #f59e0b; margin-bottom: 10px; font-size: 1.2rem;">
-                                                    Limited Form Data</h4>
-                                                <p style="color: #94a3b8; margin: 0; font-size: 0.95rem;">
-                                                    Insufficient recent match data for these teams.<br>
-                                                    Form shown is generated based on team characteristics.
-                                                </p>
-                                            </div>
-                                            {% endif %}
-
-                                            <div class="team-form-grid">
-                                                <!-- Home Team Form -->
-                                                <div class="team-form-item home">
-                                                    <div class="team-name-display"
-                                                        style="color: #00d4aa; font-weight: 700; font-size: 1.1rem; min-width: 100px;">
-                                                        {{ home_team }}
-                                                    </div>
-                                                    <div class="form-balls-container"
-                                                        style="display: flex; justify-content: center; flex-wrap: nowrap; gap: 6px;">
-                                                        {% for result in home_team_form %}
-                                                        {% if result == 'W' %}
-                                                        <div class="form-ball"
-                                                            style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);"
-                                                            title="Win">W</div>
-                                                        {% elif result == 'D' %}
-                                                        <div class="form-ball"
-                                                            style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);"
-                                                            title="Draw">D</div>
-                                                        {% elif result == 'L' %}
-                                                        <div class="form-ball"
-                                                            style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);"
-                                                            title="Loss">L</div>
-                                                        {% else %}
-                                                        <div class="form-ball"
-                                                            style="background: linear-gradient(135deg, #64748b 0%, #475569 100%);"
-                                                            title="Unknown">-</div>
-                                                        {% endif %}
-                                                        {% endfor %}
-                                                    </div>
-                                                </div>
-
-                                                <!-- VS Divider -->
-                                                <div class="vs-divider"
-                                                    style="color: #666; font-weight: 700; font-size: 1.2rem; padding: 0 10px;">
-                                                    <i class="fas fa-arrow-right-arrow-left"
-                                                        style="color: #94a3b8;"></i>
-                                                </div>
-
-                                                <!-- Away Team Form -->
-                                                <div class="team-form-item away">
-                                                    <div class="team-name-display"
-                                                        style="color: #ff6b35; font-weight: 700; font-size: 1.1rem; min-width: 100px;">
-                                                        {{ away_team }}
-                                                    </div>
-                                                    <div class="form-balls-container"
-                                                        style="display: flex; justify-content: center; flex-wrap: nowrap; gap: 6px;">
-                                                        {% for result in away_team_form %}
-                                                        {% if result == 'W' %}
-                                                        <div class="form-ball"
-                                                            style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);"
-                                                            title="Win">W</div>
-                                                        {% elif result == 'D' %}
-                                                        <div class="form-ball"
-                                                            style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);"
-                                                            title="Draw">D</div>
-                                                        {% elif result == 'L' %}
-                                                        <div class="form-ball"
-                                                            style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);"
-                                                            title="Loss">L</div>
-                                                        {% else %}
-                                                        <div class="form-ball"
-                                                            style="background: linear-gradient(135deg, #64748b 0%, #475569 100%);"
-                                                            title="Unknown">-</div>
-                                                        {% endif %}
-                                                        {% endfor %}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Head-to-Head Results - Collapsible -->
-                                        {% if h2h_matches %}
-                                        <details class="analytics-card" style="margin-top: 30px; cursor: pointer;">
-                                            <summary
-                                                style="list-style: none; cursor: pointer; padding: 15px; background: rgba(0, 212, 170, 0.1); border-radius: 10px; margin-bottom: 20px;">
-                                                <h4
-                                                    style="color: #00d4aa; margin: 0; display: inline-flex; align-items: center; gap: 10px;">
-                                                    <span>Past Meetings</span>
-                                                    <span
-                                                        style="font-size: 0.9rem; color: #94a3b8; font-weight: normal; margin-left: 10px;">Previous
-                                                        matches between these teams</span>
-                                                    <span style="margin-left: auto; font-size: 1.2rem;">▼</span>
-                                                </h4>
-                                            </summary>
-                                            <div style="overflow-x: auto;">
-                                                <table style="width: 100%; border-collapse: collapse; color: #ffffff;">
-                                                    <thead>
-                                                        <tr
-                                                            style="background: #2a2a2a; border-bottom: 2px solid #00d4aa;">
-                                                            <th
-                                                                style="padding: 12px; text-align: left; font-weight: 600;">
-                                                                Date</th>
-                                                            <th
-                                                                style="padding: 12px; text-align: center; font-weight: 600;">
-                                                                Match</th>
-                                                            <th
-                                                                style="padding: 12px; text-align: center; font-weight: 600;">
-                                                                Result</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {% for match in h2h_matches %}
-                                                        <tr
-                                                            style="border-bottom: 1px solid #333333; transition: background 0.2s ease;">
-                                                            <td style="padding: 12px;">{{ match.date }}</td>
-                                                            <td
-                                                                style="padding: 12px; text-align: center; font-weight: 600;">
-                                                                {{ home_team }} vs {{ away_team }}
-                                                            </td>
-                                                            <td style="padding: 12px; text-align: center;">
-                                                                {% if match.winner == home_team %}
-                                                                <span style="color: #00d4aa; font-weight: 600;">{{
-                                                                    home_team }} Win</span>
-                                                                {% elif match.winner == away_team %}
-                                                                <span style="color: #ff6b35; font-weight: 600;">{{
-                                                                    away_team }} Win</span>
-                                                                {% else %}
-                                                                <span
-                                                                    style="color: #f59e0b; font-weight: 600;">Draw</span>
-                                                                {% endif %}
-                                                            </td>
-                                                        </tr>
-                                                        {% endfor %}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                            {% if not has_sufficient_h2h %}
-                                            <!-- Insufficient H2H Data Warning -->
-                                            <div
-                                                style="margin-top: 15px; padding: 12px; background: rgba(239, 68, 68, 0.1); border-left: 3px solid #ef4444; border-radius: 4px;">
-                                                <p style="margin: 0; color: #94a3b8; font-size: 0.9rem;">
-                                                    <i class="fas fa-exclamation-triangle me-2"
-                                                        style="color: #ef4444;"></i>
-                                                    <strong style="color: #ef4444;">Limited Historical Data:</strong>
-                                                    Only {{
-                                                    h2h_matches|length }} match{{ h2h_matches|length|pluralize:"es" }}
-                                                    found. At least 4
-                                                    matches are recommended for reliable historical analysis.
-                                                </p>
-                                            </div>
-                                            {% endif %}
-                                        </details>
-                                        {% else %}
-                                        <!-- No H2H Matches Found -->
-                                        <div class="analytics-card"
-                                            style="margin-top: 30px; padding: 20px; background: rgba(0, 0, 0, 0.3); border-radius: 12px;">
-                                            <h5
-                                                style="color: #00d4aa; margin-bottom: 20px; text-align: center; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                                                <i class="fas fa-history"></i>
-                                                <span>Past Meetings</span>
-                                            </h5>
-                                            <div
-                                                style="text-align: center; padding: 30px 20px; background: rgba(100, 116, 139, 0.1); border: 2px dashed #64748b; border-radius: 10px;">
-                                                <i class="fas fa-search"
-                                                    style="font-size: 2.5rem; color: #64748b; margin-bottom: 15px;"></i>
-                                                <h4 style="color: #64748b; margin-bottom: 10px; font-size: 1.2rem;">No
-                                                    Head-to-Head Data
-                                                </h4>
-                                                <p style="color: #94a3b8; margin: 0; font-size: 0.95rem;">
-                                                    These teams have not met in our historical database.<br>
-                                                    Predictions are based on overall team performance and statistics.
-                                                </p>
-                                            </div>
-                                        </div>
-                                        {% endif %}
-
-                                        <!-- Upcoming Matches - Collapsible -->
-                                        {% if upcoming_matches %}
-                                        <details class="analytics-card" style="margin-top: 30px; cursor: pointer;">
-                                            <summary
-                                                style="list-style: none; cursor: pointer; padding: 15px; background: rgba(59, 130, 246, 0.1); border-radius: 10px; margin-bottom: 20px;">
-                                                <h4
-                                                    style="color: #3b82f6; margin: 0; display: inline-flex; align-items: center; gap: 10px;">
-                                                    <span>Future Matches</span>
-                                                    <span
-                                                        style="font-size: 0.9rem; color: #94a3b8; font-weight: normal; margin-left: 10px;">Scheduled
-                                                        games</span>
-                                                    <span style="margin-left: auto; font-size: 1.2rem;">▼</span>
-                                                </h4>
-                                            </summary>
-                                            <div style="overflow-x: auto;">
-                                                <table style="width: 100%; border-collapse: collapse; color: #ffffff;">
-                                                    <thead>
-                                                        <tr
-                                                            style="background: #2a2a2a; border-bottom: 2px solid #00d4aa;">
-                                                            <th
-                                                                style="padding: 12px; text-align: left; font-weight: 600;">
-                                                                Date</th>
-                                                            <th
-                                                                style="padding: 12px; text-align: center; font-weight: 600;">
-                                                                Match</th>
-                                                            <th
-                                                                style="padding: 12px; text-align: center; font-weight: 600;">
-                                                                Status</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {% for match in upcoming_matches %}
-                                                        <tr
-                                                            style="border-bottom: 1px solid #333333; transition: background 0.2s ease;">
-                                                            <td style="padding: 12px;">{{ match.date }}</td>
-                                                            <td
-                                                                style="padding: 12px; text-align: center; font-weight: 600;">
-                                                                {{ home_team }} vs {{ away_team }}
-                                                            </td>
-                                                            <td style="padding: 12px; text-align: center;">
-                                                                <span
-                                                                    style="color: #3b82f6; font-weight: 600; background: rgba(59, 130, 246, 0.1); padding: 4px 12px; border-radius: 12px;">
-                                                                    <i class="fas fa-clock me-1"></i>{{ match.status }}
-                                                                </span>
-                                                            </td>
-                                                        </tr>
-                                                        {% endfor %}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                            <div
-                                                style="margin-top: 15px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; border-radius: 4px;">
-                                                <p style="margin: 0; color: #94a3b8; font-size: 0.9rem;">
-                                                    <i class="fas fa-info-circle me-2"></i>
-                                                    These matches are scheduled but haven't been played yet. Check back
-                                                    after the match date
-                                                    for actual results.
-                                                </p>
-                                            </div>
-                                        </details>
-                                        {% endif %}
-
-                                        <!-- All Predictions for This Matchup - Collapsible -->
-                                        {% if all_predictions %}
-                                        <details class="analytics-card" style="margin-top: 30px; cursor: pointer;" open>
-                                            <summary
-                                                style="list-style: none; cursor: pointer; padding: 15px; background: rgba(139, 92, 246, 0.1); border-radius: 10px; margin-bottom: 20px;">
-                                                <h4
-                                                    style="color: #8b5cf6; margin: 0; display: inline-flex; align-items: center; gap: 10px;">
-                                                    <span>Your Prediction History</span>
-                                                    <span
-                                                        style="font-size: 0.9rem; color: #94a3b8; font-weight: normal; margin-left: 10px;">All
-                                                        predictions for this matchup</span>
-                                                    <span style="margin-left: auto; font-size: 1.2rem;">▼</span>
-                                                </h4>
-                                            </summary>
-
-                                            <!-- Unified Prediction Statistics -->
-                                            <div style="padding: 20px; background: rgba(0, 0, 0, 0.2);">
-                                                <div
-                                                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 15px; margin-bottom: 20px;">
-                                                    <!-- Home Stats -->
-                                                    <div
-                                                        style="text-align: center; padding: 10px; background: rgba(0, 212, 170, 0.1); border-radius: 8px; border: 1px solid rgba(0, 212, 170, 0.3);">
-                                                        <div
-                                                            style="color: #00d4aa; font-size: 0.9rem; margin-bottom: 5px;">
-                                                            Home Win</div>
-                                                        <div
-                                                            style="font-size: 1.2rem; font-weight: bold; color: white;">
-                                                            {{ prediction_stats.home_count|default:"0" }}</div>
-                                                        <div style="font-size: 0.8rem; color: #94a3b8;">{{
-                                                            prediction_stats.home_percentage_fmt|default:"0.0" }}%</div>
-                                                    </div>
-
-                                                    <!-- Draw Stats -->
-                                                    <div
-                                                        style="text-align: center; padding: 10px; background: rgba(245, 158, 11, 0.1); border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.3);">
-                                                        <div
-                                                            style="color: #f59e0b; font-size: 0.9rem; margin-bottom: 5px;">
-                                                            Draw</div>
-                                                        <div
-                                                            style="font-size: 1.2rem; font-weight: bold; color: white;">
-                                                            {{ prediction_stats.draw_count|default:"0" }}</div>
-                                                        <div style="font-size: 0.8rem; color: #94a3b8;">{{
-                                                            prediction_stats.draw_percentage_fmt|default:"0.0" }}%</div>
-                                                    </div>
-
-                                                    <!-- Away Stats -->
-                                                    <div
-                                                        style="text-align: center; padding: 10px; background: rgba(255, 107, 53, 0.1); border-radius: 8px; border: 1px solid rgba(255, 107, 53, 0.3);">
-                                                        <div
-                                                            style="color: #ff6b35; font-size: 0.9rem; margin-bottom: 5px;">
-                                                            Away Win</div>
-                                                        <div
-                                                            style="font-size: 1.2rem; font-weight: bold; color: white;">
-                                                            {{ prediction_stats.away_count|default:"0" }}</div>
-                                                        <div style="font-size: 0.8rem; color: #94a3b8;">{{
-                                                            prediction_stats.away_percentage_fmt|default:"0.0" }}%</div>
-                                                    </div>
-                                                </div>
-
-                                                <div
-                                                    style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; border-top: 1px solid #333; padding-top: 15px;">
-                                                    <div style="text-align: center;">
-                                                        <div style="color: #94a3b8; font-size: 0.8rem;">Avg Home Goals
-                                                        </div>
-                                                        <div style="color: white; font-weight: bold;">{{
-                                                            prediction_stats.avg_home_score|default:"0" }}</div>
-                                                    </div>
-                                                    <div style="text-align: center;">
-                                                        <div style="color: #94a3b8; font-size: 0.8rem;">Avg Away Goals
-                                                        </div>
-                                                        <div style="color: white; font-weight: bold;">{{
-                                                            prediction_stats.avg_away_score|default:"0" }}</div>
-                                                    </div>
-                                                    <div style="text-align: center;">
-                                                        <div style="color: #94a3b8; font-size: 0.8rem;">Avg Ability
-                                                        </div>
-                                                        <div style="color: white; font-weight: bold;">{{
-                                                            prediction_stats.avg_confidence|default:"0" }}%</div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Predictions Table -->
-                                            <div style="overflow-x: auto;">
-                                                <table style="width: 100%; border-collapse: collapse; color: #ffffff;">
-                                                    <thead>
-                                                        <tr
-                                                            style="background: #2a2a2a; border-bottom: 2px solid #00d4aa;">
-                                                            <th
-                                                                style="padding: 12px; text-align: left; font-weight: 600;">
-                                                                Date</th>
-                                                            <th
-                                                                style="padding: 12px; text-align: center; font-weight: 600;">
-                                                                Match</th>
-                                                            <th
-                                                                style="padding: 12px; text-align: center; font-weight: 600;">
-                                                                Outcome</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {% for pred in all_predictions %}
-                                                        <tr style="border-bottom: 1px solid #333333; transition: background 0.2s ease;"
-                                                            onmouseover="this.style.background='#2a2a2a'"
-                                                            onmouseout="this.style.background='transparent'">
-                                                            <td style="padding: 12px;">{{ pred.prediction_date|date:"M
-                                                                d, Y H:i" }}</td>
-                                                            <td
-                                                                style="padding: 12px; text-align: center; font-weight: 600;">
-                                                                {{ pred.home_team }} vs {{ pred.away_team }}
-                                                            </td>
-                                                            <td style="padding: 12px; text-align: center;">
-                                                                {% if pred.outcome == "Home" %}
-                                                                <span
-                                                                    style="color: #00d4aa; font-weight: 600; background: rgba(0, 212, 170, 0.1); padding: 4px 12px; border-radius: 12px;">
-                                                                    {{ home_team }} Win
-                                                                </span>
-                                                                {% elif pred.outcome == "Away" %}
-                                                                <span
-                                                                    style="color: #ff6b35; font-weight: 600; background: rgba(255, 107, 53, 0.1); padding: 4px 12px; border-radius: 12px;">
-                                                                    {{ away_team }} Win
-                                                                </span>
-                                                                {% elif pred.outcome == "Draw" %}
-                                                                <span
-                                                                    style="color: #f59e0b; font-weight: 600; background: rgba(245, 158, 11, 0.1); padding: 4px 12px; border-radius: 12px;">
-                                                                    Draw
-                                                                </span>
-                                                                {% else %}
-                                                                <!-- For double chance or other predictions, show the actual outcome text -->
-                                                                <span
-                                                                    style="color: #8b5cf6; font-weight: 600; background: rgba(139, 92, 246, 0.1); padding: 4px 12px; border-radius: 12px;">
-                                                                    {{ pred.outcome }}
-                                                                </span>
-                                                                {% endif %}
-                                                            </td>
-                                                        </tr>
-                                                        {% endfor %}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-
-                                            {% if prediction_stats.total_count > 10 %}
-                                            <div
-                                                style="margin-top: 15px; text-align: center; color: #94a3b8; font-size: 0.9rem;">
-                                                Showing last 10 of {{ prediction_stats.total_count }} predictions
-                                            </div>
-                                            {% endif %}
-                                    </div>
-                                    </details>
+                                <div class="form-balls-container"
+                                    style="display: flex; justify-content: center; flex-wrap: nowrap; gap: 6px;">
+                                    {% for result in home_team_form %}
+                                    {% if result == 'W' %}
+                                    <div class="form-ball"
+                                        style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);"
+                                        title="Win">W</div>
+                                    {% elif result == 'D' %}
+                                    <div class="form-ball"
+                                        style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);"
+                                        title="Draw">D</div>
+                                    {% elif result == 'L' %}
+                                    <div class="form-ball"
+                                        style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);"
+                                        title="Loss">L</div>
+                                    {% else %}
+                                    <div class="form-ball"
+                                        style="background: linear-gradient(135deg, #64748b 0%, #475569 100%);"
+                                        title="Unknown">-</div>
                                     {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
 
-                                    <!-- Action Buttons -->
-                                    <div class="action-buttons" style="margin-top: 40px;">
-                                        <a href="{% url 'predictor:predict' %}" class="btn-action"
-                                            id="new-prediction-btn">
-                                            <i class="fas fa-plus"></i>
-                                            New Prediction
-                                        </a>
-                                        <a href="{% url 'predictor:home' %}" class="btn-secondary">
-                                            <i class="fas fa-home"></i>
-                                            Dashboard
-                                        </a>
-                                    </div>
+                            <!-- VS Divider -->
+                            <div class="vs-divider"
+                                style="color: #666; font-weight: 700; font-size: 1.2rem; padding: 0 10px;">
+                                <i class="fas fa-arrow-right-arrow-left" style="color: #94a3b8;"></i>
+                            </div>
+
+                            <!-- Away Team Form -->
+                            <div class="team-form-item away">
+                                <div class="team-name-display"
+                                    style="color: #ff6b35; font-weight: 700; font-size: 1.1rem; min-width: 100px;">
+                                    {{ away_team }}
+                                </div>
+                                <div class="form-balls-container"
+                                    style="display: flex; justify-content: center; flex-wrap: nowrap; gap: 6px;">
+                                    {% for result in away_team_form %}
+                                    {% if result == 'W' %}
+                                    <div class="form-ball"
+                                        style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);"
+                                        title="Win">W</div>
+                                    {% elif result == 'D' %}
+                                    <div class="form-ball"
+                                        style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);"
+                                        title="Draw">D</div>
+                                    {% elif result == 'L' %}
+                                    <div class="form-ball"
+                                        style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);"
+                                        title="Loss">L</div>
+                                    {% else %}
+                                    <div class="form-ball"
+                                        style="background: linear-gradient(135deg, #64748b 0%, #475569 100%);"
+                                        title="Unknown">-</div>
+                                    {% endif %}
+                                    {% endfor %}
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Head-to-Head Results - Collapsible -->
+                    {% if h2h_matches %}
+                    <details class="analytics-card" style="margin-top: 30px; cursor: pointer;">
+                        <summary
+                            style="list-style: none; cursor: pointer; padding: 15px; background: rgba(0, 212, 170, 0.1); border-radius: 10px; margin-bottom: 20px;">
+                            <h4
+                                style="color: #00d4aa; margin: 0; display: inline-flex; align-items: center; gap: 10px;">
+                                <span>Past Meetings</span>
+                                <span
+                                    style="font-size: 0.9rem; color: #94a3b8; font-weight: normal; margin-left: 10px;">Previous
+                                    matches between these teams</span>
+                                <span style="margin-left: auto; font-size: 1.2rem;">▼</span>
+                            </h4>
+                        </summary>
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; color: #ffffff;">
+                                <thead>
+                                    <tr style="background: #2a2a2a; border-bottom: 2px solid #00d4aa;">
+                                        <th style="padding: 12px; text-align: left; font-weight: 600;">
+                                            Date</th>
+                                        <th style="padding: 12px; text-align: center; font-weight: 600;">
+                                            Match</th>
+                                        <th style="padding: 12px; text-align: center; font-weight: 600;">
+                                            Result</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for match in h2h_matches %}
+                                    <tr style="border-bottom: 1px solid #333333; transition: background 0.2s ease;">
+                                        <td style="padding: 12px;">{{ match.date }}</td>
+                                        <td style="padding: 12px; text-align: center; font-weight: 600;">
+                                            {{ home_team }} vs {{ away_team }}
+                                        </td>
+                                        <td style="padding: 12px; text-align: center;">
+                                            {% if match.winner == home_team %}
+                                            <span style="color: #00d4aa; font-weight: 600;">{{ home_team }} Win</span>
+                                            {% elif match.winner == away_team %}
+                                            <span style="color: #ff6b35; font-weight: 600;">{{ away_team }} Win</span>
+                                            {% else %}
+                                            <span style="color: #f59e0b; font-weight: 600;">Draw</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% if not has_sufficient_h2h %}
+                        <!-- Insufficient H2H Data Warning -->
+                        <div
+                            style="margin-top: 15px; padding: 12px; background: rgba(239, 68, 68, 0.1); border-left: 3px solid #ef4444; border-radius: 4px;">
+                            <p style="margin: 0; color: #94a3b8; font-size: 0.9rem;">
+                                <i class="fas fa-exclamation-triangle me-2" style="color: #ef4444;"></i>
+                                <strong style="color: #ef4444;">Limited Historical Data:</strong>
+                                Only {{ h2h_matches|length }} match{{ h2h_matches|length|pluralize:"es" }}
+                                found. At least 4
+                                matches are recommended for reliable historical analysis.
+                            </p>
+                        </div>
+                        {% endif %}
+                    </details>
+                    {% else %}
+                    <!-- No H2H Matches Found -->
+                    <div class="analytics-card"
+                        style="margin-top: 30px; padding: 20px; background: rgba(0, 0, 0, 0.3); border-radius: 12px;">
+                        <h5
+                            style="color: #00d4aa; margin-bottom: 20px; text-align: center; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <i class="fas fa-history"></i>
+                            <span>Past Meetings</span>
+                        </h5>
+                        <div
+                            style="text-align: center; padding: 30px 20px; background: rgba(100, 116, 139, 0.1); border: 2px dashed #64748b; border-radius: 10px;">
+                            <i class="fas fa-search"
+                                style="font-size: 2.5rem; color: #64748b; margin-bottom: 15px;"></i>
+                            <h4 style="color: #64748b; margin-bottom: 10px; font-size: 1.2rem;">No
+                                Head-to-Head Data
+                            </h4>
+                            <p style="color: #94a3b8; margin: 0; font-size: 0.95rem;">
+                                These teams have not met in our historical database.<br>
+                                Predictions are based on overall team performance and statistics.
+                            </p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Upcoming Matches - Collapsible -->
+                    {% if upcoming_matches %}
+                    <details class="analytics-card" style="margin-top: 30px; cursor: pointer;">
+                        <summary
+                            style="list-style: none; cursor: pointer; padding: 15px; background: rgba(59, 130, 246, 0.1); border-radius: 10px; margin-bottom: 20px;">
+                            <h4
+                                style="color: #3b82f6; margin: 0; display: inline-flex; align-items: center; gap: 10px;">
+                                <span>Future Matches</span>
+                                <span
+                                    style="font-size: 0.9rem; color: #94a3b8; font-weight: normal; margin-left: 10px;">Scheduled
+                                    games</span>
+                                <span style="margin-left: auto; font-size: 1.2rem;">▼</span>
+                            </h4>
+                        </summary>
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; color: #ffffff;">
+                                <thead>
+                                    <tr style="background: #2a2a2a; border-bottom: 2px solid #00d4aa;">
+                                        <th style="padding: 12px; text-align: left; font-weight: 600;">
+                                            Date</th>
+                                        <th style="padding: 12px; text-align: center; font-weight: 600;">
+                                            Match</th>
+                                        <th style="padding: 12px; text-align: center; font-weight: 600;">
+                                            Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for match in upcoming_matches %}
+                                    <tr style="border-bottom: 1px solid #333333; transition: background 0.2s ease;">
+                                        <td style="padding: 12px;">{{ match.date }}</td>
+                                        <td style="padding: 12px; text-align: center; font-weight: 600;">
+                                            {{ home_team }} vs {{ away_team }}
+                                        </td>
+                                        <td style="padding: 12px; text-align: center;">
+                                            <span
+                                                style="color: #3b82f6; font-weight: 600; background: rgba(59, 130, 246, 0.1); padding: 4px 12px; border-radius: 12px;">
+                                                <i class="fas fa-clock me-1"></i>{{ match.status }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div
+                            style="margin-top: 15px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; border-radius: 4px;">
+                            <p style="margin: 0; color: #94a3b8; font-size: 0.9rem;">
+                                <i class="fas fa-info-circle me-2"></i>
+                                These matches are scheduled but haven't been played yet. Check back
+                                after the match date
+                                for actual results.
+                            </p>
+                        </div>
+                    </details>
+                    {% endif %}
+
+                    <!-- All Predictions for This Matchup - Collapsible -->
+                    {% if all_predictions %}
+                    <details class="analytics-card" style="margin-top: 30px; cursor: pointer;" open>
+                        <summary
+                            style="list-style: none; cursor: pointer; padding: 15px; background: rgba(139, 92, 246, 0.1); border-radius: 10px; margin-bottom: 20px;">
+                            <h4
+                                style="color: #8b5cf6; margin: 0; display: inline-flex; align-items: center; gap: 10px;">
+                                <span>Your Prediction History</span>
+                                <span
+                                    style="font-size: 0.9rem; color: #94a3b8; font-weight: normal; margin-left: 10px;">All
+                                    predictions for this matchup</span>
+                                <span style="margin-left: auto; font-size: 1.2rem;">▼</span>
+                            </h4>
+                        </summary>
+
+                        <!-- Unified Prediction Statistics -->
+                        <div style="padding: 20px; background: rgba(0, 0, 0, 0.2);">
+                            <div
+                                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                                <!-- Home Stats -->
+                                <div
+                                    style="text-align: center; padding: 10px; background: rgba(0, 212, 170, 0.1); border-radius: 8px; border: 1px solid rgba(0, 212, 170, 0.3);">
+                                    <div style="color: #00d4aa; font-size: 0.9rem; margin-bottom: 5px;">
+                                        Home Win</div>
+                                    <div style="font-size: 1.2rem; font-weight: bold; color: white;">
+                                        {{ prediction_stats.home_count|default:"0" }}</div>
+                                    <div style="font-size: 0.8rem; color: #94a3b8;">{{ prediction_stats.home_percentage_fmt|default:"0.0" }}%</div>
+                                </div>
+
+                                <!-- Draw Stats -->
+                                <div
+                                    style="text-align: center; padding: 10px; background: rgba(245, 158, 11, 0.1); border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.3);">
+                                    <div style="color: #f59e0b; font-size: 0.9rem; margin-bottom: 5px;">
+                                        Draw</div>
+                                    <div style="font-size: 1.2rem; font-weight: bold; color: white;">
+                                        {{ prediction_stats.draw_count|default:"0" }}</div>
+                                    <div style="font-size: 0.8rem; color: #94a3b8;">{{ prediction_stats.draw_percentage_fmt|default:"0.0" }}%</div>
+                                </div>
+
+                                <!-- Away Stats -->
+                                <div
+                                    style="text-align: center; padding: 10px; background: rgba(255, 107, 53, 0.1); border-radius: 8px; border: 1px solid rgba(255, 107, 53, 0.3);">
+                                    <div style="color: #ff6b35; font-size: 0.9rem; margin-bottom: 5px;">
+                                        Away Win</div>
+                                    <div style="font-size: 1.2rem; font-weight: bold; color: white;">
+                                        {{ prediction_stats.away_count|default:"0" }}</div>
+                                    <div style="font-size: 0.8rem; color: #94a3b8;">{{ prediction_stats.away_percentage_fmt|default:"0.0" }}%</div>
+                                </div>
+                            </div>
+
+                            <div
+                                style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; border-top: 1px solid #333; padding-top: 15px;">
+                                <div style="text-align: center;">
+                                    <div style="color: #94a3b8; font-size: 0.8rem;">Avg Home Goals
+                                    </div>
+                                    <div style="color: white; font-weight: bold;">{{ prediction_stats.avg_home_score|default:"0" }}</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="color: #94a3b8; font-size: 0.8rem;">Avg Away Goals
+                                    </div>
+                                    <div style="color: white; font-weight: bold;">{{ prediction_stats.avg_away_score|default:"0" }}</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="color: #94a3b8; font-size: 0.8rem;">Avg Ability
+                                    </div>
+                                    <div style="color: white; font-weight: bold;">{{ prediction_stats.avg_confidence|default:"0" }}%</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Predictions Table -->
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; color: #ffffff;">
+                                <thead>
+                                    <tr style="background: #2a2a2a; border-bottom: 2px solid #00d4aa;">
+                                        <th style="padding: 12px; text-align: left; font-weight: 600;">
+                                            Date</th>
+                                        <th style="padding: 12px; text-align: center; font-weight: 600;">
+                                            Match</th>
+                                        <th style="padding: 12px; text-align: center; font-weight: 600;">
+                                            Outcome</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for pred in all_predictions %}
+                                    <tr style="border-bottom: 1px solid #333333; transition: background 0.2s ease;"
+                                        onmouseover="this.style.background='#2a2a2a'"
+                                        onmouseout="this.style.background='transparent'">
+                                        <td style="padding: 12px;">{{ pred.prediction_date|date:"M d, Y H:i" }}</td>
+                                        <td style="padding: 12px; text-align: center; font-weight: 600;">
+                                            {{ pred.home_team }} vs {{ pred.away_team }}
+                                        </td>
+                                        <td style="padding: 12px; text-align: center;">
+                                            {% if pred.outcome == "Home" %}
+                                            <span
+                                                style="color: #00d4aa; font-weight: 600; background: rgba(0, 212, 170, 0.1); padding: 4px 12px; border-radius: 12px;">
+                                                {{ home_team }} Win
+                                            </span>
+                                            {% elif pred.outcome == "Away" %}
+                                            <span
+                                                style="color: #ff6b35; font-weight: 600; background: rgba(255, 107, 53, 0.1); padding: 4px 12px; border-radius: 12px;">
+                                                {{ away_team }} Win
+                                            </span>
+                                            {% elif pred.outcome == "Draw" %}
+                                            <span
+                                                style="color: #f59e0b; font-weight: 600; background: rgba(245, 158, 11, 0.1); padding: 4px 12px; border-radius: 12px;">
+                                                Draw
+                                            </span>
+                                            {% else %}
+                                            <!-- For double chance or other predictions, show the actual outcome text -->
+                                            <span
+                                                style="color: #8b5cf6; font-weight: 600; background: rgba(139, 92, 246, 0.1); padding: 4px 12px; border-radius: 12px;">
+                                                {{ pred.outcome }}
+                                            </span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {% if prediction_stats.total_count > 10 %}
+                        <div style="margin-top: 15px; text-align: center; color: #94a3b8; font-size: 0.9rem;">
+                            Showing last 10 of {{ prediction_stats.total_count }} predictions
+                        </div>
+                        {% endif %}
                 </div>
-                {% endblock %}
+                </details>
+                {% endif %}
+
+                <!-- Action Buttons -->
+                <div class="action-buttons" style="margin-top: 40px;">
+                    <a href="{% url 'predictor:predict' %}" class="btn-action" id="new-prediction-btn">
+                        <i class="fas fa-plus"></i>
+                        New Prediction
+                    </a>
+                    <a href="{% url 'predictor:home' %}" class="btn-secondary">
+                        <i class="fas fa-home"></i>
+                        Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
 
 
-                {% block extra_js %}
-                <script>
-                    document.addEventListener('DOMContentLoaded', function () {
-                        // Simple fade-in animation
-                        const resultCard = document.querySelector('.result-card');
-                        if (resultCard) {
-                            resultCard.style.opacity = '0';
-                            resultCard.style.transform = 'translateY(20px)';
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Simple fade-in animation
+        const resultCard = document.querySelector('.result-card');
+        if (resultCard) {
+            resultCard.style.opacity = '0';
+            resultCard.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                resultCard.style.transition = 'all 0.6s ease';
+                resultCard.style.opacity = '1';
+                resultCard.style.transform = 'translateY(0)';
+            }, 100);
+        }
+
+        // Calculate and display probabilities as percentages for stat cards
+        const probElements = document.querySelectorAll('.stat-value[data-prob]');
+        probElements.forEach(function (elem) {
+            let prob = parseFloat(elem.getAttribute('data-prob'));
+
+            // Handle both decimal (0-1) and percentage (0-100) formats
+            // If prob > 1, it's already in percentage format, otherwise convert
+            let percentage;
+            if (prob > 1) {
+                // Already in percentage format (0-100)
+                percentage = prob.toFixed(1);
+            } else {
+                // In decimal format (0-1), convert to percentage
+                percentage = (prob * 100).toFixed(1);
+            }
+
+            elem.textContent = percentage + '%';
+
+            // Update the corresponding progress bar
+            const card = elem.closest('.stat-card');
+            const probFill = card.querySelector('.probability-fill');
+            if (probFill) {
+                // Animate the width
+                setTimeout(() => {
+                    probFill.style.width = percentage + '%';
+                }, 300);
+            }
+        });
+
+        // Calculate and display probabilities for main Win Probability section
+        const probDisplayHome = document.querySelector('.prob-display-home');
+        const probDisplayDraw = document.querySelector('.prob-display-draw');
+        const probDisplayAway = document.querySelector('.prob-display-away');
+
+        if (probDisplayHome && probDisplayDraw && probDisplayAway) {
+            let probHome = parseFloat(probDisplayHome.getAttribute('data-prob'));
+            let probDraw = parseFloat(probDisplayDraw.getAttribute('data-prob'));
+            let probAway = parseFloat(probDisplayAway.getAttribute('data-prob'));
+
+            // Handle both decimal (0-1) and percentage (0-100) formats
+            // If any prob > 1, they're already in percentage format
+            let homePercentage, drawPercentage, awayPercentage;
+            if (probHome > 1 || probDraw > 1 || probAway > 1) {
+                // Already in percentage format (0-100)
+                homePercentage = Math.round(probHome);
+                drawPercentage = Math.round(probDraw);
+                awayPercentage = Math.round(probAway);
+            } else {
+                // In decimal format (0-1), convert to percentage
+                homePercentage = Math.round(probHome * 100);
+                drawPercentage = Math.round(probDraw * 100);
+                awayPercentage = Math.round(probAway * 100);
+            }
+
+            // Ensure probabilities sum to 100% (handle rounding errors)
+            const total = homePercentage + drawPercentage + awayPercentage;
+            if (total !== 100 && total > 0) {
+                // Normalize to 100%
+                const factor = 100 / total;
+                homePercentage = Math.round(homePercentage * factor);
+                drawPercentage = Math.round(drawPercentage * factor);
+                awayPercentage = Math.round(awayPercentage * factor);
+
+                // Fix any remaining rounding error by adjusting the largest value
+                const newTotal = homePercentage + drawPercentage + awayPercentage;
+                if (newTotal !== 100) {
+                    const diff = 100 - newTotal;
+                    if (homePercentage >= drawPercentage && homePercentage >= awayPercentage) {
+                        homePercentage += diff;
+                    } else if (drawPercentage >= homePercentage && drawPercentage >= awayPercentage) {
+                        drawPercentage += diff;
+                    } else {
+                        awayPercentage += diff;
+                    }
+                }
+            }
+
+            // Update display
+            probDisplayHome.textContent = homePercentage + '%';
+            probDisplayDraw.textContent = drawPercentage + '%';
+            probDisplayAway.textContent = awayPercentage + '%';
+
+            // Update progress bars
+            const probBarHome = document.querySelector('.prob-bar-home');
+            const probBarDraw = document.querySelector('.prob-bar-draw');
+            const probBarAway = document.querySelector('.prob-bar-away');
+
+            setTimeout(() => {
+                if (probBarHome) probBarHome.style.width = homePercentage + '%';
+                if (probBarDraw) probBarDraw.style.width = drawPercentage + '%';
+                if (probBarAway) probBarAway.style.width = awayPercentage + '%';
+            }, 300);
+        }
+
+        // Update Historical Probabilities display
+        function updateHistoricalProbabilities() {
+            // Find all elements with data-prob attribute in the Historical Probabilities section
+            const histProbElements = document.querySelectorAll('[data-prob]');
+
+            histProbElements.forEach(function (elem) {
+                const probValue = parseFloat(elem.getAttribute('data-prob'));
+
+                if (!isNaN(probValue)) {
+                    // Handle both decimal (0-1) and percentage (0-100) formats
+                    let percentage;
+                    if (probValue > 1) {
+                        // Already in percentage format (0-100)
+                        percentage = Math.round(probValue);
+                    } else {
+                        // In decimal format (0-1), convert to percentage
+                        percentage = Math.round(probValue * 100);
+                    }
+
+                    // Update the text content
+                    elem.textContent = percentage + '%';
+
+                    // Find the corresponding progress bar (sibling element with class prob-home-hist, prob-draw-hist, or prob-away-hist)
+                    const parent = elem.parentElement;
+                    if (parent) {
+                        const progressBar = parent.querySelector('.prob-home-hist, .prob-draw-hist, .prob-away-hist');
+                        if (progressBar) {
+                            // Update progress bar width with animation
                             setTimeout(() => {
-                                resultCard.style.transition = 'all 0.6s ease';
-                                resultCard.style.opacity = '1';
-                                resultCard.style.transform = 'translateY(0)';
+                                progressBar.style.width = percentage + '%';
                             }, 100);
                         }
+                    }
+                }
+            });
+        }
 
-                        // Calculate and display probabilities as percentages for stat cards
-                        const probElements = document.querySelectorAll('.stat-value[data-prob]');
-                        probElements.forEach(function (elem) {
-                            let prob = parseFloat(elem.getAttribute('data-prob'));
+        // Call updateHistoricalProbabilities when page loads
+        updateHistoricalProbabilities();
 
-                            // Handle both decimal (0-1) and percentage (0-100) formats
-                            // If prob > 1, it's already in percentage format, otherwise convert
-                            let percentage;
-                            if (prob > 1) {
-                                // Already in percentage format (0-100)
-                                percentage = prob.toFixed(1);
-                            } else {
-                                // In decimal format (0-1), convert to percentage
-                                percentage = (prob * 100).toFixed(1);
-                            }
+        // Clear localStorage when clicking "New Prediction" button
+        const newPredictionBtn = document.getElementById('new-prediction-btn');
+        if (newPredictionBtn) {
+            newPredictionBtn.addEventListener('click', function (e) {
+                e.preventDefault();  // Prevent default navigation
 
-                            elem.textContent = percentage + '%';
+                // Clear the saved form data from localStorage
+                localStorage.removeItem('form_prediction-form');
+                localStorage.removeItem('lastPrediction');
 
-                            // Update the corresponding progress bar
-                            const card = elem.closest('.stat-card');
-                            const probFill = card.querySelector('.probability-fill');
-                            if (probFill) {
-                                // Animate the width
-                                setTimeout(() => {
-                                    probFill.style.width = percentage + '%';
-                                }, 300);
-                            }
-                        });
+                // Clear any session storage
+                sessionStorage.clear();
 
-                        // Calculate and display probabilities for main Win Probability section
-                        const probDisplayHome = document.querySelector('.prob-display-home');
-                        const probDisplayDraw = document.querySelector('.prob-display-draw');
-                        const probDisplayAway = document.querySelector('.prob-display-away');
+                // Navigate to predict page with a fresh flag
+                window.location.href = '/predict/?fresh=true';
+            });
+        }
 
-                        if (probDisplayHome && probDisplayDraw && probDisplayAway) {
-                            let probHome = parseFloat(probDisplayHome.getAttribute('data-prob'));
-                            let probDraw = parseFloat(probDisplayDraw.getAttribute('data-prob'));
-                            let probAway = parseFloat(probDisplayAway.getAttribute('data-prob'));
-
-                            // Handle both decimal (0-1) and percentage (0-100) formats
-                            // If any prob > 1, they're already in percentage format
-                            let homePercentage, drawPercentage, awayPercentage;
-                            if (probHome > 1 || probDraw > 1 || probAway > 1) {
-                                // Already in percentage format (0-100)
-                                homePercentage = Math.round(probHome);
-                                drawPercentage = Math.round(probDraw);
-                                awayPercentage = Math.round(probAway);
-                            } else {
-                                // In decimal format (0-1), convert to percentage
-                                homePercentage = Math.round(probHome * 100);
-                                drawPercentage = Math.round(probDraw * 100);
-                                awayPercentage = Math.round(probAway * 100);
-                            }
-
-                            // Ensure probabilities sum to 100% (handle rounding errors)
-                            const total = homePercentage + drawPercentage + awayPercentage;
-                            if (total !== 100 && total > 0) {
-                                // Normalize to 100%
-                                const factor = 100 / total;
-                                homePercentage = Math.round(homePercentage * factor);
-                                drawPercentage = Math.round(drawPercentage * factor);
-                                awayPercentage = Math.round(awayPercentage * factor);
-
-                                // Fix any remaining rounding error by adjusting the largest value
-                                const newTotal = homePercentage + drawPercentage + awayPercentage;
-                                if (newTotal !== 100) {
-                                    const diff = 100 - newTotal;
-                                    if (homePercentage >= drawPercentage && homePercentage >= awayPercentage) {
-                                        homePercentage += diff;
-                                    } else if (drawPercentage >= homePercentage && drawPercentage >= awayPercentage) {
-                                        drawPercentage += diff;
-                                    } else {
-                                        awayPercentage += diff;
-                                    }
-                                }
-                            }
-
-                            // Update display
-                            probDisplayHome.textContent = homePercentage + '%';
-                            probDisplayDraw.textContent = drawPercentage + '%';
-                            probDisplayAway.textContent = awayPercentage + '%';
-
-                            // Update progress bars
-                            const probBarHome = document.querySelector('.prob-bar-home');
-                            const probBarDraw = document.querySelector('.prob-bar-draw');
-                            const probBarAway = document.querySelector('.prob-bar-away');
-
-                            setTimeout(() => {
-                                if (probBarHome) probBarHome.style.width = homePercentage + '%';
-                                if (probBarDraw) probBarDraw.style.width = drawPercentage + '%';
-                                if (probBarAway) probBarAway.style.width = awayPercentage + '%';
-                            }, 300);
-                        }
-
-                        // Update Historical Probabilities display
-                        function updateHistoricalProbabilities() {
-                            // Find all elements with data-prob attribute in the Historical Probabilities section
-                            const histProbElements = document.querySelectorAll('[data-prob]');
-
-                            histProbElements.forEach(function (elem) {
-                                const probValue = parseFloat(elem.getAttribute('data-prob'));
-
-                                if (!isNaN(probValue)) {
-                                    // Handle both decimal (0-1) and percentage (0-100) formats
-                                    let percentage;
-                                    if (probValue > 1) {
-                                        // Already in percentage format (0-100)
-                                        percentage = Math.round(probValue);
-                                    } else {
-                                        // In decimal format (0-1), convert to percentage
-                                        percentage = Math.round(probValue * 100);
-                                    }
-
-                                    // Update the text content
-                                    elem.textContent = percentage + '%';
-
-                                    // Find the corresponding progress bar (sibling element with class prob-home-hist, prob-draw-hist, or prob-away-hist)
-                                    const parent = elem.parentElement;
-                                    if (parent) {
-                                        const progressBar = parent.querySelector('.prob-home-hist, .prob-draw-hist, .prob-away-hist');
-                                        if (progressBar) {
-                                            // Update progress bar width with animation
-                                            setTimeout(() => {
-                                                progressBar.style.width = percentage + '%';
-                                            }, 100);
-                                        }
-                                    }
-                                }
-                            });
-                        }
-
-                        // Call updateHistoricalProbabilities when page loads
-                        updateHistoricalProbabilities();
-
-                        // Clear localStorage when clicking "New Prediction" button
-                        const newPredictionBtn = document.getElementById('new-prediction-btn');
-                        if (newPredictionBtn) {
-                            newPredictionBtn.addEventListener('click', function (e) {
-                                e.preventDefault();  // Prevent default navigation
-
-                                // Clear the saved form data from localStorage
-                                localStorage.removeItem('form_prediction-form');
-                                localStorage.removeItem('lastPrediction');
-
-                                // Clear any session storage
-                                sessionStorage.clear();
-
-                                // Navigate to predict page with a fresh flag
-                                window.location.href = '/predict/?fresh=true';
-                            });
-                        }
-
-                        // Also handle the "Make Another Prediction" button at the top
-                        const makeAnotherBtn = document.querySelector('a[href*="predictor:predict"]');
-                        if (makeAnotherBtn && makeAnotherBtn !== newPredictionBtn) {
-                            makeAnotherBtn.addEventListener('click', function (e) {
-                                e.preventDefault();
-                                localStorage.removeItem('form_prediction-form');
-                                localStorage.removeItem('lastPrediction');
-                                sessionStorage.clear();
-                                window.location.href = '/predict/?fresh=true';
-                            });
-                        }
-                    });
-                </script>
-                {% endblock %}
+        // Also handle the "Make Another Prediction" button at the top
+        const makeAnotherBtn = document.querySelector('a[href*="predictor:predict"]');
+        if (makeAnotherBtn && makeAnotherBtn !== newPredictionBtn) {
+            makeAnotherBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                localStorage.removeItem('form_prediction-form');
+                localStorage.removeItem('lastPrediction');
+                sessionStorage.clear();
+                window.location.href = '/predict/?fresh=true';
+            });
+        }
+    });
+</script>
+{% endblock %}
