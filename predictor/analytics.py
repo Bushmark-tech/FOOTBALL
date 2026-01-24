@@ -574,7 +574,15 @@ def get_team_recent_form_model2(team_name, data, version="v2"):
         for _, row in recent_matches.iterrows():
             result = row[result_col]
             is_home = str(row[home_col]).lower() == team_name_low
-            if result == "D":
+            # Handle numeric results (0=Away, 1=Draw, 2=Home)
+            if str(result) == '1':
+                form.append("D")
+            elif str(result) == '2' and is_home:
+                form.append("W")
+            elif str(result) == '0' and not is_home:
+                form.append("W")
+            # Handle standard string results
+            elif result == "D":
                 form.append("D")
             elif (result == "H" and is_home) or (result == "A" and not is_home):
                 form.append("W")
