@@ -1773,12 +1773,15 @@ def preprocess_for_models(home_team, away_team, model, data=None):
     UPDATED: Also supports Model 2 which uses Team IDs and specific advanced stats.
     """
     try:
-        # OPTIMIZED: Use provided data if available (from FastAPI cache), otherwise load
+        # OPTIMIZED: Use provided data if available, otherwise load
         if data is None:
             data = load_football_data(use_cache=True)
-        if data.empty:
-            return None
-        
+            
+        # USE COMBINED DATA for form features to ensure accuracy
+        combined_data = load_combined_data()
+        if combined_data.empty:
+            combined_data = data
+            
         pd = safe_import_pandas()
         np = safe_import_numpy()
         
@@ -1850,9 +1853,9 @@ def preprocess_for_models(home_team, away_team, model, data=None):
             away_col = 'AwayTeam'
             dataset_version = 'v1'
             
-        # Use data directly instead of copying (saves memory and time)
-        home_form = calculate_recent_form_features(data, dummy_idx, home_team, 'home', version=dataset_version)
-        away_form = calculate_recent_form_features(data, dummy_idx, away_team, 'away', version=dataset_version)
+        # Use combined data for form calculations (standardize to v1)
+        home_form = calculate_recent_form_features(combined_data, len(combined_data), home_team, 'home', version='v1')
+        away_form = calculate_recent_form_features(combined_data, len(combined_data), away_team, 'away', version='v1')
 
         # Re-populate form features now that we have them
         if home_form:
@@ -2141,19 +2144,24 @@ def advanced_predict_match(home_team, away_team, model1, model2):
         elif home_team in other_teams and away_team in other_teams:
             required_dataset = 2
         else:
-            # Mixed teams - will use fallback, but load dataset 1 as default
+            # Mixed teams - will use fallback
             required_dataset = 1
         
-        # Load only the required dataset (use cache for speed)
+        # USE COMBINED DATA for form-based fallback and probabilities
         t0 = time.time()
+        combined_data = load_combined_data()
+        debug_timings['load_combined_data'] = time.time() - t0
+        
+        # Load the specific dataset ONLY for model features if needed
         data = load_football_data(required_dataset, use_cache=True)
-        debug_timings['load_data_1'] = time.time() - t0
-        data_empty = hasattr(data, 'empty') and data.empty if hasattr(data, 'empty') else (not data if data else True)
+        debug_timings['load_data_specific'] = time.time() - t0
+        
+        data_empty = hasattr(combined_data, 'empty') and combined_data.empty if hasattr(combined_data, 'empty') else (not combined_data if combined_data else True)
         
         # If data is empty, use form-based fallback instead of returning None
         if data_empty:
             logger.warning("No data available for prediction, using form-based fallback")
-            # Use enhanced features based on form
+            # Use enhanced features based on form (already uses combined data internally now)
             enhanced_features = get_enhanced_features(home_team, away_team)
             home_strength = enhanced_features['home_strength']
             away_strength = enhanced_features['away_strength']
@@ -2302,9 +2310,8 @@ def advanced_predict_match(home_team, away_team, model1, model2):
                 if confidence > 1.0:
                     confidence = confidence / 100.0
                 
-                # Get historical probabilities for display (use dataset 2 for Model 2 with lGIC logic)
-                # OPTIMIZATION: Reuse already loaded data instead of reloading
-                probs = calculate_probabilities_model2(home_team, away_team, data, version="v2")
+                # Get historical probabilities for display (use combined data)
+                probs = calculate_probabilities_model2(home_team, away_team, combined_data, version="v1")
                 h2h_data = analytics_engine.get_head_to_head_stats(home_team, away_team)
                 
                 logger.info(f"Model2 Fallback - Confidence: {confidence}, Probabilities: {prob_dict}")
@@ -2375,20 +2382,20 @@ def advanced_predict_match(home_team, away_team, model1, model2):
             
             debug_timings['compute_features'] = time.time() - t_features
         
-        # Get historical probabilities - use Model2-specific logic for Model2
+        # Get historical probabilities - use Combined Data for all models
         t_probs = time.time()
         if model_type == "Model2":
             # Use lGIC logic for Model2 (simpler, cleaner)
-            probs = calculate_probabilities_model2(home_team, away_team, data, version="v2")
+            probs = calculate_probabilities_model2(home_team, away_team, combined_data, version="v1")
             # If no H2H data, use form-based fallback
             if probs is None:
                 logger.info(f"No H2H data for Model2 prediction: {home_team} vs {away_team}, using form-based fallback")
                 # Use form-based probabilities instead
-                probs = calculate_probabilities_original(home_team, away_team, data, version="v1")
+                probs = calculate_probabilities_original(home_team, away_team, combined_data, version="v1")
                 model_type = "Model2 (Form-based)"
         else:
             # Use original logic for Model1
-            probs = calculate_probabilities_original(home_team, away_team, data, version="v1")
+            probs = calculate_probabilities_original(home_team, away_team, combined_data, version="v1")
         debug_timings['calculate_probabilities'] = time.time() - t_probs
         
         # Log probabilities for debugging consistency
@@ -3273,16 +3280,10 @@ class ProfessionalFootballAnalytics:
     def calculate_team_strength(self, team_name, home_away='home'):
         """Calculate team strength based on recent performance using actual form data."""
         try:
-            # Determine which dataset to use
-            # Check if team is in Model 2 mapping
-            mapping = load_team_mapping()
-            if team_name in mapping:
-                # Likely Model 2
-                data = load_football_data(2)
-                actual_version = "v2"
-            else:
-                data = load_football_data(1)
-                actual_version = "v1"
+            # Use LOAD COMBINED DATA for strength calculation
+            # This ensures we see all matches regardless of team category
+            data = load_combined_data()
+            actual_version = "v1" # Combined data is standardized to v1 col names
 
             data_empty = hasattr(data, 'empty') and data.empty if hasattr(data, 'empty') else (not data if data else True)
             
