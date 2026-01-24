@@ -38,12 +38,16 @@ You need to obtain these from the [Safaricom Daraja Portal](https://developer.sa
 Add these to your `.env` file (or Render environment variables):
 
 ```bash
-# M-Pesa Configuration
+# M-Pesa Configuration (Buy Goods / Till)
 MPESA_CONSUMER_KEY=your_actual_consumer_key_here
 MPESA_CONSUMER_SECRET=your_actual_consumer_secret_here
-MPESA_SHORTCODE=3049053
 MPESA_PASSKEY=your_actual_passkey_here
-MPESA_ENVIRONMENT=production  # Use 'sandbox' for testing
+MPESA_ENVIRONMENT=production
+
+# Specific Numbers from your SMS:
+MPESA_SHORTCODE=9536577         # Store Number
+MPESA_TILL_NUMBER=3062917       # Till Number
+MPESA_TRANSACTION_TYPE=CustomerBuyGoodsOnline
 ```
 
 ### Step 3: Whitelist Callback URL

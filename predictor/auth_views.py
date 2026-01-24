@@ -582,7 +582,12 @@ def get_mpesa_access_token():
         ).decode()
         
         headers = {'Authorization': f'Basic {auth}'}
+        print(f"DEBUG: URL={url}")
+        print(f"DEBUG: Keys Used (First 5 chars): {settings.MPESA_CONSUMER_KEY[:5]}...")
+        
         response = requests.get(url, headers=headers)
+        
+        print(f"DEBUG TOKEN RESPONSE: {response.status_code} {response.text}")
         
         if response.status_code == 200:
             return response.json().get('access_token')

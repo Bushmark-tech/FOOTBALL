@@ -1,0 +1,17 @@
+CORRECTION REQUIRED FOR RENDER VARIABLES
+======================================
+
+I reviewed your Render configuration screenshots. 
+You have entered the wrong number for MPESA_SHORTCODE.
+
+CURRENT INCORRECT SETTING:
+MPESA_SHORTCODE = 3062917  <-- This is your Till Number. WRONG.
+
+CORRECT SETTING (FROM YOUR SMS):
+MPESA_SHORTCODE = 9536577  <-- This is your Store Number. CORRECT.
+
+Please update MPESA_SHORTCODE to 9536577 immediately on Render.
+
+Summary:
+1. MPESA_SHORTCODE  -> Change to 9536577
+2. MPESA_TILL_NUMBER -> Keep as 3062917 (This is correct)
