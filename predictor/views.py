@@ -3149,24 +3149,13 @@ def result(request):
     # NOTE: has_valid_historical_prob is already set above (line ~2813) - DO NOT reset it here!
     # Resetting it here would overwrite the correct value and cause "Limited Historical Data" warnings
     try:
-        from .analytics import get_column_names, load_football_data, safe_import_pandas
+        from .analytics import get_column_names, load_football_data, load_combined_data, safe_import_pandas
         pd = safe_import_pandas()
         
-        # Use the same dataset as for probabilities
-        other_teams = set()
-        try:
-            other_leagues = League.objects.filter(category='Others').prefetch_related('teams')
-            for league in other_leagues:
-                other_teams.update([team.name for team in league.teams.all()])
-        except Exception:
-            pass  # Fallback to default dataset
-        
-        if home_team in other_teams and away_team in other_teams:
-            data = load_football_data(2)
-            dataset_version = "v2"
-        else:
-            data = load_football_data(1)
-            dataset_version = "v1"
+        # USE COMBINED DATA for comprehensive display (form/H2H)
+        # This fixes issues where latest matches from different datasets are missed
+        data = load_combined_data()
+        dataset_version = "v1" # Combined data always uses v1 standardization
         
         if hasattr(data, 'columns') and len(data.columns) > 0 and not (hasattr(data, 'empty') and data.empty):
             home_col, away_col, result_col = get_column_names(dataset_version)
@@ -3388,34 +3377,9 @@ def result(request):
     
     if home_team and away_team:
         try:
-            # Determine which dataset to use based on team categories (same logic as probabilities)
-            other_teams = set()
-            try:
-                other_leagues = League.objects.filter(category='Others').prefetch_related('teams')
-                for league in other_leagues:
-                    other_teams.update([team.name for team in league.teams.all()])
-            except Exception:
-                pass  # Fallback to default dataset
-            
-            # Load appropriate dataset (data1 for Model 1 teams, data2 for Model 2 teams)
-            # For Others category, try dataset 2 first, but fallback to dataset 1 if no data found
-            if home_team in other_teams and away_team in other_teams:
-                data = load_football_data(2, use_cache=True)  # Try dataset 2 first
-                dataset_version = "v2"
-                # Check if dataset 2 has the teams, if not try dataset 1
-                if hasattr(data, 'columns') and len(data.columns) > 0:
-                    temp_h_col, temp_a_col, _ = get_column_names("v2")
-                    # Check if teams exist in dataset 2
-                    home_matches = data[data[temp_h_col].astype(str).str.contains(home_team, case=False, na=False)]
-                    away_matches = data[data[temp_a_col].astype(str).str.contains(away_team, case=False, na=False)]
-                    if len(home_matches) == 0 and len(away_matches) == 0:
-                        # Teams not in dataset 2, try dataset 1
-                        logger.info(f"Teams {home_team}/{away_team} not in dataset 2, trying dataset 1")
-                        data = load_football_data(1, use_cache=True)
-                        dataset_version = "v1"
-            else:
-                data = load_football_data(1, use_cache=True)  # Use dataset 1 for Model 1 teams
-                dataset_version = "v1"
+            # Use combined data for form calculation as well
+            data = load_combined_data()
+            dataset_version = "v1"
             
             # Check if data is actually usable (not our mock EmptyDataFrame)
             data_usable = hasattr(data, 'columns') and len(data.columns) > 0 and not (hasattr(data, 'empty') and data.empty and len(data.columns) == 0)
@@ -3425,18 +3389,6 @@ def result(request):
                 try:
                     home_team_form = get_team_recent_form_original(home_team, data, version=dataset_version)
                     away_team_form = get_team_recent_form_original(away_team, data, version=dataset_version)
-                    # If forms are hash-based (no real data), try dataset 1 as fallback for Others teams
-                    if home_team in other_teams and away_team in other_teams:
-                        # Check if forms look hash-based (all same pattern or unrealistic)
-                        if home_team_form == 'DDDDD' or away_team_form == 'DDDDD':
-                            logger.info(f"Hash-based forms detected, trying dataset 1 for {home_team}/{away_team}")
-                            data1 = load_football_data(1, use_cache=True)
-                            home_form_d1 = get_team_recent_form_original(home_team, data1, version="v1")
-                            away_form_d1 = get_team_recent_form_original(away_team, data1, version="v1")
-                            if home_form_d1 != 'DDDDD':
-                                home_team_form = home_form_d1
-                            if away_form_d1 != 'DDDDD':
-                                away_team_form = away_form_d1
                 except Exception as form_error:
                     logger.warning(f"Error getting form from data: {form_error}, using hash-based fallback")
                     # Fall through to hash-based generation

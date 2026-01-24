@@ -159,6 +159,51 @@ class _LazyNumpy:
 pd = _LazyPandas()
 np = _LazyNumpy()
 
+def load_combined_data():
+    """
+    Load and merge both football_data1 and football_data2 for comprehensive display (form/H2H).
+    Standardizes columns to Dataset 1 format (HomeTeam, AwayTeam, FTR, FTHG, FTAG).
+    """
+    try:
+        d1 = load_football_data(1)
+        d2 = load_football_data(2)
+        
+        pd = safe_import_pandas()
+        
+        # Standardize d2 to d1 format
+        # d2 columns: Home, Away, Res, Date, HG, AG
+        # d1 columns: HomeTeam, AwayTeam, FTR, Date, FTHG, FTAG
+        
+        d2_mapping = {
+            'Home': 'HomeTeam',
+            'Away': 'AwayTeam',
+            'Res': 'FTR',
+            'HG': 'FTHG',
+            'AG': 'FTAG'
+        }
+        
+        # Only rename what exists
+        d2_renamed = d2.rename(columns={k: v for k, v in d2_mapping.items() if k in d2.columns})
+        
+        # Pick common columns
+        common_cols = ['Date', 'HomeTeam', 'AwayTeam', 'FTR', 'FTHG', 'FTAG']
+        cols1 = [c for c in common_cols if c in d1.columns]
+        cols2 = [c for c in common_cols if c in d2_renamed.columns]
+        
+        # Combine
+        combined = pd.concat([d1[cols1], d2_renamed[cols2]], ignore_index=True)
+        
+        # Drop absolute duplicates (same teams and date and scores)
+        if 'Date' in combined.columns:
+            combined['Date'] = pd.to_datetime(combined['Date'], errors='coerce')
+            combined = combined.dropna(subset=['Date'])
+            combined = combined.drop_duplicates(subset=['Date', 'HomeTeam', 'AwayTeam'], keep='first')
+            
+        return combined
+    except Exception as e:
+        logger.warning(f"Error loading combined data: {e}")
+        return load_football_data(1)
+
 # Define EmptyDataFrame class globally to avoid duplication and scope issues
 class EmptyDataFrame:
     """Mock empty DataFrame for fallback scenarios."""
@@ -588,7 +633,12 @@ def get_team_recent_form_model2(team_name, data, version="v2"):
                 form.append("W")
             else:
                 form.append("L")
-        return "".join(form) if form else "-----"
+        
+        # User requested specific order (W W W D D vs D D W W W)
+        # Currently it processes Newest -> Oldest. 
+        # If user sees D D W W W and wants W W W D D, we need to reverse the final string.
+        # This makes it read Left (Oldest) -> Right (Newest) which is standard for "Form: W W W D D"
+        return "".join(form[::-1]) if form else "-----"
     except Exception as e:
         logger.warning(f"Error getting team form for Model2: {e}")
         return "-----"
