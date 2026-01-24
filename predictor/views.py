@@ -3449,10 +3449,6 @@ def result(request):
                 away_team_form = "-----"
 
             
-            # ORIGINAL LOGIC FROM lGIC - Use available information without padding
-            # (Padding with 'D' removed as requested by user)
-            logger.info(f"Team forms - {home_team}: {home_team_form}, {away_team}: {away_team_form}")
-            
             # Check if form data is valid (from actual data, not hash-based)
             # We need to verify it's not the generated fallback form that analytics.py creates
             import hashlib
@@ -3471,6 +3467,10 @@ def result(request):
             
             # If the calculated form matches the generated one, it's likely a fallback
             is_generated = (home_team_form == gen_home) or (away_team_form == gen_away)
+
+            # Match symmetry: Home team form should have newest matches on the right
+            # Away team form (row-reverse) has newest matches on the left
+            # This ensures newest matches for both teams meet at the center VS
             
             # If data_usable was True and forms were retrieved, it's valid ONLY if not generated
             if data_usable and home_team_form and away_team_form and not is_generated and home_team_form != 'DDDDD' and away_team_form != 'DDDDD':
@@ -3523,29 +3523,26 @@ def result(request):
     
     # Iterate through outcomes (more robust than DB filtering for stats)
     for pred in all_predictions:
-        o = str(pred.outcome).strip() # specific handling for potential whitespace
+        o = str(pred.outcome).strip().lower() # specific handling for potential whitespace and case validity
         # Standard outcomes
-        if o == 'Home':
+        if o == 'home' or 'home win' in o:
             home_predictions += 1
-        elif o == 'Draw':
+        elif o == 'draw':
             draw_predictions += 1
-        elif o == 'Away':
+        elif o == 'away' or 'away win' in o:
             away_predictions += 1
         # Handle "Team Win" format if present in DB (legacy/alternate format)
-        elif home_team and (f"{home_team} Win" in o or f"{home_team} WIN" in o or o == f"{home_team} Win"):
+        elif home_team and home_team.lower() in o and 'win' in o:
             home_predictions += 1
-        elif away_team and (f"{away_team} Win" in o or f"{away_team} WIN" in o or o == f"{away_team} Win"):
+        elif away_team and away_team.lower() in o and 'win' in o:
             away_predictions += 1
-        # Fallback partial matching for case variations
-        elif 'Win' in o or 'WIN' in o:
-            if home_team and home_team.lower() in o.lower():
-                home_predictions += 1
-            elif away_team and away_team.lower() in o.lower():
-                away_predictions += 1
-        elif o in ['1X', 'X2', '12']:
-            # Handle double chance if they exist (count towards primary option)
-            # This is a fallback as these shouldn't be the primary outcome stored
-            pass
+        elif o == '1x':
+            home_predictions += 1
+        elif o == 'x2':
+            away_predictions += 1
+        elif o == '12':
+            # Count 12 (Home or Away) as Home for statistical simplification, or ignore
+            home_predictions += 1
     
     logger.info(f"Stats Calculated (Python) - Home: {home_predictions}, Draw: {draw_predictions}, Away: {away_predictions} (Total: {total_predictions_count})")
 
