@@ -561,13 +561,19 @@ def get_team_recent_form_model2(team_name, data, version="v2"):
         df = data[[home_col, away_col, result_col, "Date"]].copy()
         df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
         df = df.dropna(subset=["Date"])
-        recent_matches = df[(df[home_col] == team_name) | (df[away_col] == team_name)]
+        df_temp = df.copy()
+        # Create lower case columns for robust matching
+        df_temp['HomeLow'] = df_temp[home_col].astype(str).str.lower()
+        df_temp['AwayLow'] = df_temp[away_col].astype(str).str.lower()
+        team_name_low = str(team_name).lower()
+        
+        recent_matches = df_temp[(df_temp['HomeLow'] == team_name_low) | (df_temp['AwayLow'] == team_name_low)]
         recent_matches = recent_matches.sort_values("Date", ascending=False).head(5)
 
         form = []
         for _, row in recent_matches.iterrows():
             result = row[result_col]
-            is_home = row[home_col] == team_name
+            is_home = str(row[home_col]).lower() == team_name_low
             if result == "D":
                 form.append("D")
             elif (result == "H" and is_home) or (result == "A" and not is_home):
