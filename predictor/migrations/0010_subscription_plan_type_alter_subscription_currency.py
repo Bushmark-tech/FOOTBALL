@@ -2,6 +2,33 @@
 
 from django.db import migrations, models
 
+def add_plan_type_if_missing(apps, schema_editor):
+    db_table = 'predictor_subscription'
+    column_name = 'plan_type'
+    
+    # Check if column exists
+    from django.db import connection
+    with connection.cursor() as cursor:
+        if connection.vendor == 'postgresql':
+            cursor.execute(f"SELECT 1 FROM information_schema.columns WHERE table_name='{db_table}' AND column_name='{column_name}'")
+            exists = cursor.fetchone() is not None
+        else:
+            try:
+                cursor.execute(f"PRAGMA table_info({db_table})")
+                exists = any(row[1] == column_name for row in cursor.fetchall())
+            except:
+                exists = False
+            
+    if not exists:
+        Subscription = apps.get_model('predictor', 'Subscription')
+        field = models.CharField(choices=[('standard', 'Standard Plan'), ('starter', 'Starter Plan'), ('vip', 'VIP Plan')], default='standard', max_length=20)
+        # Add the field to the database
+        # We use raw SQL or schema_editor
+        if connection.vendor == 'postgresql':
+            cursor.execute(f"ALTER TABLE {db_table} ADD COLUMN {column_name} varchar(20) DEFAULT 'standard' NOT NULL")
+        else:
+            # SQLite handles DEFAULT in a specific way
+            cursor.execute(f"ALTER TABLE {db_table} ADD COLUMN {column_name} varchar(20) DEFAULT 'standard' NOT NULL")
 
 class Migration(migrations.Migration):
 
@@ -10,10 +37,17 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='subscription',
-            name='plan_type',
-            field=models.CharField(choices=[('standard', 'Standard Plan'), ('starter', 'Starter Plan'), ('vip', 'VIP Plan')], default='standard', max_length=20),
+        migrations.SeparateDatabaseAndState(
+            database_operations=[
+                migrations.RunPython(add_plan_type_if_missing, migrations.RunPython.noop),
+            ],
+            state_operations=[
+                migrations.AddField(
+                    model_name='subscription',
+                    name='plan_type',
+                    field=models.CharField(choices=[('standard', 'Standard Plan'), ('starter', 'Starter Plan'), ('vip', 'VIP Plan')], default='standard', max_length=20),
+                ),
+            ]
         ),
         migrations.AlterField(
             model_name='subscription',
@@ -21,3 +55,4 @@ class Migration(migrations.Migration):
             field=models.CharField(default='KSH', max_length=3),
         ),
     ]
+
