@@ -385,6 +385,8 @@ class Subscription(models.Model):
     currency = models.CharField(max_length=3, default='USD')  # USD or KSH
     mpesa_number = models.CharField(max_length=20, blank=True, null=True)
     mpesa_transaction_id = models.CharField(max_length=100, blank=True, null=True)
+    matches_limit = models.IntegerField(default=0)
+    matches_used = models.IntegerField(default=0)
     start_date = models.DateTimeField(null=True, blank=True)
     end_date = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -397,17 +399,28 @@ class Subscription(models.Model):
         """Check if subscription is currently active."""
         if self.status != 'active':
             return False
+            
+        # Check time expiration
         if self.end_date and timezone.now() > self.end_date:
             self.status = 'expired'
             self.save()
             return False
+            
+        # Check match limit expiration
+        if self.matches_limit > 0 and self.matches_used >= self.matches_limit:
+            self.status = 'expired'
+            self.save()
+            return False
+            
         return True
     
-    def activate(self, duration_days=30):
-        """Activate subscription for specified duration."""
+    def activate(self, duration_days=30, matches_limit=0):
+        """Activate subscription for specified duration and match limit."""
         self.status = 'active'
         self.start_date = timezone.now()
         self.end_date = timezone.now() + timedelta(days=duration_days)
+        if matches_limit > 0:
+            self.matches_limit = matches_limit
         self.save()
     
     class Meta:

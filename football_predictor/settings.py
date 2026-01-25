@@ -260,9 +260,25 @@ SOCIALACCOUNT_LOGIN_ON_GET = True
 
 # Subscription Settings
 FREE_MATCHES_LIMIT = 1
+SUBSCRIPTION_DURATION_DAYS = 30
+
+# Plan Prices (KSh)
+PLAN_PRICES = {
+    'starter': 200.00,
+    'standard': 500.00,
+    'vip': 1000.00
+}
+
+# Plan Match Limits (Total per month)
+PLAN_MATCH_LIMITS = {
+    'starter': 300,
+    'standard': 600,
+    'vip': 1500
+}
+
+# Legacy support
 SUBSCRIPTION_PRICE_USD = 2.00
 SUBSCRIPTION_PRICE_KSH = 200.00
-SUBSCRIPTION_DURATION_DAYS = 30
 
 # M-Pesa Settings
 MPESA_CONSUMER_KEY = os.environ.get('MPESA_CONSUMER_KEY')

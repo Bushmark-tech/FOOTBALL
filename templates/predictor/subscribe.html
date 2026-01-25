@@ -500,10 +500,10 @@
 
         <!-- Subscription Plans Grid -->
         <div class="plans-grid">
-            <!-- Standard Plan -->
+            <!-- Starter Plan -->
             <div class="plan-card">
-                <div class="plan-icon">🟢</div>
-                <h3 class="plan-name">Standard Plan</h3>
+                <div class="plan-icon">🎉</div>
+                <h3 class="plan-name">Starter Plan</h3>
                 <div class="plan-price">
                     <div class="amount">KSh 200</div>
                     <span class="period">per month</span>
@@ -511,11 +511,7 @@
                 <ul class="plan-features">
                     <li>
                         <i class="fas fa-check-circle"></i>
-                        <span>7 matches per day</span>
-                    </li>
-                    <li>
-                        <i class="fas fa-check-circle"></i>
-                        <span>300 matches per month</span>
+                        <span>300 matches per cycle</span>
                     </li>
                     <li>
                         <i class="fas fa-check-circle"></i>
@@ -526,15 +522,16 @@
                         <span>All leagues access</span>
                     </li>
                 </ul>
-                <button class="plan-button primary" onclick="selectPlan('Standard Plan', 200, 'standard')">
+                <button class="plan-button primary" onclick="selectPlan('Starter Plan', 200, 'starter')">
                     <i class="fas fa-crown"></i> Select Plan
                 </button>
             </div>
 
-            <!-- Starter Plan -->
-            <div class="plan-card">
+            <!-- Standard Plan -->
+            <div class="plan-card popular">
+                <div class="plan-badge">BEST VALUE</div>
                 <div class="plan-icon">⭐</div>
-                <h3 class="plan-name">Starter Plan</h3>
+                <h3 class="plan-name">Standard Plan</h3>
                 <div class="plan-price">
                     <div class="amount">KSh 500</div>
                     <span class="period">per month</span>
@@ -542,11 +539,7 @@
                 <ul class="plan-features">
                     <li>
                         <i class="fas fa-check-circle"></i>
-                        <span>20 matches per day</span>
-                    </li>
-                    <li>
-                        <i class="fas fa-check-circle"></i>
-                        <span>600 matches per month</span>
+                        <span>600 matches per cycle</span>
                     </li>
                     <li>
                         <i class="fas fa-check-circle"></i>
@@ -557,14 +550,13 @@
                         <span>Priority support</span>
                     </li>
                 </ul>
-                <button class="plan-button primary" onclick="selectPlan('Starter Plan', 500, 'starter')">
+                <button class="plan-button primary" onclick="selectPlan('Standard Plan', 500, 'standard')">
                     <i class="fas fa-star"></i> Select Plan
                 </button>
             </div>
 
             <!-- VIP Plan -->
             <div class="plan-card premium">
-                <div class="plan-badge premium">BEST VALUE</div>
                 <div class="plan-icon">♾️</div>
                 <h3 class="plan-name">VIP Plan</h3>
                 <div class="plan-price">
@@ -574,11 +566,7 @@
                 <ul class="plan-features">
                     <li>
                         <i class="fas fa-check-circle" style="color: #fbbf24;"></i>
-                        <span>100 matches per day</span>
-                    </li>
-                    <li>
-                        <i class="fas fa-check-circle" style="color: #fbbf24;"></i>
-                        <span>1,500 matches per month</span>
+                        <span>1,500 matches per cycle</span>
                     </li>
                     <li>
                         <i class="fas fa-check-circle" style="color: #fbbf24;"></i>
@@ -637,27 +625,54 @@
 
         <!-- Payment Processing Modal -->
         <div class="payment-modal" id="paymentModal">
-            <div class="payment-modal-content">
-                <div class="payment-spinner"></div>
-                <h2><i class="fas fa-credit-card"></i> Processing Payment</h2>
-                <p>Please wait while we process your payment request...</p>
-                <p style="color: #00d9a3; font-weight: 600; margin-top: 1rem;">
-                    <span id="modalPlanName">Basic Plan</span> - <span id="modalAmount">KSh 200</span>
-                </p>
+            <div class="payment-modal-content" id="modalContent">
+                <div id="modalLoading">
+                    <div class="payment-spinner"></div>
+                    <h2><i class="fas fa-credit-card"></i> Processing Payment</h2>
+                    <p>Please wait while we process your payment request...</p>
+                    <p style="color: #00d9a3; font-weight: 600; margin-top: 1rem;">
+                        <span id="modalPlanName">Basic Plan</span> - <span id="modalAmount">KSh 200</span>
+                    </p>
 
-                <div class="payment-steps">
-                    <h3><i class="fas fa-mobile-alt"></i> What to Expect</h3>
-                    <ol>
-                        <li>You'll receive an M-PESA prompt on your phone</li>
-                        <li>Enter your M-PESA PIN to authorize payment</li>
-                        <li>You'll receive a confirmation SMS</li>
-                        <li>Your subscription will be activated immediately</li>
-                    </ol>
+                    <div class="payment-steps">
+                        <h3><i class="fas fa-mobile-alt"></i> What to Expect</h3>
+                        <ol>
+                            <li>You'll receive an M-PESA prompt on your phone</li>
+                            <li>Enter your M-PESA PIN to authorize payment</li>
+                            <li>Your subscription will activate automatically once confirmed</li>
+                        </ol>
+                    </div>
+
+                    <p style="margin-top: 2rem; font-size: 0.9rem; color: #6b7280;">
+                        <i class="fas fa-info-circle"></i> Waiting for M-Pesa confirmation...
+                    </p>
+
+                    <button class="cancel-button" onclick="closeModal()"
+                        style="margin-top: 1rem; width: auto; padding: 0.5rem 2rem; border-color: rgba(239, 68, 68, 0.4); color: #ef4444;">
+                        Cancel Wait
+                    </button>
                 </div>
-
-                <p style="margin-top: 2rem; font-size: 0.9rem; color: #6b7280;">
-                    <i class="fas fa-info-circle"></i> This may take a few seconds...
-                </p>
+                <!-- Success State (Hidden) -->
+                <div id="modalSuccess" style="display: none;">
+                    <div style="font-size: 4rem; color: #00d9a3; margin-bottom: 1.5rem;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h2 style="color: #00d9a3;">Payment Successful!</h2>
+                    <p id="successDisplayMessage" style="color: #e5e7eb; margin: 1rem 0;"></p>
+                    <p style="color: #9ca3af; font-size: 0.9rem;">Redirecting to dashboard...</p>
+                </div>
+                <!-- Error State (Hidden) -->
+                <div id="modalError" style="display: none;">
+                    <div style="font-size: 4rem; color: #ef4444; margin-bottom: 1.5rem;">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <h2 style="color: #ef4444;">Payment Failed</h2>
+                    <p id="errorDisplayMessage" style="color: #e5e7eb; margin: 1rem 0;"></p>
+                    <button class="cancel-button" onclick="closeModal()"
+                        style="margin-top: 1rem; width: auto; padding: 0.5rem 2rem;">
+                        Try Again
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -665,6 +680,7 @@
 
 <script>
     let selectedPlanData = null;
+    let pollInterval = null;
 
     function selectPlan(planName, price, planType) {
         // Store selected plan data
@@ -683,6 +699,27 @@
 
         // Scroll to payment section
         paymentSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function closeModal() {
+        const paymentModal = document.getElementById('paymentModal');
+        paymentModal.classList.remove('active');
+
+        // Stop polling
+        if (pollInterval) {
+            clearInterval(pollInterval);
+            pollInterval = null;
+        }
+
+        // Reset modal states
+        document.getElementById('modalLoading').style.display = 'block';
+        document.getElementById('modalSuccess').style.display = 'none';
+        document.getElementById('modalError').style.display = 'none';
+
+        // Reactivate submit button
+        const submitButton = document.getElementById('submitButton');
+        submitButton.disabled = false;
+        submitButton.innerHTML = '<i class="fas fa-lock"></i> Pay Now - <span id="payAmount">KSh ' + (selectedPlanData ? selectedPlanData.price : '200') + '</span>';
     }
 
     function cancelPayment() {
@@ -763,44 +800,67 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    // Hide modal
-                    paymentModal.classList.remove('active');
+                    const modalLoading = document.getElementById('modalLoading');
+                    const modalSuccess = document.getElementById('modalSuccess');
+                    const modalError = document.getElementById('modalError');
 
                     if (data.success) {
-                        // Show success message with different text for mock vs real
-                        let successMessage = '✅ Payment Successful!\n\n';
-
-                        if (data.is_mock) {
-                            successMessage += '🎉 TEST MODE: Your subscription has been activated!\n\n';
-                            successMessage += '✨ You now have unlimited access to all features.\n';
-                            successMessage += '💡 Note: This is a test payment - no actual charge was made.\n\n';
-                            successMessage += 'To use real M-PESA payments, configure your API credentials in the .env file.';
-                        } else {
-                            successMessage += data.message || 'Your subscription has been activated. You now have unlimited access to all features!';
-                        }
-
-                        alert(successMessage);
-
-                        // Redirect to home after 2 seconds
-                        setTimeout(() => {
-                            window.location.href = '/';
-                        }, 2000);
+                        // Start polling for activation
+                        startPolling(data.subscription_id);
                     } else {
-                        alert('❌ Payment Failed\n\n' + (data.error || 'Payment initiation failed. Please try again.'));
+                        // Show error state
+                        modalLoading.style.display = 'none';
+                        modalError.style.display = 'block';
+                        document.getElementById('errorDisplayMessage').textContent = data.error || 'Payment initiation failed. Please try again.';
+
                         submitButton.disabled = false;
                         submitButton.innerHTML = originalText;
                     }
                 })
                 .catch(error => {
-                    // Hide modal
-                    paymentModal.classList.remove('active');
-
                     console.error('Error:', error);
-                    alert('❌ Error\n\nAn error occurred while processing your payment. Please try again.');
+
+                    const modalLoading = document.getElementById('modalLoading');
+                    const modalError = document.getElementById('modalError');
+
+                    modalLoading.style.display = 'none';
+                    modalError.style.display = 'block';
+                    document.getElementById('errorDisplayMessage').textContent = 'An error occurred while processing your payment. Please try again.';
+
                     submitButton.disabled = false;
                     submitButton.innerHTML = originalText;
                 });
         });
+    }
+
+    function startPolling(subscriptionId) {
+        if (pollInterval) clearInterval(pollInterval);
+
+        // Poll every 2 seconds
+        pollInterval = setInterval(() => {
+            fetch(`/api/subscription/status/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.has_access && data.reason === 'subscription') {
+                        // Success! Stop polling and show success UI
+                        clearInterval(pollInterval);
+                        pollInterval = null;
+
+                        const modalLoading = document.getElementById('modalLoading');
+                        const modalSuccess = document.getElementById('modalSuccess');
+
+                        modalLoading.style.display = 'none';
+                        modalSuccess.style.display = 'block';
+                        document.getElementById('successDisplayMessage').textContent = 'Payment received! Your subscription is now active.';
+
+                        // Redirect to home after 1.5 seconds
+                        setTimeout(() => {
+                            window.location.href = '/';
+                        }, 1500);
+                    }
+                })
+                .catch(err => console.error('Polling error:', err));
+        }, 2000);
     }
 </script>
 {% endblock %}

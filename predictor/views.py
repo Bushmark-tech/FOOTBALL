@@ -529,6 +529,7 @@ def home(request):
         'teams_covered': unique_teams,
         'leagues_supported': unique_leagues,
         'recent_predictions': predictions_with_display,
+        'status': check_subscription_status(request.user),
     }
     
     return render(request, 'predictor/home.html', context)

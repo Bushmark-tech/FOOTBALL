@@ -46,44 +46,32 @@ def check_subscription_status(user):
     valid_subs = [sub for sub in active_subscriptions if sub.is_active()]
     
     if valid_subs:
-        # Sum up limits from all active plans
-        limits = {
-            'standard': 7,
-            'starter': 20,
-            'vip': 100
-        }
-        
-        total_plan_limit = 0
+        total_remaining = 0
         plan_names = []
         
         for sub in valid_subs:
-            ptype = getattr(sub, 'plan_type', 'standard')
-            total_plan_limit += limits.get(ptype, 7)
-            plan_names.append(ptype.title())
-            
-        # Add the base "free" match to the subscriber's total
-        # User requirement: "20+7 = 27 plus free one which is 28"
-        daily_limit = total_plan_limit + 1
+            # Plan names for display
+            plan_names.append(sub.plan_type.title())
+            # Calculate remaining for this specific sub
+            remaining = sub.matches_limit - sub.matches_used
+            if remaining > 0:
+                total_remaining += remaining
+                
+        # Add the base "free" match to the subscriber's total if they haven't used it today
+        # But wait, the user says "billed monthly ... if exhausted billed again"
+        # Let's just use the subscription balance.
         
-        # Count today's predictions
-        today = timezone.now().date()
-        today_predictions = Prediction.objects.filter(
-            user=user,
-            prediction_date__date=today
-        ).count()
-        
-        if today_predictions >= daily_limit:
+        if total_remaining <= 0:
              return {
                 'has_access': False,
-                'reason': 'daily_limit_reached',
-                'limit': daily_limit,
-                'message': f'You have reached your total daily limit of {daily_limit} matches ({"+".join(plan_names)} + Free).'
+                'reason': 'limit_reached',
+                'message': f'You have exhausted all matches in your {", ".join(plan_names)} plan(s). Please subscribe again to continue.'
             }
 
         return {
             'has_access': True,
             'reason': 'subscription',
-            'remaining_daily': daily_limit - today_predictions
+            'remaining': total_remaining
         }
     
     # SECURITY FIX: Count ALL predictions (including archived) to prevent bypass
@@ -144,30 +132,13 @@ def use_prediction_credit(user):
     valid_subs = [sub for sub in active_subscriptions if sub.is_active()]
     
     if valid_subs:
-        # Sum up limits
-        limits = {
-            'standard': 7,
-            'starter': 20,
-            'vip': 100
-        }
-        total_plan_limit = 0
-        for sub in valid_subs:
-            ptype = getattr(sub, 'plan_type', 'standard')
-            total_plan_limit += limits.get(ptype, 7)
-            
-        # Add base free match
-        daily_limit = total_plan_limit + 1
-        
-        today = timezone.now().date()
-        today_predictions = Prediction.objects.filter(
-            user=user,
-            prediction_date__date=today
-        ).count()
-        
-        if today_predictions >= daily_limit:
-            return False # Limit reached
-            
-        return True  # Access granted
+        # Use oldest active subscription first
+        for sub in sorted(valid_subs, key=lambda x: x.created_at):
+            if sub.matches_used < sub.matches_limit:
+                sub.matches_used += 1
+                sub.save()
+                return True
+        return False  # All subscriptions exhausted
     
     # SECURITY FIX: Count ALL predictions (including archived) to prevent bypass
     total_predictions = Prediction.objects.filter(user=user).count()
@@ -391,20 +362,20 @@ def initiate_mpesa_payment(request):
             return JsonResponse({'error': 'Invalid M-Pesa number format'}, status=400)
         
         # Determine amount based on plan_type (Security: Do not trust amount from client)
-        if plan_type == 'standard':
-            amount = 200.00
-            currency = 'KSH'
-        elif plan_type == 'starter':
-            amount = 500.00
-            currency = 'KSH'
-        elif plan_type == 'vip':
-            amount = 1000.00
+        # Determine amount based on plan_type and match limit
+        plan_prices = getattr(settings, 'PLAN_PRICES', {'starter': 200, 'standard': 500, 'vip': 1000})
+        plan_limits = getattr(settings, 'PLAN_MATCH_LIMITS', {'starter': 300, 'standard': 600, 'vip': 1500})
+        
+        if plan_type in plan_prices:
+            amount = plan_prices[plan_type]
+            matches_limit = plan_limits.get(plan_type, 0)
             currency = 'KSH'
         else:
-             # Default fallback
-             amount = getattr(settings, 'SUBSCRIPTION_PRICE_KSH', 200.00)
-             plan_type = 'standard'
-             currency = 'KSH'
+            # Fallback
+            plan_type = 'starter'
+            amount = 200.00
+            matches_limit = 300
+            currency = 'KSH'
         
         # Create pending subscription
         subscription = Subscription.objects.create(
@@ -414,7 +385,8 @@ def initiate_mpesa_payment(request):
             amount=amount,
             currency=currency,
             mpesa_number=mpesa_number,
-            plan_type=plan_type
+            plan_type=plan_type,
+            matches_limit=matches_limit
         )
         
         # Update user profile with M-Pesa number
@@ -465,7 +437,13 @@ def initiate_stk_push(request, phone_number, amount, subscription_id):
             subscription = Subscription.objects.get(id=subscription_id)
             subscription.status = 'active'
             subscription.mpesa_transaction_id = f'MOCK-{subscription_id}-{datetime.now().strftime("%Y%m%d%H%M%S")}'
-            subscription.activate(duration_days=getattr(settings, 'SUBSCRIPTION_DURATION_DAYS', 30))
+            
+            # Use specific limit for this plan if set
+            matches_limit = getattr(subscription, 'matches_limit', 0)
+            subscription.activate(
+                duration_days=getattr(settings, 'SUBSCRIPTION_DURATION_DAYS', 30),
+                matches_limit=matches_limit
+            )
             subscription.save()
             
             logger.info(f"MOCK PAYMENT: Subscription {subscription_id} activated successfully")
@@ -618,7 +596,10 @@ def mpesa_callback(request):
                 if result_code == 0:
                     # Payment successful
                     subscription.status = 'active'
-                    subscription.activate(duration_days=settings.SUBSCRIPTION_DURATION_DAYS)
+                    subscription.activate(
+                        duration_days=settings.SUBSCRIPTION_DURATION_DAYS,
+                        matches_limit=subscription.matches_limit
+                    )
                     
                     logger.info(f"M-Pesa payment successful for subscription {subscription.id}")
                     log_mpesa_transaction('callback', data, status='success')
