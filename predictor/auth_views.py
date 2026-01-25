@@ -194,7 +194,7 @@ def login_view(request):
         return redirect('predictor:home')
     
     if request.method == 'POST':
-        username_or_email = request.POST.get('username', '')
+        username_or_email = request.POST.get('username', '').strip()
         password = request.POST.get('password')
         next_url = request.POST.get('next', next_url)
         
@@ -207,11 +207,17 @@ def login_view(request):
         # Try to find user by email if input looks like an email
         if '@' in username_or_email:
             try:
-                user_obj = User.objects.get(email=username_or_email)
+                user_obj = User.objects.get(email__iexact=username_or_email)
                 username_to_auth = user_obj.username
             except User.DoesNotExist:
                 logger.warning(f"DEBUG: Email {username_or_email} not found in DB.")
-                # Proceed with original string to let authenticate fail naturally
+                # If email lookup fails, we can't authenticate with it as a username usually
+                # But we will let it fall through just in case
+            except User.MultipleObjectsReturned:
+                # This shouldn't happen with unique emails, but safety first
+                user_obj = User.objects.filter(email__iexact=username_or_email).first()
+                if user_obj:
+                    username_to_auth = user_obj.username
         
         user = authenticate(request, username=username_to_auth, password=password)
         
