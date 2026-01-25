@@ -981,4 +981,35 @@ def sync_data(request):
         return JsonResponse({'success': False, 'error': str(e)})
 
 
+@admin_required
+def debug_email(request):
+    """View to test email configuration"""
+    from django.core.mail import send_mail
+    from django.conf import settings
+    
+    email_to = request.GET.get('email', request.user.email)
+    
+    try:
+        send_mail(
+            'Debug Email - Leon Games Pro',
+            'This is a test email to verify configuration.',
+            settings.DEFAULT_FROM_EMAIL,
+            [email_to],
+            fail_silently=False,
+        )
+        return JsonResponse({
+            'success': True, 
+            'message': f'Test email sent to {email_to}',
+            'backend': settings.EMAIL_BACKEND,
+            'from_email': settings.DEFAULT_FROM_EMAIL
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False, 
+            'error': str(e),
+            'backend': getattr(settings, 'EMAIL_BACKEND', 'Not Set'),
+            'host': getattr(settings, 'EMAIL_HOST', 'Not Set')
+        })
+
+
 
