@@ -20,9 +20,12 @@ MPESA_ALLOWED_IPS = [
     '196.201.214.207',
     '196.201.214.208',
     '196.201.212.129',  # New IP seen in logs
+    '196.201.212.138',  # New IP seen in logs (Jan 25, 2026)
     '196.201.212.127',  # New IP seen in logs (Jan 25, 2026)
+    '196.201.212.132',  # Potential M-Pesa IP
     '196.201.212.74',   # New IP seen in logs (Jan 2026)
     '196.201.212.69',   # Another new IP seen in logs (Jan 2026)
+    '196.201.213.114',  # Common M-Pesa IP
     # Add more M-Pesa IPs as needed
 ]
 
