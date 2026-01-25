@@ -355,8 +355,8 @@ def initiate_mpesa_payment(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Method not allowed'}, status=405)
     
-    print(f"DEBUG PAYMENT REQUEST: Body={request.body}")
-    print(f"DEBUG PAYMENT REQUEST: Headers={request.content_type}")
+    logger.debug(f"DEBUG PAYMENT REQUEST: Body={request.body}")
+    logger.debug(f"DEBUG PAYMENT REQUEST: Headers={request.content_type}")
     
     try:
         mpesa_number = request.POST.get('mpesa_number')
@@ -374,7 +374,7 @@ def initiate_mpesa_payment(request):
                  pass
         
         if not mpesa_number:
-            print("DEBUG: Number is missing after extraction")
+            logger.debug("DEBUG: Number is missing after extraction")
             return JsonResponse({'error': 'M-Pesa number is required'}, status=400)
         
         # Validate M-Pesa number
@@ -384,10 +384,10 @@ def initiate_mpesa_payment(request):
         elif not mpesa_number.startswith('254'):
             mpesa_number = '254' + mpesa_number
         
-        print(f"DEBUG: Processed number: {mpesa_number}")
+        logger.debug(f"DEBUG: Processed number: {mpesa_number}")
 
         if len(mpesa_number) != 12:
-            print(f"DEBUG: Invalid Length {len(mpesa_number)}")
+            logger.debug(f"DEBUG: Invalid Length {len(mpesa_number)}")
             return JsonResponse({'error': 'Invalid M-Pesa number format'}, status=400)
         
         # Determine amount based on plan_type (Security: Do not trust amount from client)
@@ -423,7 +423,7 @@ def initiate_mpesa_payment(request):
         profile.save()
         
         # Initiate M-Pesa STK Push
-        result = initiate_stk_push(mpesa_number, amount, subscription.id)
+        result = initiate_stk_push(request, mpesa_number, amount, subscription.id)
         
         if result.get('success'):
             # Use message from result (will be different for mock vs real)
@@ -447,7 +447,7 @@ def initiate_mpesa_payment(request):
         return JsonResponse({'error': 'Payment initiation failed'}, status=500)
 
 
-def initiate_stk_push(phone_number, amount, subscription_id):
+def initiate_stk_push(request, phone_number, amount, subscription_id):
     """Initiate M-Pesa STK Push payment with mock mode for testing."""
     try:
         # Check if M-PESA credentials are configured
@@ -498,20 +498,23 @@ def initiate_stk_push(phone_number, amount, subscription_id):
             (settings.MPESA_SHORTCODE + settings.MPESA_PASSKEY + timestamp).encode()
         ).decode()
         
-        # Get callback URL (need to construct from request or settings)
-        from django.contrib.sites.models import Site
-        try:
-            current_site = Site.objects.get_current()
-            callback_url = f"https://{current_site.domain}/api/mpesa/callback/"
-        except:
-            callback_url = "https://yourdomain.com/api/mpesa/callback/"
+        # Get callback URL dynamically from request
+        from django.urls import reverse
+        callback_path = reverse('predictor:mpesa_callback')
+        callback_url = request.build_absolute_uri(callback_path)
+        
+        # Ensure HTTPS for production
+        if not request.is_secure() and settings.MPESA_ENVIRONMENT == 'production':
+            callback_url = callback_url.replace('http://', 'https://')
+        
+        logger.info(f"Using Callback URL: {callback_url}")
         
         # Request payload
         payload = {
             "BusinessShortCode": settings.MPESA_SHORTCODE,
             "Password": password,
             "Timestamp": timestamp,
-            "TransactionType": "CustomerPayBillOnline",
+            "TransactionType": getattr(settings, 'MPESA_TRANSACTION_TYPE', 'CustomerPayBillOnline'),
             "Amount": int(amount),
             "PartyA": phone_number,
             "PartyB": settings.MPESA_SHORTCODE,
@@ -561,8 +564,8 @@ def get_mpesa_access_token():
         headers = {'Authorization': f'Basic {auth}'}
         response = requests.get(url, headers=headers)
         
-        print(f"DEBUG TOKEN RESPONSE: {response.status_code} {response.text}")
-        print(f"DEBUG KEYS USING: {settings.MPESA_CONSUMER_KEY[:5]}...")
+        logger.debug(f"DEBUG TOKEN RESPONSE: {response.status_code} {response.text}")
+        logger.debug(f"DEBUG KEYS USING: {settings.MPESA_CONSUMER_KEY[:5]}...")
 
         if response.status_code == 200:
             return response.json().get('access_token')
