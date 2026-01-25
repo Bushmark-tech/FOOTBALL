@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -31,10 +32,12 @@
 
         body {
             font-family: 'Outfit', sans-serif;
-            background-color: var(--dark-bg);
-            background-image:
-                radial-gradient(circle at 10% 20%, rgba(0, 242, 234, 0.08) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(79, 172, 254, 0.08) 0%, transparent 40%);
+            background: linear-gradient(rgba(13, 17, 23, 0.7), rgba(13, 17, 23, 0.8)),
+            url("{% static 'images/soccer-space-bg.jpg' %}");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -79,6 +82,7 @@
             font-size: 2.5rem;
             background: var(--gradient-primary);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 15px;
             display: inline-block;

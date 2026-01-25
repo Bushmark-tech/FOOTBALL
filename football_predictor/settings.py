@@ -222,6 +222,7 @@ ACCOUNT_EMAIL_VERIFICATION = 'optional'
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
+ACCOUNT_ADAPTER = 'predictor.account_adapter.SafeAccountAdapter'
 
 # Email Settings
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')

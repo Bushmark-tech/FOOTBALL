@@ -1,0 +1,72 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+{% load account socialaccount %}
+
+{% block head_title %}{% trans "Sign Up" %}{% endblock %}
+
+{% block content %}
+<div class="auth-header">
+    <div class="app-logo">
+        <i class="fas fa-user-plus"></i>
+    </div>
+    <h1 class="auth-title">{% trans "Sign Up" %}</h1>
+    <p class="auth-subtitle">{% trans "Create a Leon Games Pro account" %}</p>
+</div>
+
+{% if messages %}
+{% for message in messages %}
+<div class="alert-box">
+    <i class="fas fa-exclamation-circle"></i> {{ message }}
+</div>
+{% endfor %}
+{% endif %}
+
+<form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
+    {% csrf_token %}
+
+    {% for field in form %}
+    <div class="form-group">
+        {{ field }}
+        {% if field.errors %}
+        {% for error in field.errors %}
+        <div style="color: #ff6b6b; font-size: 0.75rem; margin-top: 5px;">{{ error }}</div>
+        {% endfor %}
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    {% if redirect_field_value %}
+    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+    {% endif %}
+
+    <button class="btn-submit" type="submit">{% trans "Sign Up" %}</button>
+</form>
+
+<div class="divider"
+    style="display: flex; align-items: center; margin: 25px 0; color: var(--text-secondary); font-size: 0.8rem;">
+    <span style="flex: 1; height: 1px; background: var(--glass-border);"></span>
+    <span style="padding: 0 10px;">OR</span>
+    <span style="flex: 1; height: 1px; background: var(--glass-border);"></span>
+</div>
+
+<a href="{% provider_login_url 'google' %}" class="btn-google"
+    style="width: 100%; background: transparent; border: 1px solid var(--glass-border); color: var(--text-primary); padding: 12px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; font-size: 0.9rem; transition: all 0.3s;">
+    <i class="fab fa-google"></i> Google
+</a>
+
+<div class="footer-link">
+    {% trans "Already have an account?" %} <a href="{{ login_url }}">{% trans "Sign In" %}</a>
+</div>
+
+<script>
+    // Add classes to form inputs to match our styles
+    document.querySelectorAll('#signup_form input').forEach(input => {
+        input.classList.add('form-control');
+        // Placeholder handling
+        if (input.name === 'username') input.placeholder = 'Username';
+        if (input.name === 'email') input.placeholder = 'Email address';
+        if (input.name === 'password1') input.placeholder = 'Password';
+        if (input.name === 'password2') input.placeholder = 'Password (again)';
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+{% load account socialaccount %}
+
+{% block head_title %}{% trans "Sign In" %}{% endblock %}
+
+{% block content %}
+<div class="auth-header">
+    <div class="app-logo">
+        <i class="fas fa-lock"></i>
+    </div>
+    <h1 class="auth-title">{% trans "Sign In" %}</h1>
+    <p class="auth-subtitle">{% trans "Access your Leon Games Pro account" %}</p>
+</div>
+
+{% if messages %}
+{% for message in messages %}
+<div class="alert-box">
+    <i class="fas fa-exclamation-circle"></i> {{ message }}
+</div>
+{% endfor %}
+{% endif %}
+
+<form class="login" method="POST" action="{% url 'account_login' %}" id="login_form">
+    {% csrf_token %}
+
+    {% for field in form %}
+    <div class="form-group">
+        {{ field }}
+        {% if field.errors %}
+        {% for error in field.errors %}
+        <div style="color: #ff6b6b; font-size: 0.75rem; margin-top: 5px;">{{ error }}</div>
+        {% endfor %}
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    {% if redirect_field_value %}
+    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+    {% endif %}
+
+    <button class="btn-submit" type="submit">{% trans "Sign In" %}</button>
+
+    <div style="text-align: right; margin-top: 10px;">
+        <a href="{% url 'account_reset_password' %}"
+            style="color: var(--text-secondary); text-decoration: none; font-size: 0.85rem;">{% trans "Forgot Password?"
+            %}</a>
+    </div>
+</form>
+
+<div class="divider"
+    style="display: flex; align-items: center; margin: 25px 0; color: var(--text-secondary); font-size: 0.8rem;">
+    <span style="flex: 1; height: 1px; background: var(--glass-border);"></span>
+    <span style="padding: 0 10px;">OR</span>
+    <span style="flex: 1; height: 1px; background: var(--glass-border);"></span>
+</div>
+
+<a href="{% provider_login_url 'google' %}" class="btn-google"
+    style="width: 100%; background: transparent; border: 1px solid var(--glass-border); color: var(--text-primary); padding: 12px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; font-size: 0.9rem; transition: all 0.3s;">
+    <i class="fab fa-google"></i> Google
+</a>
+
+<div class="footer-link">
+    {% trans "Don't have an account?" %} <a href="{{ signup_url }}">{% trans "Sign Up" %}</a>
+</div>
+
+<script>
+    document.querySelectorAll('#login_form input').forEach(input => {
+        if (input.type !== 'checkbox') {
+            input.classList.add('form-control');
+            if (input.name === 'login') input.placeholder = 'Username or Email';
+            if (input.name === 'password') input.placeholder = 'Password';
+        }
+    });
+</script>
+{% endblock %}
