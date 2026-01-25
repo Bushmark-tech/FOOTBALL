@@ -517,7 +517,7 @@ def initiate_stk_push(request, phone_number, amount, subscription_id):
             "TransactionType": getattr(settings, 'MPESA_TRANSACTION_TYPE', 'CustomerPayBillOnline'),
             "Amount": int(amount),
             "PartyA": phone_number,
-            "PartyB": settings.MPESA_SHORTCODE,
+            "PartyB": settings.MPESA_TILL_NUMBER,
             "PhoneNumber": phone_number,
             "CallBackURL": callback_url,
             "AccountReference": f"SUB{subscription_id}",
