@@ -195,7 +195,7 @@ def login_view(request):
     
     if request.method == 'POST':
         username_or_email = request.POST.get('username', '').strip()
-        password = request.POST.get('password')
+        password = request.POST.get('password', '').strip()
         next_url = request.POST.get('next', next_url)
         
         logger.info(f"Login attempt for: '{username_or_email}'")
@@ -253,8 +253,8 @@ def register_view(request):
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
         email = request.POST.get('email', '').strip()
-        password = request.POST.get('password')
-        password_confirm = request.POST.get('password_confirm')
+        password = request.POST.get('password', '').strip()
+        password_confirm = request.POST.get('password_confirm', '').strip()
         
         # Validation: Google Email Only
         if not email or not email.strip().lower().endswith('@gmail.com'):
