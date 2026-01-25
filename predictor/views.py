@@ -2956,36 +2956,38 @@ def result(request):
                 # Fallback if probability parsing fails
                 winning_outcome = None
         
-        # Fallback to Outcome String if no valid probabilities found
+        # Normalize outcome string
         if not winning_outcome:
-            o = str(pred.outcome).strip()
+            o_raw = str(pred.outcome).strip()
+            o = o_raw.lower().replace(" ", "")  # Normalize: '1x' or 'homewin'
+            
             # Standard outcomes
-            if o == 'Home' or o == f"{home_team} Win" or f"{home_team} Win" in o:
+            if o in ['home', 'homewin'] or f"{home_team.lower().replace(' ', '')}win" in o:
                 winning_outcome = 'Home'
-            elif o == 'Draw':
+            elif o == 'draw':
                 winning_outcome = 'Draw'
-            elif o == 'Away' or o == f"{away_team} Win" or f"{away_team} Win" in o:
+            elif o in ['away', 'awaywin'] or f"{away_team.lower().replace(' ', '')}win" in o:
                 winning_outcome = 'Away'
             # Double Chance (Split weight if we don't have probabilities)
-            elif o == '1X':
+            elif '1x' in o or 'x1' in o or 'homeordraw' in o:
                 home_predictions += 0.5
                 draw_predictions += 0.5
                 continue
-            elif o == 'X2':
+            elif 'x2' in o or '2x' in o or 'draworaway' in o:
                 draw_predictions += 0.5
                 away_predictions += 0.5
                 continue
-            elif o == '12':
+            elif '12' in o or 'homeoraway' in o:
                 home_predictions += 0.5
                 away_predictions += 0.5
                 continue
             # Fallback partial matching
-            elif 'Win' in o or 'WIN' in o:
-                if home_team and home_team.lower() in o.lower():
+            elif 'win' in o:
+                if home_team and home_team.lower().replace(" ", "") in o:
                     winning_outcome = 'Home'
-                elif away_team and away_team.lower() in o.lower():
+                elif away_team and away_team.lower().replace(" ", "") in o:
                     winning_outcome = 'Away'
-        
+
         # Increment counts based on determined winning_outcome
         if winning_outcome == 'Home':
             home_predictions += 1
