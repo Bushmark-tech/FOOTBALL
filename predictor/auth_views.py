@@ -295,8 +295,8 @@ def register_view(request):
                 password=password
             )
             
-            # Create user profile with 3 free matches
-            UserProfile.objects.create(user=user, free_matches_limit=3)
+            # Create user profile with 1 free match
+            UserProfile.objects.create(user=user, free_matches_limit=1)
             
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             messages.success(request, f'Welcome! Account created for {email}.')
