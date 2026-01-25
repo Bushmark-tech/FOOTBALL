@@ -43,6 +43,7 @@ urlpatterns = [
     
     # API Endpoints
     path('admin/api/stats/', admin_views.admin_api_stats, name='admin_api_stats'),
+    path('admin/email/debug/', admin_views.debug_email, name='debug_email'),
     
     # ========== AUTHENTICATION ==========
     path('login/', auth_views.login_view, name='login'),

@@ -52,6 +52,7 @@ INSTALLED_APPS.extend([
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'football_predictor.security_middleware.ScannerBlockerMiddleware', # Custom Bot Blocker
     'whitenoise.middleware.WhiteNoiseMiddleware',  # Serve static files on Render
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -217,10 +218,24 @@ SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_QUERY_EMAIL = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
-ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
+
+# Email Settings
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() == 'true'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'Football Predictor <noreply@football-predictor.com>')
+
+# Site URL for emails
+SITE_URL = os.environ.get('SITE_URL', 'http://127.0.0.1:8000')
+if IS_RENDER:
+    SITE_URL = 'https://football-o48u.onrender.com'
 
 # Google OAuth Settings
 SOCIALACCOUNT_PROVIDERS = {
@@ -252,9 +267,13 @@ SUBSCRIPTION_DURATION_DAYS = 30
 # M-Pesa Settings
 MPESA_CONSUMER_KEY = os.environ.get('MPESA_CONSUMER_KEY')
 MPESA_CONSUMER_SECRET = os.environ.get('MPESA_CONSUMER_SECRET')
-MPESA_SHORTCODE = os.environ.get('MPESA_SHORTCODE', '174379')
+MPESA_SHORTCODE = os.environ.get('MPESA_SHORTCODE', '5699046')  # Till Number
 MPESA_PASSKEY = os.environ.get('MPESA_PASSKEY')
+
+
 MPESA_ENVIRONMENT = os.environ.get('MPESA_ENVIRONMENT', 'sandbox') 
+MPESA_TRANSACTION_TYPE = os.environ.get('MPESA_TRANSACTION_TYPE', 'CustomerBuyGoodsOnline')
+MPESA_TILL_NUMBER = os.environ.get('MPESA_TILL_NUMBER', MPESA_SHORTCODE)
 
 if MPESA_ENVIRONMENT == 'production':
     MPESA_ACCESS_TOKEN_URL = 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
