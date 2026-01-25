@@ -219,14 +219,7 @@ def login_view(request):
                 if user_obj:
                     username_to_auth = user_obj.username
         
-        # Try to find user explicitly for debugging reasons
-        if not user:
-             try:
-                 debug_user = User.objects.get(username=username_to_auth)
-                 is_password_valid = debug_user.check_password(password)
-                 logger.warning(f"DEBUG LOGIN FAILURE: User '{username_to_auth}' found. Active={debug_user.is_active}. PasswordValid={is_password_valid}")
-             except User.DoesNotExist:
-                 logger.warning(f"DEBUG LOGIN FAILURE: User '{username_to_auth}' NOT FOUND in DB.")
+
 
         user = authenticate(request, username=username_to_auth, password=password)
         
@@ -253,8 +246,8 @@ def register_view(request):
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
         email = request.POST.get('email', '').strip()
-        password = request.POST.get('password', '').strip()
-        password_confirm = request.POST.get('password_confirm', '').strip()
+        password = request.POST.get('password', '').strip() or request.POST.get('password1', '').strip()
+        password_confirm = request.POST.get('password_confirm', '').strip() or request.POST.get('password2', '').strip()
         
         # Validation: Google Email Only
         if not email or not email.strip().lower().endswith('@gmail.com'):
