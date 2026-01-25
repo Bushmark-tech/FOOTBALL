@@ -1,4 +1,4 @@
-{% extends 'admin/dashboard_base.html' %}
+﻿{% extends 'admin/dashboard_base.html' %}
 
 {% block title %}Billing & Subscriptions - Admin Dashboard{% endblock %}
 {% block page_title %}Billing Management{% endblock %}
@@ -96,6 +96,7 @@
                 <thead>
                     <tr>
                         <th>User</th>
+                        <th>Plan</th>
                         <th>Amount</th>
                         <th>Currency</th>
                         <th>Payment Method</th>
@@ -113,6 +114,15 @@
                             <strong>{{ subscription.user.username }}</strong>
                             <br>
                             <small class="text-muted">{{ subscription.user.email }}</small>
+                        </td>
+                        <td>
+                            {% if subscription.plan_type == 'vip' %}
+                            <span class="badge bg-warning text-dark border"><i class="fas fa-crown me-1"></i>VIP</span>
+                            {% elif subscription.plan_type == 'starter' %}
+                            <span class="badge bg-info text-dark border">Starter</span>
+                            {% else %}
+                            <span class="badge bg-light text-dark border">Standard</span>
+                            {% endif %}
                         </td>
                         <td>
                             <strong>KES {{ subscription.amount|floatformat:0 }}</strong>
@@ -135,7 +145,7 @@
                             {% if subscription.end_date %}
                             {{ subscription.end_date|date:"M d, Y" }}
                             {% else %}
-                            —
+                            â€”
                             {% endif %}
                         </td>
                         <td>
@@ -148,7 +158,7 @@
                     {% endfor %}
                     {% else %}
                     <tr>
-                        <td colspan="8" class="text-center py-4">
+                        <td colspan="9" class="text-center py-4">
                             <p class="text-muted mb-0">No subscriptions found</p>
                         </td>
                     </tr>
@@ -172,6 +182,10 @@
                     <div class="mb-3">
                         <label class="form-label"><strong>User</strong></label>
                         <p>{{ subscription.user.username }} ({{ subscription.user.email }})</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Plan Type</strong></label>
+                        <p class="text-capitalize">{{ subscription.plan_type }}</p>
                     </div>
                     <div class="mb-3">
                         <label class="form-label"><strong>Amount</strong></label>
@@ -212,7 +226,7 @@
                             {% if subscription.end_date %}
                             to {{ subscription.end_date|date:"M d, Y" }}
                             {% else %}
-                            to —
+                            to â€”
                             {% endif %}
                         </p>
                     </div>

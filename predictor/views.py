@@ -214,21 +214,12 @@ def process_prediction_probabilities(advanced_result):
     Returns normalized probabilities dict and outcome.
     This ensures the same match always gets the same probabilities in both single and multi-match modes.
     """
-    # Use historical probabilities for display (preferred)
-    historical_probs = advanced_result.get('historical_probs')
-    if historical_probs:
-        # Historical probabilities are in percentage format (0-100)
-        # Convert to decimal (0-1) and round to avoid floating point precision issues
-        probabilities = {
-            "Home": round(historical_probs.get("Home Team Win", 0) / 100.0, 6),
-            "Draw": round(historical_probs.get("Draw", 0) / 100.0, 6),
-            "Away": round(historical_probs.get("Away Team Win", 0) / 100.0, 6)
-        }
-    else:
-        # Fallback to model probabilities if historical not available
-        raw_probs = advanced_result['probabilities']
+    # Use model/blended probabilities as primary source (Standard AI behavior)
+    # The 'probabilities' key from advanced_result contains the blended score (Model + Form + H2H)
+    raw_probs = advanced_result.get('probabilities')
+    
+    if raw_probs:
         probabilities = {}
-        
         for key, value in raw_probs.items():
             if key == 2:
                 probabilities["Home"] = round(float(value), 6)
@@ -238,6 +229,18 @@ def process_prediction_probabilities(advanced_result):
                 probabilities["Away"] = round(float(value), 6)
             else:
                 probabilities[str(key)] = round(float(value), 6)
+    else:
+        # Fallback to historical probabilities if model probs not available
+        historical_probs = advanced_result.get('historical_probs')
+        if historical_probs:
+             # Historical probabilities are in percentage format (0-100)
+            probabilities = {
+                "Home": round(historical_probs.get("Home Team Win", 0) / 100.0, 6),
+                "Draw": round(historical_probs.get("Draw", 0) / 100.0, 6),
+                "Away": round(historical_probs.get("Away Team Win", 0) / 100.0, 6)
+            }
+        else:
+             probabilities = {}
     
     # Normalize probabilities to ensure they sum to 1.0
     total_prob = probabilities.get("Home", 0) + probabilities.get("Draw", 0) + probabilities.get("Away", 0)
@@ -310,11 +313,11 @@ def calculate_double_chance(prob_home, prob_draw, prob_away):
     sorted_singles = sorted(single_outcomes.items(), key=lambda x: x[1], reverse=True)
     second_best_single_prob = sorted_singles[1][1] if len(sorted_singles) > 1 else 0
     
-    # Thresholds (calibrated to only suggest double chance when truly uncertain)
-    # These are very conservative to avoid showing double chance for most matches
-    CLEAR_WIN_THRESHOLD = 0.38  # 38% - lowered slightly to favor single outcomes (user preference)
-    UNCERTAINTY_THRESHOLD = 0.02  # 2% - outcomes must be extremely close (REDUCED from 3%)
-    DOUBLE_CHANCE_MIN_ADVANTAGE = 0.15  # 15% - double chance must be this much better to use it
+    # Thresholds (updated to match analytics.py improved logic)
+    # Use double chance when confidence is low or outcomes are close
+    CLEAR_WIN_THRESHOLD = 0.45  # 45% - must have at least this confidence for single outcome
+    UNCERTAINTY_THRESHOLD = 0.08  # 8% - if top two are within this, use double chance
+    DOUBLE_CHANCE_MIN_ADVANTAGE = 0.10  # 10% - double chance must be this much better to use it
     
     # Calculate double chance probabilities
     double_outcomes = {
@@ -327,23 +330,14 @@ def calculate_double_chance(prob_home, prob_draw, prob_away):
     best_double_prob = best_double[1]
     
     # Logic to decide between single outcome and double chance:
-    # 1. If the best single outcome is confident (>= 40%), use it directly
-    if best_single_prob >= CLEAR_WIN_THRESHOLD:
-        return best_single_name
-    
-    # 2. Check if top two outcomes are very close (within UNCERTAINTY_THRESHOLD)
+    # Match the logic from analytics.py for consistency
     prob_difference = best_single_prob - second_best_single_prob
     
-    # 3. Only use double chance if ALL of these conditions are met:
-    #    a) The top two outcomes are VERY close (< 3% difference), AND
-    #    b) The double chance is significantly better (>= 15% advantage), AND
-    #    c) No single outcome has >= 40% probability (no clear favorite)
-    if (prob_difference < UNCERTAINTY_THRESHOLD and 
-        (best_double_prob - best_single_prob) >= DOUBLE_CHANCE_MIN_ADVANTAGE and
-        best_single_prob < 0.40):
+    # Use double chance if confidence is low (< 45%) OR outcomes are close (< 8%)
+    if best_single_prob < CLEAR_WIN_THRESHOLD or prob_difference < UNCERTAINTY_THRESHOLD:
         return best_double_name
     
-    # 4. Default to the best single outcome (most common case)
+    # Default to the best single outcome
     return best_single_name
 
 
@@ -546,13 +540,17 @@ def predict(request):
     # Check subscription status - user is authenticated due to @login_required
     status = check_subscription_status(request.user)
     if not status['has_access']:
-        messages.warning(request, 'You have used all your free matches. Please subscribe to continue making predictions.')
+        msg = status.get('message', 'You have used all your free matches. Please subscribe to continue making predictions.')
+        messages.warning(request, msg)
         return redirect('predictor:subscribe')
     
     if request.method == 'POST':
         # Check subscription before processing prediction
         if not use_prediction_credit(request.user):
-            messages.warning(request, 'You have used all your free matches. Please subscribe to continue.')
+            # Check why it failed
+            status = check_subscription_status(request.user)
+            msg = status.get('message', 'You have used all your free matches. Please subscribe to continue.')
+            messages.warning(request, msg)
             return redirect('predictor:subscribe')
         
         home_team = request.POST.get('home_team')
@@ -577,7 +575,16 @@ def predict(request):
                 # Use advanced prediction logic
                 from .analytics import advanced_predict_match
                 
-                advanced_result = advanced_predict_match(home_team, away_team, model1, model2)
+                advanced_result = advanced_predict_match(home_team, away_team, model1, model2, category=category)
+                
+                # Debug logging for prediction result
+                if advanced_result:
+                     logger.info(f"Advanced Result Type: {type(advanced_result)}")
+                     logger.info(f"Advanced Result Keys: {list(advanced_result.keys())}")
+                     logger.info(f"Advanced Result Outcome: {advanced_result.get('outcome')}")
+                     logger.info(f"Advanced Result Probabilities: {advanced_result.get('probabilities')}")
+                else:
+                     logger.error("Advanced Result is None or Empty")
                 
                 if not advanced_result:
                     # Fallback prediction if advanced_predict_match fails
@@ -800,6 +807,13 @@ def predict(request):
                     # Redirect to result page with parameters
                     from django.urls import reverse
                     from urllib.parse import urlencode
+                    
+                    # Extract H2H probabilities from advanced_result if available
+                    h2h_probs = advanced_result.get('historical_probs', {}) if advanced_result else {}
+                    h2h_home = h2h_probs.get('Home Team Win', 0) / 100.0 if h2h_probs else 0.33
+                    h2h_draw = h2h_probs.get('Draw', 0) / 100.0 if h2h_probs else 0.33
+                    h2h_away = h2h_probs.get('Away Team Win', 0) / 100.0 if h2h_probs else 0.33
+                    
                     params = urlencode({
                         'home_team': home_team,
                         'away_team': away_team,
@@ -815,21 +829,27 @@ def predict(request):
                     'prediction_type': 'Single',
                         'prob_home': probabilities.get('Home', 0.33),
                         'prob_draw': probabilities.get('Draw', 0.33),
-                        'prob_away': probabilities.get('Away', 0.33)
+                        'prob_away': probabilities.get('Away', 0.33),
+                        # Add H2H probabilities separately
+                        'h2h_prob_home': h2h_home,
+                        'h2h_prob_draw': h2h_draw,
+                        'h2h_prob_away': h2h_away
                     })
                     return redirect(reverse('predictor:result') + '?' + params)
                     
             except Exception as e:
-                logger.error(f"Error in prediction: {str(e)}")
+                logger.error(f"CRITICAL ERROR in prediction: {str(e)}")
                 import traceback
-                logger.error(traceback.format_exc())
-                # Need to regenerate leagues_json for the template
+                error_trace = traceback.format_exc()
+                logger.error(error_trace)
+                
+                # Show detailed error to user
                 leagues_data = get_leagues_by_category()
                 import json
                 return render(request, 'predictor/predict.html', {
                     'leagues_by_category': leagues_data,
                     'leagues_json': json.dumps(leagues_data),
-                    'error': f'Error generating prediction: {str(e)}'
+                    'error': f'Prediction Error: {str(e)}\n\nPlease check the console logs for details.'
                 })
             
     
@@ -930,177 +950,6 @@ def get_teams_by_category(request):
 
 
 @login_required(login_url='predictor:login')
-def multi_match_predictions_api(request):
-    """API endpoint for managing multi-match predictions in database.
-    
-    GET: Return all user's draft predictions for this session
-    POST: Save a new prediction
-    DELETE: Delete a specific prediction
-    """
-    from django.views.decorators.http import require_http_methods
-    
-    if request.method == 'GET':
-        # Get all draft predictions for current user (temporary/draft predictions)
-        # We'll use a flag to mark these as draft predictions
-        predictions_qs = Prediction.objects.filter(
-            user=request.user,
-            is_archived=False,
-            model_type='draft'  # Mark draft predictions with this type
-        ).order_by('-prediction_date')
-        
-        predictions_list = []
-        try:
-            from .analytics import analytics_engine
-            for pred in predictions_qs:
-                pred_data = {
-                    'id': pred.id,
-                    'home_team': pred.home_team,
-                    'away_team': pred.away_team,
-                    'home_score': pred.home_score,
-                    'away_score': pred.away_score,
-                    'category': pred.category,
-                    'league': pred.league,
-                    'outcome': pred.outcome,
-                    'prob_home': pred.prob_home,
-                    'prob_draw': pred.prob_draw,
-                    'prob_away': pred.prob_away
-                }
-                
-                # Get team form data for each prediction
-                try:
-                    home_form_data = analytics_engine.get_team_form(pred.home_team)
-                    away_form_data = analytics_engine.get_team_form(pred.away_team)
-                    
-                    if home_form_data and home_form_data.get('recent_form'):
-                        pred_data['form_home'] = ''.join(home_form_data['recent_form'][:5])
-                    else:
-                        pred_data['form_home'] = None
-                    
-                    if away_form_data and away_form_data.get('recent_form'):
-                        pred_data['form_away'] = ''.join(away_form_data['recent_form'][:5])
-                    else:
-                        pred_data['form_away'] = None
-                except Exception as form_error:
-                    logger.warning(f"Could not get team form data for {pred.home_team} vs {pred.away_team}: {form_error}")
-                    pred_data['form_home'] = None
-                    pred_data['form_away'] = None
-                
-                predictions_list.append(pred_data)
-        except Exception as e:
-            logger.error(f"Error loading predictions with form data: {e}")
-            # Fallback to simple list without form data
-            predictions_list = list(predictions_qs.values(
-                'id', 'home_team', 'away_team', 'home_score', 'away_score',
-                'category', 'league', 'outcome', 'prob_home', 'prob_draw', 'prob_away'
-            ))
-        
-        return JsonResponse({
-            'success': True,
-            'predictions': predictions_list
-        })
-    
-    elif request.method == 'POST':
-        try:
-            import json
-            from .auth_views import check_subscription_status
-            
-            # Check subscription status BEFORE allowing new prediction
-            status = check_subscription_status(request.user)
-            
-            if not status['has_access']:
-                return JsonResponse({
-                    'success': False,
-                    'error': 'You have used all your free matches. Please subscribe to continue.',
-                    'redirect': '/subscribe/',
-                    'subscription_required': True
-                }, status=403)
-            
-            data = json.loads(request.body)
-            
-            # Validate required fields
-            required_fields = ['homeTeam', 'awayTeam', 'homeScore', 'awayScore', 'category', 'league']
-            if not all(field in data for field in required_fields):
-                return JsonResponse({'success': False, 'error': 'Missing required fields'}, status=400)
-            
-            # Create prediction in database
-            prediction = Prediction.objects.create(
-                user=request.user,
-                home_team=data['homeTeam'],
-                away_team=data['awayTeam'],
-                home_score=int(data['homeScore']),
-                away_score=int(data['awayScore']),
-                category=data.get('category', ''),
-                league=data.get('league', ''),
-                outcome=data.get('outcome', ''),
-                prob_home=float(data.get('probHome', 0)),
-                prob_draw=float(data.get('probDraw', 0)),
-                prob_away=float(data.get('probAway', 0)),
-                confidence=float(data.get('confidence', 0)),
-                model_type='draft',  # Mark as draft prediction
-                model1_prediction=data.get('prediction', ''),
-                final_prediction=data.get('prediction', '')
-            )
-            
-            # Check if user has now exceeded their limit after this prediction
-            # This will trigger on the NEXT prediction attempt
-            total_predictions = Prediction.objects.filter(user=request.user).count()
-            profile = request.user.profile if hasattr(request.user, 'profile') else None
-            
-            if profile and total_predictions >= profile.free_matches_limit:
-                # Update the profile
-                profile.free_matches_used = total_predictions
-                profile.save()
-                
-                return JsonResponse({
-                    'success': True,
-                    'prediction_id': prediction.id,
-                    'message': 'Prediction saved successfully',
-                    'limit_reached': True,
-                    'warning': f'You have used all your free matches ({profile.free_matches_limit}). Subscribe to continue making predictions.'
-                })
-            
-            return JsonResponse({
-                'success': True,
-                'prediction_id': prediction.id,
-                'message': 'Prediction saved successfully'
-            })
-        
-        except json.JSONDecodeError:
-            return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
-        except Exception as e:
-            logger.error(f"Error saving multi-match prediction: {e}")
-            return JsonResponse({'success': False, 'error': str(e)}, status=500)
-    
-    elif request.method == 'DELETE':
-        try:
-            import json
-            data = json.loads(request.body)
-            prediction_id = data.get('prediction_id')
-            
-            if not prediction_id:
-                return JsonResponse({'success': False, 'error': 'Missing prediction_id'}, status=400)
-            
-            # Delete prediction (ensure it belongs to current user)
-            deleted_count, _ = Prediction.objects.filter(
-                id=prediction_id,
-                user=request.user,
-                model_type='draft'
-            ).delete()
-            
-            if deleted_count > 0:
-                return JsonResponse({'success': True, 'message': 'Prediction deleted'})
-            else:
-                return JsonResponse({'success': False, 'error': 'Prediction not found'}, status=404)
-        
-        except json.JSONDecodeError:
-            return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
-        except Exception as e:
-            logger.error(f"Error deleting multi-match prediction: {e}")
-            return JsonResponse({'success': False, 'error': str(e)}, status=500)
-    
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
-
-
 def prepare_features(home_team, away_team, is_home=True):
     """Prepare features for model prediction using analytics."""
     try:
@@ -1324,436 +1173,8 @@ def history(request):
         'is_paginated': paginator.num_pages > 1,
         'page_obj': paginated_predictions,
     }
+    
     return render(request, 'predictor/history.html', context)
-
-
-@csrf_exempt
-def api_predict(request):
-    """API endpoint for predictions - uses local prediction logic.
-    
-    Returns JSON response with prediction data including probabilities,
-    scores, and model information.
-    """
-    if request.method == 'POST':
-        try:
-            # Handle both form data and JSON
-            if request.content_type == 'application/json':
-                data = json.loads(request.body)
-                home_team = data.get('home_team')
-                away_team = data.get('away_team')
-                category = data.get('category')
-                league = data.get('league')
-            else:
-                # Handle form data
-                home_team = request.POST.get('home_team')
-                away_team = request.POST.get('away_team')
-                category = request.POST.get('category')
-                league = request.POST.get('league')
-            
-            # Auto-detect league if not provided
-            if home_team and not league:
-                 league = get_league_for_team(home_team)
-                 if not league and away_team:
-                     league = get_league_for_team(away_team)
-            
-            # Check subscription status before processing
-            if request.user.is_authenticated:
-                status = check_subscription_status(request.user)
-                if not status['has_access']:
-                    logger.warning(f"Blocked API prediction for {request.user.username}: Limit reached")
-                    return JsonResponse({'error': 'Prediction limit reached. Please subscribe.', 'redirect': '/subscribe/'}, status=403)
-            
-            missing = []
-            if not home_team:
-                missing.append('home_team')
-            if not away_team:
-                missing.append('away_team')
-            if missing:
-                return JsonResponse({'error': f"Missing required field(s): {', '.join(missing)}"}, status=400)
-            
-            if home_team and away_team:
-                # Use local prediction logic instead of API
-                try:
-                    # Load models
-                    model1, model2 = load_prediction_models()
-                    
-                    # Use advanced prediction logic
-                    from .analytics import advanced_predict_match
-                    
-                    advanced_result = advanced_predict_match(home_team, away_team, model1, model2)
-                    
-                    if not advanced_result:
-                        advanced_result = {}  # Initialize to empty dict to prevent AttributeError later
-                        # Fallback prediction if advanced_predict_match fails
-                        import random
-                        fallback_prediction = random.choice([0, 1, 2])
-                        outcome = {0: 'Away', 1: 'Draw', 2: 'Home'}[fallback_prediction]
-                        probabilities = {"Home": 0.33, "Draw": 0.34, "Away": 0.33}
-                        confidence = 0.33
-                        model_type = 'Model1 (Fallback)'
-                        
-                        # Generate fallback scores
-                        if outcome == "Home":
-                            home_score = random.choice([2, 3])
-                            away_score = random.choice([0, 1])
-                        elif outcome == "Away":
-                            away_score = random.choice([2, 3])
-                            home_score = random.choice([0, 1])
-                        else:  # Draw
-                            home_score = random.choice([0, 1, 2])
-                            away_score = home_score
-                        
-                        prediction_number = fallback_prediction
-                        h2h_probabilities = None
-                        
-                        # Get team form data for fallback case too
-                        home_form = None
-                        away_form = None
-                        try:
-                            from .analytics import analytics_engine
-                            home_form_data = analytics_engine.get_team_form(home_team)
-                            away_form_data = analytics_engine.get_team_form(away_team)
-                            
-                            if home_form_data and home_form_data.get('recent_form'):
-                                home_form = ''.join(home_form_data['recent_form'][:5])
-                            
-                            if away_form_data and away_form_data.get('recent_form'):
-                                away_form = ''.join(away_form_data['recent_form'][:5])
-                        except Exception as form_error:
-                            logger.warning(f"Could not get team form data: {form_error}")
-                    else:
-                        # Use advanced prediction results
-                        # Process probabilities consistently using shared function
-                        probabilities, outcome = process_prediction_probabilities(advanced_result)
-                        prediction_number = advanced_result['prediction_number']  # 0=Away, 1=Draw, 2=Home
-                        
-                        # Update prediction_number based on outcome (for backward compatibility)
-                        prediction_mapping = {
-                            "Home": 2, "Draw": 1, "Away": 0,
-                            "1X": 3, "X2": 4, "12": 5  # Double chance mappings
-                        }
-                        prediction_number = prediction_mapping.get(outcome, 1)
-                        
-                        # Calculate scores based on outcome and probabilities
-                        import random
-                        max_prob = max(probabilities.values())
-                        
-                        if outcome == "Home":
-                            # Home win - score difference should reflect probability
-                            if max_prob > 0.55:  # Strong home advantage
-                                home_score = random.choice([2, 3, 3])
-                                away_score = random.choice([0, 1])
-                            elif max_prob > 0.45:  # Moderate home advantage
-                                home_score = random.choice([2, 2, 3])
-                                away_score = random.choice([1, 1, 2])
-                            else:  # Close match
-                                home_score = random.choice([1, 2])
-                                away_score = random.choice([0, 1])
-                            # Ensure home wins
-                            if home_score <= away_score:
-                                home_score = away_score + 1
-                        elif outcome == "Away":
-                            # Away win - score difference should reflect probability
-                            if max_prob > 0.55:  # Strong away advantage
-                                away_score = random.choice([2, 3, 3])
-                                home_score = random.choice([0, 1])
-                            elif max_prob > 0.45:  # Moderate away advantage
-                                away_score = random.choice([2, 2, 3])
-                                home_score = random.choice([1, 1, 2])
-                            else:  # Close match
-                                away_score = random.choice([1, 2])
-                                home_score = random.choice([0, 1])
-                            # Ensure away wins
-                            if away_score <= home_score:
-                                away_score = home_score + 1
-                        elif outcome == "1X":
-                            # Home or Draw - home doesn't lose
-                            prob_1X = probabilities.get("Home", 0) + probabilities.get("Draw", 0)
-                            if prob_1X > 0.7:  # Strong 1X probability
-                                # More likely home win
-                                home_score = random.choice([2, 3])
-                                away_score = random.choice([0, 1])
-                            else:  # Could be draw or home win
-                                if random.random() < 0.5:  # 50% chance of draw
-                                    home_score = random.choice([0, 1, 2])
-                                    away_score = home_score
-                                else:  # Home win
-                                    home_score = random.choice([1, 2])
-                                    away_score = random.choice([0, 1])
-                        elif outcome == "X2":
-                            # Draw or Away - away doesn't lose
-                            prob_X2 = probabilities.get("Draw", 0) + probabilities.get("Away", 0)
-                            if prob_X2 > 0.7:  # Strong X2 probability
-                                # More likely away win
-                                away_score = random.choice([2, 3])
-                                home_score = random.choice([0, 1])
-                            else:  # Could be draw or away win
-                                if random.random() < 0.5:  # 50% chance of draw
-                                    home_score = random.choice([0, 1, 2])
-                                    away_score = home_score
-                                else:  # Away win
-                                    away_score = random.choice([1, 2])
-                                    home_score = random.choice([0, 1])
-                        elif outcome == "12":
-                            # Home or Away - no draw
-                            prob_12 = probabilities.get("Home", 0) + probabilities.get("Away", 0)
-                            if probabilities.get("Home", 0) > probabilities.get("Away", 0):
-                                # Home more likely
-                                home_score = random.choice([2, 3])
-                                away_score = random.choice([0, 1])
-                            else:  # Away more likely
-                                away_score = random.choice([2, 3])
-                                home_score = random.choice([0, 1])
-                            # Ensure no draw
-                            if home_score == away_score:
-                                if home_score == 0:
-                                    home_score = 1
-                                else:
-                                    away_score = home_score + 1
-                        else:  # Draw
-                            # Draw scores are usually low, but can vary based on team strength
-                            if max_prob > 0.4:  # High draw probability
-                                home_score = random.choice([0, 1, 1, 2])
-                                away_score = home_score
-                            else:  # Lower draw probability
-                                home_score = random.choice([1, 2])
-                                away_score = home_score
-                    
-                    # Calculate confidence from probabilities
-                    # For double chance, use the combined probability
-                    if outcome == "1X":
-                        confidence = probabilities.get("Home", 0) + probabilities.get("Draw", 0)
-                    elif outcome == "X2":
-                        confidence = probabilities.get("Draw", 0) + probabilities.get("Away", 0)
-                    elif outcome == "12":
-                        confidence = probabilities.get("Home", 0) + probabilities.get("Away", 0)
-                    else:
-                        confidence = float(max(probabilities.values()))
-                    
-                    # Get model_type from advanced_result
-                    model_type = advanced_result.get('model_type', 'Model1')
-                    h2h_probabilities = advanced_result.get('h2h_probabilities')
-                    
-                    # Get team form data for multi-match display
-                    home_form = None
-                    away_form = None
-                    try:
-                        from .analytics import analytics_engine
-                        home_form_data = analytics_engine.get_team_form(home_team)
-                        away_form_data = analytics_engine.get_team_form(away_team)
-                        
-                        logger.info(f"Form data retrieved - Home: {home_form_data}, Away: {away_form_data}")
-                        
-                        if home_form_data and home_form_data.get('recent_form'):
-                            # Get last 5 matches as a string (e.g., "WWDLW")
-                            home_form = ''.join(home_form_data['recent_form'][:5])
-                            logger.info(f"Home form for {home_team}: {home_form}")
-                        
-                        if away_form_data and away_form_data.get('recent_form'):
-                            # Get last 5 matches as a string (e.g., "WWDLW")
-                            away_form = ''.join(away_form_data['recent_form'][:5])
-                            logger.info(f"Away form for {away_team}: {away_form}")
-                    except Exception as form_error:
-                        logger.warning(f"Could not get team form data: {form_error}")
-                        import traceback
-                        logger.warning(traceback.format_exc())
-                        # Continue without form data
-                    
-                    # Log probabilities for debugging
-                    logger.info(f"API_PREDICT probabilities for {home_team} vs {away_team}: Home={probabilities.get('Home', 0)*100:.1f}%, Draw={probabilities.get('Draw', 0)*100:.1f}%, Away={probabilities.get('Away', 0)*100:.1f}%")
-                    
-                    # SAVE PREDICTION TO DATABASE BEFORE RETURNING
-                    prediction_saved = False
-                    duplicate_check = False
-                    clean_home = clean_team_name(home_team)
-                    clean_away = clean_team_name(away_team)
-                    session_key = None
-                    
-                    try:
-                        from django.core.cache import cache
-                        from datetime import timedelta
-                        
-                        # Generate or get session key for non-authenticated users
-                        if not request.user.is_authenticated:
-                            if not request.session.session_key:
-                                request.session['_init'] = True
-                                request.session.save()  # Explicitly save to ensure session_key is created
-                            session_key = request.session.session_key
-                            if not session_key:
-                                logger.error("CRITICAL: Failed to get session_key for API prediction!")
-                        else:
-                            session_key = None
-                        
-                        # Prevent duplicate predictions - check if same match was predicted in last 10 seconds
-                        recent_time = timezone.now() - timedelta(seconds=10)
-                        
-                        # Check for duplicates based on user/session and teams
-                        if request.user.is_authenticated:
-                            duplicate_check = Prediction.objects.filter(
-                                user=request.user,
-                                home_team=clean_home,
-                                away_team=clean_away,
-                                prediction_date__gte=recent_time
-                            ).exists()
-                        elif session_key:
-                            duplicate_check = Prediction.objects.filter(
-                                session_key=session_key,
-                                home_team=clean_home,
-                                away_team=clean_away,
-                                prediction_date__gte=recent_time
-                            ).exists()
-                        else:
-                            duplicate_check = False
-                        
-                        if not duplicate_check:
-                            # Create new prediction (use get_or_create to prevent race conditions)
-                            try:
-                                # Use get_or_create with a reasonable time window to prevent duplicates
-                                lookup_time = timezone.now() - timedelta(seconds=30)
-                                
-                                # Build lookup criteria
-                                if request.user.is_authenticated:
-                                    lookup_criteria = {
-                                        'user': request.user,
-                                        'home_team': clean_home,
-                                        'away_team': clean_away,
-                                        'prediction_date__gte': lookup_time
-                                    }
-                                elif session_key:
-                                    lookup_criteria = {
-                                        'session_key': session_key,
-                                        'home_team': clean_home,
-                                        'away_team': clean_away,
-                                        'prediction_date__gte': lookup_time
-                                    }
-                                else:
-                                    lookup_criteria = {}
-                                
-                                # Try to get existing prediction first
-                                if lookup_criteria:
-                                    existing_pred = Prediction.objects.filter(**lookup_criteria).first()
-                                    if existing_pred:
-                                        prediction = existing_pred
-                                        created = False
-                                        logger.info(f"Using existing prediction: {prediction.id} - {clean_home} vs {clean_away}")
-                                    else:
-                                        # Create new prediction
-                                        prediction = Prediction.objects.create(
-                                            home_team=clean_home,
-                                            away_team=clean_away,
-                                            home_score=home_score,
-                                            away_score=away_score,
-                                            confidence=confidence,
-                                            category=category or '',
-                                            league=league or '',
-                                            outcome=outcome,
-                                            prob_home=probabilities.get('Home', 0.33),
-                                            prob_draw=probabilities.get('Draw', 0.33),
-                                            prob_away=probabilities.get('Away', 0.33),
-                                            model_type=model_type,
-                                            final_prediction=outcome,
-                                            user=request.user if request.user.is_authenticated else None,
-                                            session_key=session_key
-                                        )
-                                        created = True
-                                else:
-                                    # No lookup criteria (shouldn't happen), create anyway
-                                    prediction = Prediction.objects.create(
-                                        home_team=clean_home,
-                                        away_team=clean_away,
-                                        home_score=home_score,
-                                        away_score=away_score,
-                                        confidence=confidence,
-                                        category=category or '',
-                                        league=league or '',
-                                        outcome=outcome,
-                                        prob_home=probabilities.get('Home', 0.33),
-                                        prob_draw=probabilities.get('Draw', 0.33),
-                                        prob_away=probabilities.get('Away', 0.33),
-                                        model_type=model_type,
-                                        final_prediction=outcome,
-                                        user=request.user if request.user.is_authenticated else None,
-                                        session_key=session_key
-                                    )
-                                    created = True
-                                
-                                # Verify prediction was actually saved
-                                if prediction and prediction.id:
-                                    prediction_saved = True
-                                    if created:
-                                        logger.info(f"API Prediction saved to database: {prediction.id} - {clean_home} vs {clean_away} (User: {request.user.username if request.user.is_authenticated else 'Anonymous'}, Session: {session_key})")
-                                    else:
-                                        logger.info(f"API Prediction already exists: {prediction.id} - {clean_home} vs {clean_away}")
-                                    
-                                    # Update billing statistics only if newly created
-                                    if created:
-                                        logger.info(f"Updating billing statistics for multi-match prediction (User: {request.user.username if request.user.is_authenticated else 'Anonymous'}, Session: {session_key})")
-                                        update_billing_statistics(
-                                            user=request.user if request.user.is_authenticated else None,
-                                            session_key=session_key
-                                        )
-                                else:
-                                    logger.error(f"CRITICAL: Prediction object created but has no ID! {clean_home} vs {clean_away}")
-                                    prediction_saved = False
-                            except Exception as create_error:
-                                logger.error(f"CRITICAL: Failed to create prediction in database: {create_error}")
-                                import traceback
-                                logger.error(traceback.format_exc())
-                                prediction_saved = False
-                        else:
-                            logger.info(f"Duplicate prediction prevented: {clean_home} vs {clean_away}")
-                            prediction_saved = True  # Using existing prediction
-                        
-                        # Clear cache to update history immediately (handle Redis unavailable)
-                        try:
-                            cache.delete('home_stats')
-                            cache.delete('recent_predictions')
-                        except Exception as cache_error:
-                            logger.warning(f"Cache clear failed (Redis may be unavailable): {cache_error}")
-                    except Exception as save_error:
-                        logger.error(f"Error in prediction save process: {save_error}")
-                        import traceback
-                        logger.error(traceback.format_exc())
-                        prediction_saved = False
-                    
-                    # Log warning if prediction was not saved
-                    if not prediction_saved and not duplicate_check:
-                        logger.error(f"CRITICAL: Prediction for {clean_home} vs {clean_away} was NOT saved to database! Session: {session_key}")
-                    
-                    return JsonResponse({
-                        'home_team': home_team,
-                        'away_team': away_team,
-                        'home_score': str(home_score),
-                        'away_score': str(away_score),
-                        'category': str(category) if category else '',
-                        'prediction_number': prediction_number,
-                        'outcome': outcome,
-                        'probabilities': probabilities,
-                        'h2h_probabilities': h2h_probabilities,
-                        'model1_prediction': prediction_number,
-                        'model1_basis': 'Based on historical data analysis',
-                        'model1_confidence': str(int(confidence * 100)) + '%' if confidence <= 1.0 else str(int(confidence)) + '%',
-                        'model_type': model_type,
-                        'model2_prediction': prediction_number if 'Model2' in model_type else None,
-                        'final_prediction': outcome,
-                        'form_home': home_form,  # Team form as string (e.g., "WWDLW")
-                        'form_away': away_form  # Team form as string (e.g., "WWDLW")
-                    })
-                        
-                except Exception as api_error:
-                    logger.error(f"Error in api_predict: {str(api_error)}")
-                    import traceback
-                    logger.error(traceback.format_exc())
-                    return JsonResponse({'error': f'Prediction failed: {str(api_error)}'}, status=500)
-            
-            return JsonResponse({'error': 'Invalid request'}, status=400)
-                
-        except Exception as e:
-            error_msg = str(e)
-            logger.error(f"API_PREDICT ERROR: {error_msg}")
-            return JsonResponse({'error': f'Server error: {error_msg}'}, status=500)
-    
-    return JsonResponse({'error': 'Method not allowed'}, status=405)
 
 
 @csrf_exempt
@@ -2278,138 +1699,7 @@ def api_team_stats(request):
                         'final_prediction': advanced_result.get('final_prediction', '') if advanced_result else outcome
                     })
 
-@csrf_exempt
-def api_team_stats(request):
-    """API endpoint for real-time team statistics.
-    
-    Expects GET with query parameters:
-        team: "<team name>"
-    Returns JSON with team statistics.
-    """
-    if request.method == 'GET':
-        try:
-            team_name = request.GET.get('team')
-            if not team_name:
-                return JsonResponse({'error': 'Team parameter is required'}, status=400)
-            
-            # Get team statistics from analytics engine
-            from .analytics import analytics_engine
-            
-            # Get team form
-            form_data = analytics_engine.get_team_form(team_name)
-            
-            # Get team strength
-            home_strength = analytics_engine.calculate_team_strength(team_name, 'home')
-            away_strength = analytics_engine.calculate_team_strength(team_name, 'away')
-            
-            # Get injury/suspension data
-            injuries = analytics_engine.get_injury_suspensions(team_name)
-            
-            # Calculate recent form percentage
-            if form_data and form_data['recent_form']:
-                form_points = {'W': 3, 'D': 1, 'L': 0}
-                recent_points = sum(form_points[result] for result in form_data['recent_form'][:5])
-                max_points = 15  # 5 matches * 3 points
-                form_percentage = (recent_points / max_points) * 100
-            else:
-                form_percentage = 50  # Default neutral form
-            
-            # Try to import numpy for calculations, fallback to simple mean if unavailable
-            try:
-                np = safe_import_numpy()
-                calc_mean = lambda x: float(np.mean(x)) if x else 0
-            except ImportError:
-                # Fallback to simple Python mean
-                calc_mean = lambda x: float(sum(x) / len(x)) if x and len(x) > 0 else 0
-            
-            stats = {
-                'team_name': team_name,
-                'recent_form': form_data['recent_form'][:5] if form_data else ['D', 'D', 'D', 'D', 'D'],
-                'form_percentage': round(form_percentage, 1),
-                    'goals_scored_avg': float(round(calc_mean(form_data['goals_scored'][:5] if form_data and form_data.get('goals_scored') else []), 1)) if form_data else 1.5,
-                    'goals_conceded_avg': float(round(calc_mean(form_data['goals_conceded'][:5] if form_data and form_data.get('goals_conceded') else []), 1)) if form_data else 1.2,
-                    'possession_avg': float(round(calc_mean(form_data['possession_avg'][:5] if form_data and form_data.get('possession_avg') else []), 1)) if form_data else 50.0,
-                    'shots_on_target_avg': float(round(calc_mean(form_data['shots_on_target'][:5] if form_data and form_data.get('shots_on_target') else []), 1)) if form_data else 4.5,
-                                    'clean_sheets': int(form_data['clean_sheets']) if form_data else 2,
-                    'points': int(form_data['points']) if form_data else 25,
-                    'home_strength': float(round(home_strength * 100, 1)),
-                    'away_strength': float(round(away_strength * 100, 1)),
-                'injuries': injuries if injuries else {
-                    'key_players_out': 0,
-                    'total_players_out': 0,
-                    'impact_score': 0,
-                    'expected_return': 0
-                }
-            }
-            
-            return JsonResponse(stats)
-            
-        except Exception as e:
-            return JsonResponse({'error': f'Error getting team stats: {str(e)}'}, status=500)
-    
-    return JsonResponse({'error': 'Method not allowed'}, status=405)
 
-@csrf_exempt
-def api_head_to_head(request):
-    """API endpoint for head-to-head statistics.
-    
-    Expects GET with query parameters:
-        team1: "<team name>"
-        team2: "<team name>"
-    Returns JSON with head-to-head statistics.
-    """
-    if request.method == 'GET':
-        try:
-            team1 = request.GET.get('team1')
-            team2 = request.GET.get('team2')
-            
-            if not team1 or not team2:
-                return JsonResponse({'error': 'Both team1 and team2 parameters are required'}, status=400)
-            
-            # Get head-to-head data from analytics engine
-            from .analytics import analytics_engine
-            h2h_data = analytics_engine.get_head_to_head_stats(team1, team2)
-            
-            if not h2h_data:
-                return JsonResponse({'error': 'No head-to-head data available'}, status=404)
-            
-            return JsonResponse(h2h_data)
-            
-        except Exception as e:
-            return JsonResponse({'error': f'Error getting head-to-head stats: {str(e)}'}, status=500)
-    
-    return JsonResponse({'error': 'Method not allowed'}, status=405)
-
-@csrf_exempt
-def api_market_odds(request):
-    """API endpoint for market betting odds.
-    
-    Expects GET with query parameters:
-        home_team: "<team name>"
-        away_team: "<team name>"
-    Returns JSON with betting odds.
-    """
-    if request.method == 'GET':
-        try:
-            home_team = request.GET.get('home_team')
-            away_team = request.GET.get('away_team')
-            
-            if not home_team or not away_team:
-                return JsonResponse({'error': 'Both home_team and away_team parameters are required'}, status=400)
-            
-            # Get market odds from analytics engine
-            from .analytics import analytics_engine
-            odds = analytics_engine.get_market_odds(home_team, away_team)
-            
-            if not odds:
-                return JsonResponse({'error': 'No odds data available'}, status=404)
-            
-            return JsonResponse(odds)
-            
-        except Exception as e:
-            return JsonResponse({'error': f'Error getting market odds: {str(e)}'}, status=500)
-    
-    return JsonResponse({'error': 'Method not allowed'}, status=405)
 
 
 def about(request):
@@ -2439,6 +1729,10 @@ def clean_team_name(team_name):
 
 def result(request):
     """Result page view with prediction data."""
+    logger.info("Result View called with params:")
+    logger.info(f"Home: {request.GET.get('home_team')} Away: {request.GET.get('away_team')}")
+    logger.info(f"Outcome: {request.GET.get('outcome')}")
+    logger.info(f"Probabilities: H={request.GET.get('prob_home')} D={request.GET.get('prob_draw')} A={request.GET.get('prob_away')}")
     home_team = clean_team_name(request.GET.get('home_team', ''))
     away_team = clean_team_name(request.GET.get('away_team', ''))
     category = request.GET.get('category', '')
@@ -2579,6 +1873,11 @@ def result(request):
     prob_home_param = request.GET.get('prob_home')
     prob_draw_param = request.GET.get('prob_draw')
     prob_away_param = request.GET.get('prob_away')
+    
+    # Get H2H probabilities from URL (for Historical Probabilities section)
+    h2h_prob_home_param = request.GET.get('h2h_prob_home')
+    h2h_prob_draw_param = request.GET.get('h2h_prob_draw')
+    h2h_prob_away_param = request.GET.get('h2h_prob_away')
     
     # If not in URL, try to get from most recent prediction in database for these teams
     if not (prob_home_param and prob_draw_param and prob_away_param) and home_team and away_team:
@@ -2882,18 +2181,43 @@ def result(request):
                 
                 if not data_empty and home_team and away_team:
                     try:
-                        # Use the SAME calculation method as advanced_predict_match
-                        if home_team in other_teams and away_team in other_teams:
-                            # Use Model2 logic (same as advanced_predict_match)
-                            historical_probs_raw = calculate_probabilities_model2(home_team, away_team, data, version="v2")
-                            # If no H2H data, fallback to original
-                            if historical_probs_raw is None:
-                                historical_probs_raw = calculate_probabilities_original(home_team, away_team, data, version="v1")
-                        else:
-                            # Use Model1 logic (same as advanced_predict_match)
-                            historical_probs_raw = calculate_probabilities_original(home_team, away_team, data, version="v1")
+                        # Use advanced_predict_match to ensure consistency with predict view
+                        # This ensures we get blended probabilities (Model + Form + H2H)
+                        from .analytics import advanced_predict_match
+                        from .views import load_prediction_models, process_prediction_probabilities
                         
-                        if historical_probs_raw:
+                        # Load models (cached)
+                        model1, model2 = load_prediction_models()
+                        
+                        # Get advanced result
+                        adv_result_recalc = advanced_predict_match(
+                            home_team, away_team, 
+                            model1, model2, 
+                            category=category
+                        )
+                        
+                        historical_probs_raw = None
+                        if adv_result_recalc:
+                             # Use the processed probabilities from the advanced result
+                             # This handles the blending correctly
+                             probs_recalc, _ = process_prediction_probabilities(adv_result_recalc)
+                             
+                             # Convert back to percent-like dict for compatibility with existing code structure below
+                             # The code below expects 'Home Team Win' keys etc. or just raw dict
+                             # Actually the code below expects 0-100 percentage keys...
+                             # Let's just set probabilities directly and skip the raw processing block
+                             probabilities = probs_recalc
+                             historical_probs_raw = True # Flag to skip the if block below
+                        else:
+                             # Fallback to old logic if advanced fails
+                             if home_team in other_teams and away_team in other_teams:
+                                 historical_probs_raw = calculate_probabilities_model2(home_team, away_team, data, version="v2")
+                                 if historical_probs_raw is None:
+                                     historical_probs_raw = calculate_probabilities_original(home_team, away_team, data, version="v1")
+                             else:
+                                 historical_probs_raw = calculate_probabilities_original(home_team, away_team, data, version="v1")
+                        
+                        if historical_probs_raw is not None and historical_probs_raw is not True:
                             # historical_probs_raw are already in percentage format (0-100), convert to decimal (0-1)
                             probabilities = {
                                 'Home': round(historical_probs_raw.get("Home Team Win", 33.0) / 100.0, 6),
@@ -2943,13 +2267,57 @@ def result(request):
                 probabilities = {'Home': 0.333, 'Draw': 0.334, 'Away': 0.333}
                 historical_probabilities = probabilities.copy()
     
-    # ALWAYS use the ORIGINAL saved probabilities (from URL/database) as historical probabilities
-    # This ensures consistency - the same probabilities shown in prediction are shown in result
-    # DO NOT use recalculated values - they may be different due to data loading timing/caching
-    if 'saved_probabilities' in locals() and saved_probabilities:
-        # Use the original saved probabilities (before any recalculation)
-        historical_probabilities = saved_probabilities.copy()
-        logger.info(f"[RESULT VIEW] Using ORIGINAL saved probabilities as historical_probabilities: Home={historical_probabilities['Home']*100:.1f}%, Draw={historical_probabilities['Draw']*100:.1f}%, Away={historical_probabilities['Away']*100:.1f}%")
+    # Set historical_probabilities from H2H parameters (raw H2H stats)
+    # This is SEPARATE from the main probabilities (which are blended AI predictions)
+    if h2h_prob_home_param and h2h_prob_draw_param and h2h_prob_away_param:
+        try:
+            historical_probabilities = {
+                'Home': float(h2h_prob_home_param),
+                'Draw': float(h2h_prob_draw_param),
+                'Away': float(h2h_prob_away_param)
+            }
+            # Normalize
+            total_hist = sum(historical_probabilities.values())
+            if total_hist > 0:
+                historical_probabilities = {k: v/total_hist for k, v in historical_probabilities.items()}
+            logger.info(f"[RESULT VIEW] Using H2H probabilities from URL: Home={historical_probabilities['Home']*100:.1f}%, Draw={historical_probabilities['Draw']*100:.1f}%, Away={historical_probabilities['Away']*100:.1f}%")
+        except (ValueError, TypeError) as e:
+            logger.error(f"Error parsing H2H probabilities: {e}")
+            # Fallback to saved probabilities if H2H parsing fails
+            if 'saved_probabilities' in locals() and saved_probabilities:
+                historical_probabilities = saved_probabilities.copy()
+            elif probabilities:
+                historical_probabilities = probabilities.copy()
+            else:
+                historical_probabilities = {'Home': 0.33, 'Draw': 0.33, 'Away': 0.34}
+    elif 'saved_probabilities' in locals() and saved_probabilities:
+        # Fallback: Try to RECALCULATE true historical probabilities first
+        # This fixes issues where saved predictions had biased/incorrect probabilities due to old bugs (e.g. form stubs)
+        try:
+            from .analytics import calculate_probabilities_original, load_football_data
+            # Load data
+            calc_data = load_football_data(1, use_cache=True)
+            # Calculate fresh
+            hist_raw = calculate_probabilities_original(home_team, away_team, calc_data)
+            
+            if hist_raw:
+                historical_probabilities = {
+                    'Home': round(hist_raw.get("Home Team Win", 33.0) / 100.0, 6),
+                    'Draw': round(hist_raw.get("Draw", 33.0) / 100.0, 6),
+                    'Away': round(hist_raw.get("Away Team Win", 33.0) / 100.0, 6)
+                }
+                # Normalize
+                total_h = sum(historical_probabilities.values())
+                if total_h > 0:
+                    historical_probabilities = {k: v/total_h for k, v in historical_probabilities.items()}
+                logger.info(f"[RESULT VIEW] Recalculated FRESH historical probabilities: Home={historical_probabilities['Home']*100:.1f}%, Draw={historical_probabilities['Draw']*100:.1f}%, Away={historical_probabilities['Away']*100:.1f}%")
+            else:
+                historical_probabilities = saved_probabilities.copy()
+                logger.info(f"[RESULT VIEW] Could not recalculate historical, using saved: Home={historical_probabilities['Home']*100:.1f}%...")
+        except Exception as e_hist:
+            logger.warning(f"[RESULT VIEW] Error recalculating historical: {e_hist}")
+            historical_probabilities = saved_probabilities.copy()
+            
     elif probabilities:
         # Fallback to current probabilities if saved_probabilities not available
         historical_probabilities = probabilities.copy()
@@ -2990,9 +2358,17 @@ def result(request):
     
     logger.info(f"Final historical_probabilities for template: {historical_probabilities}")
     
+    
     # Check if historical probabilities are valid (not default fallback)
-    # Default fallback is typically 33/33/34 or very close to it
-    if historical_probabilities:
+    # Priority 1: If we have probabilities from URL parameters or database, they're valid
+    # Priority 2: Check if probabilities are significantly different from 33/33/34 fallback
+    has_valid_historical_prob = False
+    
+    if prob_home_param and prob_draw_param and prob_away_param:
+        # We have probabilities from URL (saved prediction) - these are ALWAYS valid
+        has_valid_historical_prob = True
+        logger.info("✅ Valid historical probabilities: Loaded from URL/database (saved prediction)")
+    elif historical_probabilities:
         home_prob = historical_probabilities.get('Home', 0.33)
         draw_prob = historical_probabilities.get('Draw', 0.33)
         away_prob = historical_probabilities.get('Away', 0.33)
@@ -3287,6 +2663,7 @@ def result(request):
                 if len(h2h_matches) >= 1:
                     has_sufficient_h2h = True
                     logger.info(f"H2H data found: {len(h2h_matches)} matches")
+                    logger.info(f"First match sample: {h2h_matches[0]}")
                 else:
                     logger.info(f"No H2H data: {len(h2h_matches)} matches found")
                 
@@ -3437,7 +2814,7 @@ def result(request):
                     data_usable = False
             
             # If data not usable or form calculation failed, use hash-based generation
-            if not data_usable or not home_team_form or not away_team_form:
+            if not data_usable or not home_team_form or not away_team_form or home_team_form == '-----' or away_team_form == '-----':
                 # Generate realistic form based on team name hash (consistent for same team)
                 import hashlib
                 
@@ -3554,29 +2931,67 @@ def result(request):
     
     # Iterate through outcomes (more robust than DB filtering for stats)
     for pred in all_predictions:
-        o = str(pred.outcome).strip() # specific handling for potential whitespace
-        # Standard outcomes
-        if o == 'Home':
+        # Determine effective outcome for stats counting
+        # Logic: If probabilities exist, the "Vote" goes to the highest probability outcome
+        # This aligns with the "Safety Switch" logic: DC is just a label for a close race, 
+        # but for stats we want to know "Which side did the model favor most?"
+        winning_outcome = None
+        
+        if pred.prob_home is not None and pred.prob_draw is not None and pred.prob_away is not None:
+            try:
+                p_h = float(pred.prob_home)
+                p_d = float(pred.prob_draw)
+                p_a = float(pred.prob_away)
+                
+                # Find max probability to determine the model's primary lean
+                max_p = max(p_h, p_d, p_a)
+                if max_p == p_h:
+                    winning_outcome = 'Home'
+                elif max_p == p_d:
+                    winning_outcome = 'Draw'
+                else:
+                    winning_outcome = 'Away'
+            except (ValueError, TypeError):
+                # Fallback if probability parsing fails
+                winning_outcome = None
+        
+        # Fallback to Outcome String if no valid probabilities found
+        if not winning_outcome:
+            o = str(pred.outcome).strip()
+            # Standard outcomes
+            if o == 'Home' or o == f"{home_team} Win" or f"{home_team} Win" in o:
+                winning_outcome = 'Home'
+            elif o == 'Draw':
+                winning_outcome = 'Draw'
+            elif o == 'Away' or o == f"{away_team} Win" or f"{away_team} Win" in o:
+                winning_outcome = 'Away'
+            # Double Chance (Split weight if we don't have probabilities)
+            elif o == '1X':
+                home_predictions += 0.5
+                draw_predictions += 0.5
+                continue
+            elif o == 'X2':
+                draw_predictions += 0.5
+                away_predictions += 0.5
+                continue
+            elif o == '12':
+                home_predictions += 0.5
+                away_predictions += 0.5
+                continue
+            # Fallback partial matching
+            elif 'Win' in o or 'WIN' in o:
+                if home_team and home_team.lower() in o.lower():
+                    winning_outcome = 'Home'
+                elif away_team and away_team.lower() in o.lower():
+                    winning_outcome = 'Away'
+        
+        # Increment counts based on determined winning_outcome
+        if winning_outcome == 'Home':
             home_predictions += 1
-        elif o == 'Draw':
+        elif winning_outcome == 'Draw':
             draw_predictions += 1
-        elif o == 'Away':
+        elif winning_outcome == 'Away':
             away_predictions += 1
-        # Handle "Team Win" format if present in DB (legacy/alternate format)
-        elif home_team and (f"{home_team} Win" in o or f"{home_team} WIN" in o or o == f"{home_team} Win"):
-            home_predictions += 1
-        elif away_team and (f"{away_team} Win" in o or f"{away_team} WIN" in o or o == f"{away_team} Win"):
-            away_predictions += 1
-        # Fallback partial matching for case variations
-        elif 'Win' in o or 'WIN' in o:
-            if home_team and home_team.lower() in o.lower():
-                home_predictions += 1
-            elif away_team and away_team.lower() in o.lower():
-                away_predictions += 1
-        elif o in ['1X', 'X2', '12']:
-            # Handle double chance if they exist (count towards primary option)
-            # This is a fallback as these shouldn't be the primary outcome stored
-            pass
     
     logger.info(f"Stats Calculated (Python) - Home: {home_predictions}, Draw: {draw_predictions}, Away: {away_predictions} (Total: {total_predictions_count})")
 
@@ -3594,9 +3009,9 @@ def result(request):
     
     prediction_stats = {
         'total_count': total_predictions_count,
-        'home_count': home_predictions,
-        'draw_count': draw_predictions,
-        'away_count': away_predictions,
+        'home_count': int(round(home_predictions, 1)) if round(home_predictions, 1) % 1 == 0 else round(home_predictions, 1),
+        'draw_count': int(round(draw_predictions, 1)) if round(draw_predictions, 1) % 1 == 0 else round(draw_predictions, 1),
+        'away_count': int(round(away_predictions, 1)) if round(away_predictions, 1) % 1 == 0 else round(away_predictions, 1),
         'home_percentage': (home_predictions / total_predictions_count * 100) if total_predictions_count > 0 else 0,
         'draw_percentage': (draw_predictions / total_predictions_count * 100) if total_predictions_count > 0 else 0,
         'away_percentage': (away_predictions / total_predictions_count * 100) if total_predictions_count > 0 else 0,

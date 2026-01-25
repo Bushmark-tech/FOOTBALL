@@ -277,11 +277,19 @@ def admin_user_action(request, user_id):
         
         elif action == 'grant_free_access':
             days = int(request.POST.get('days', 30))
-            profile, _ = UserProfile.objects.get_or_create(user=user)
-            profile.free_access_until = timezone.now() + timedelta(days=days)
-            profile.save()
-            messages.success(request, f'Granted {days} days free access to {user.username}')
-            logger.info(f"Admin {request.user.username} granted {days} days to {user.username}")
+            # Create a free VIP subscription
+            Subscription.objects.create(
+                user=user,
+                plan_type='vip',
+                amount=0,
+                currency='KES',
+                status='active',
+                payment_method='mpesa',  # Default to mpesa as placeholder
+                start_date=timezone.now(),
+                end_date=timezone.now() + timedelta(days=days)
+            )
+            messages.success(request, f'Granted {days} days VIP access to {user.username}')
+            logger.info(f"Admin {request.user.username} granted {days} days VIP to {user.username}")
         
         elif action == 'reset_free_quota':
             profile = UserProfile.objects.get_or_create(user=user)[0]

@@ -492,8 +492,7 @@
                                         {% elif prediction.outcome == "X2" %}
                                         <span class="outcome-label away-win">Draw or {{ prediction.away_team }}</span>
                                         {% elif prediction.outcome == "12" %}
-                                        <span class="outcome-label home-win">{{ prediction.home_team }} or {{
-                                            prediction.away_team }}</span>
+                                        <span class="outcome-label home-win">{{ prediction.home_team }} or {{ prediction.away_team }}</span>
                                         {% elif prediction.home_score > prediction.away_score %}
                                         <span class="outcome-label home-win">{{ prediction.home_team }} Win</span>
                                         {% elif prediction.away_score > prediction.home_score %}

@@ -237,17 +237,17 @@ class UserProfileAdmin(admin.ModelAdmin):
             'fields': ('email_verified', 'verification_token', 'token_created_at', 'token_status')
         }),
         ('Free Tier', {
-            'fields': ('free_matches_used', 'free_matches_limit', 'free_access_until')
+            'fields': ('free_matches_used', 'free_matches_limit')
         }),
         ('Payment Information', {
-            'fields': ('payment_method', 'mpesa_number', 'mpesa_wallet')
+            'fields': ('mpesa_number',)
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at')
         }),
     )
     
-    actions = ['verify_users', 'reset_free_quota', 'grant_free_month']
+    actions = ['verify_users', 'reset_free_quota']
     
     def email_verified_display(self, obj):
         """Display email verification status with color"""
@@ -318,41 +318,26 @@ class UserProfileAdmin(admin.ModelAdmin):
     user_is_active.short_description = "Account Status"
     user_is_active.admin_order_field = 'user__is_active'
     
-    def payment_method_display(self, obj):
-        """Display payment method with color"""
-        colors = {'mpesa': 'green', 'card': 'blue', 'none': 'gray'}
-        color = colors.get(obj.payment_method, 'gray')
-        return format_html(
-            '<span style="color: {}; font-weight: bold;">{}</span>',
-            color, obj.get_payment_method_display()
-        )
-    payment_method_display.short_description = "Payment Method"
-    
     def reset_free_quota(self, request, queryset):
         """Reset free matches quota"""
         count = queryset.update(free_matches_used=0)
         self.message_user(request, f"Reset quota for {count} users.")
     reset_free_quota.short_description = "Reset free quota"
     
-    def grant_free_month(self, request, queryset):
-        """Grant free access for 30 days"""
-        end_date = timezone.now() + timezone.timedelta(days=30)
-        count = queryset.update(free_access_until=end_date)
-        self.message_user(request, f"Granted free month to {count} users.")
-    grant_free_month.short_description = "Grant 30 days free access"
+
 
 
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
     """Enhanced admin for subscription management"""
-    list_display = ['user', 'status_display', 'amount_display', 'payment_method', 'start_date', 'end_date', 'days_remaining']
-    list_filter = ['status', 'payment_method', 'currency', 'created_at', 'start_date']
+    list_display = ['user', 'plan_type', 'status_display', 'amount_display', 'payment_method', 'days_remaining']
+    list_filter = ['status', 'plan_type', 'payment_method', 'currency', 'created_at', 'start_date']
     search_fields = ['user__username', 'mpesa_transaction_id', 'mpesa_number']
     readonly_fields = ['created_at', 'updated_at', 'days_remaining_info']
     
     fieldsets = (
         ('Subscription Information', {
-            'fields': ('user', 'status', 'payment_method')
+            'fields': ('user', 'plan_type', 'status', 'payment_method')
         }),
         ('Payment Details', {
             'fields': ('amount', 'currency')
@@ -361,7 +346,7 @@ class SubscriptionAdmin(admin.ModelAdmin):
             'fields': ('start_date', 'end_date', 'days_remaining_info')
         }),
         ('Payment Reference', {
-            'fields': ('mpesa_number', 'mpesa_transaction_id', 'mpesa_wallet'),
+            'fields': ('mpesa_number', 'mpesa_transaction_id'),
             'classes': ('collapse',)
         }),
         ('Timestamps', {
@@ -390,7 +375,7 @@ class SubscriptionAdmin(admin.ModelAdmin):
     def days_remaining(self, obj):
         """Display days remaining"""
         if obj.status == 'active' and obj.end_date:
-            days = (obj.end_date - timezone.now().date()).days
+            days = (obj.end_date.date() - timezone.now().date()).days
             if days > 0:
                 return format_html(
                     '<span style="color: green; font-weight: bold;">{} days</span>',
@@ -406,7 +391,7 @@ class SubscriptionAdmin(admin.ModelAdmin):
     def days_remaining_info(self, obj):
         """Info display for days remaining"""
         if obj.end_date:
-            days = (obj.end_date - timezone.now().date()).days
+            days = (obj.end_date.date() - timezone.now().date()).days
             return f"{days} days remaining" if days > 0 else "Expired"
         return "No end date"
     days_remaining_info.short_description = "Days Remaining"

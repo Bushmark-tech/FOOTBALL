@@ -315,7 +315,7 @@
             </button>
         </div>
 
-        <form id="prediction-form" method="post" autocomplete="off">
+        <form id="prediction-form" method="post" action="{% url 'predictor:predict' %}" autocomplete="off">
             {% csrf_token %}
 
             <!-- League Selection Group -->

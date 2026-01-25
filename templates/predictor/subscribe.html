@@ -405,16 +405,77 @@
     }
 
     @media (max-width: 768px) {
+        .subscribe-container {
+            padding: 1rem 0.5rem;
+        }
+
         .plans-grid {
             grid-template-columns: 1fr;
+            gap: 1.5rem;
+            padding: 0 0.5rem;
         }
 
         .page-header h1 {
+            font-size: 1.75rem;
+        }
+
+        .plan-card {
+            padding: 1.5rem;
+        }
+
+        .plan-price .amount {
             font-size: 2rem;
+        }
+
+        .plan-features li {
+            font-size: 0.9rem;
+            padding: 0.5rem 0;
+        }
+
+        .payment-section {
+            padding: 1.5rem;
+            margin: 2rem 0.5rem;
         }
 
         .payment-modal-content {
             padding: 2rem 1.5rem;
+            width: 95%;
+        }
+
+        .payment-steps {
+            padding: 1rem;
+        }
+
+        .payment-steps ol {
+            font-size: 0.9rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .page-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .plan-badge {
+            font-size: 0.75rem;
+            padding: 0.4rem 1rem;
+        }
+
+        .plan-icon {
+            font-size: 2.5rem;
+        }
+
+        .plan-name {
+            font-size: 1.25rem;
+        }
+
+        .plan-price .amount {
+            font-size: 1.75rem;
+        }
+
+        .plan-button {
+            padding: 0.875rem;
+            font-size: 0.95rem;
         }
     }
 </style>
@@ -439,33 +500,10 @@
 
         <!-- Subscription Plans Grid -->
         <div class="plans-grid">
-            <!-- Trial Plan -->
+            <!-- Standard Plan -->
             <div class="plan-card">
-                <div class="plan-icon">🆓</div>
-                <h3 class="plan-name">Trial Plan</h3>
-                <div class="plan-price">
-                    <div class="amount">Free</div>
-                </div>
-                <ul class="plan-features">
-                    <li>
-                        <i class="fas fa-check-circle"></i>
-                        <span>1 match only</span>
-                    </li>
-                    <li>
-                        <i class="fas fa-check-circle"></i>
-                        <span>Basic predictions</span>
-                    </li>
-                </ul>
-                <button class="plan-button secondary" disabled>
-                    Current Plan
-                </button>
-            </div>
-
-            <!-- Basic Plan -->
-            <div class="plan-card popular">
-                <div class="plan-badge">POPULAR</div>
                 <div class="plan-icon">🟢</div>
-                <h3 class="plan-name">Basic Plan</h3>
+                <h3 class="plan-name">Standard Plan</h3>
                 <div class="plan-price">
                     <div class="amount">KSh 200</div>
                     <span class="period">per month</span>
@@ -473,7 +511,7 @@
                 <ul class="plan-features">
                     <li>
                         <i class="fas fa-check-circle"></i>
-                        <span>10 matches per day</span>
+                        <span>7 matches per day</span>
                     </li>
                     <li>
                         <i class="fas fa-check-circle"></i>
@@ -488,7 +526,7 @@
                         <span>All leagues access</span>
                     </li>
                 </ul>
-                <button class="plan-button primary" onclick="selectPlan('Basic Plan', 200, 'basic')">
+                <button class="plan-button primary" onclick="selectPlan('Standard Plan', 200, 'standard')">
                     <i class="fas fa-crown"></i> Select Plan
                 </button>
             </div>
@@ -504,11 +542,11 @@
                 <ul class="plan-features">
                     <li>
                         <i class="fas fa-check-circle"></i>
-                        <span>50 matches per day</span>
+                        <span>20 matches per day</span>
                     </li>
                     <li>
                         <i class="fas fa-check-circle"></i>
-                        <span>1,500 matches per month</span>
+                        <span>600 matches per month</span>
                     </li>
                     <li>
                         <i class="fas fa-check-circle"></i>
@@ -524,11 +562,11 @@
                 </button>
             </div>
 
-            <!-- Unlimited Plan -->
+            <!-- VIP Plan -->
             <div class="plan-card premium">
                 <div class="plan-badge premium">BEST VALUE</div>
                 <div class="plan-icon">♾️</div>
-                <h3 class="plan-name">Unlimited Plan</h3>
+                <h3 class="plan-name">VIP Plan</h3>
                 <div class="plan-price">
                     <div class="amount" style="color: #fbbf24;">KSh 1,000</div>
                     <span class="period">per month</span>
@@ -555,7 +593,7 @@
                         <span>Exclusive features</span>
                     </li>
                 </ul>
-                <button class="plan-button premium" onclick="selectPlan('Unlimited Plan', 1000, 'unlimited')">
+                <button class="plan-button premium" onclick="selectPlan('VIP Plan', 1000, 'vip')">
                     <i class="fas fa-infinity"></i> Select Plan
                 </button>
             </div>

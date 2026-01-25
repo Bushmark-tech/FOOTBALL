@@ -133,10 +133,12 @@
                                     </td>
                                     <td class="fw-bold">{{ sub.currency }} {{ sub.amount }}</td>
                                     <td>
-                                        <span class="badge bg-light text-dark border">{{ sub.payment_method|upper }}</span>
+                                        <span class="badge bg-light text-dark border">{{ sub.payment_method|upper
+                                            }}</span>
                                     </td>
                                     <td class="small text-muted">
-                                        {{ sub.start_date|date:"M d, Y" }} — {{ sub.end_date|date:"M d, Y"|default:"..." }}
+                                        {{ sub.start_date|date:"M d, Y" }} — {{ sub.end_date|date:"M d, Y"|default:"..."
+                                        }}
                                     </td>
                                     <td class="pe-4 text-end">
                                         <a href="{% url 'predictor:admin_billing' %}?subscription_id={{ sub.id }}"
@@ -187,7 +189,8 @@
                                         <span class="badge bg-light text-dark border">
                                             {% if pred.prob_home > pred.prob_away and pred.prob_home > pred.prob_draw %}
                                             Home
-                                            {% elif pred.prob_away > pred.prob_home and pred.prob_away > pred.prob_draw %}
+                                            {% elif pred.prob_away > pred.prob_home and pred.prob_away > pred.prob_draw
+                                            %}
                                             Away
                                             {% else %}
                                             Draw

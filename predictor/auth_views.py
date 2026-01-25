@@ -36,17 +36,54 @@ def check_subscription_status(user):
     # Get or create user profile
     profile, created = UserProfile.objects.get_or_create(user=user)
     
-    # Check for active subscription
-    active_subscription = Subscription.objects.filter(
+    # Get ALL active subscriptions (Stacking Logic)
+    active_subscriptions = Subscription.objects.filter(
         user=user,
         status='active'
-    ).first()
+    )
     
-    if active_subscription and active_subscription.is_active():
+    # Check if we have any valid active subscriptions
+    valid_subs = [sub for sub in active_subscriptions if sub.is_active()]
+    
+    if valid_subs:
+        # Sum up limits from all active plans
+        limits = {
+            'standard': 7,
+            'starter': 20,
+            'vip': 100
+        }
+        
+        total_plan_limit = 0
+        plan_names = []
+        
+        for sub in valid_subs:
+            ptype = getattr(sub, 'plan_type', 'standard')
+            total_plan_limit += limits.get(ptype, 7)
+            plan_names.append(ptype.title())
+            
+        # Add the base "free" match to the subscriber's total
+        # User requirement: "20+7 = 27 plus free one which is 28"
+        daily_limit = total_plan_limit + 1
+        
+        # Count today's predictions
+        today = timezone.now().date()
+        today_predictions = Prediction.objects.filter(
+            user=user,
+            prediction_date__date=today
+        ).count()
+        
+        if today_predictions >= daily_limit:
+             return {
+                'has_access': False,
+                'reason': 'daily_limit_reached',
+                'limit': daily_limit,
+                'message': f'You have reached your total daily limit of {daily_limit} matches ({"+".join(plan_names)} + Free).'
+            }
+
         return {
             'has_access': True,
             'reason': 'subscription',
-            'subscription': active_subscription
+            'remaining_daily': daily_limit - today_predictions
         }
     
     # SECURITY FIX: Count ALL predictions (including archived) to prevent bypass
@@ -99,14 +136,38 @@ def use_prediction_credit(user):
     
     profile, created = UserProfile.objects.get_or_create(user=user)
     
-    # Check subscription first
-    active_subscription = Subscription.objects.filter(
+    # Check subscriptions (Stacking Logic)
+    active_subscriptions = Subscription.objects.filter(
         user=user,
         status='active'
-    ).first()
+    )
+    valid_subs = [sub for sub in active_subscriptions if sub.is_active()]
     
-    if active_subscription and active_subscription.is_active():
-        return True  # Subscription users have unlimited access
+    if valid_subs:
+        # Sum up limits
+        limits = {
+            'standard': 7,
+            'starter': 20,
+            'vip': 100
+        }
+        total_plan_limit = 0
+        for sub in valid_subs:
+            ptype = getattr(sub, 'plan_type', 'standard')
+            total_plan_limit += limits.get(ptype, 7)
+            
+        # Add base free match
+        daily_limit = total_plan_limit + 1
+        
+        today = timezone.now().date()
+        today_predictions = Prediction.objects.filter(
+            user=user,
+            prediction_date__date=today
+        ).count()
+        
+        if today_predictions >= daily_limit:
+            return False # Limit reached
+            
+        return True  # Access granted
     
     # SECURITY FIX: Count ALL predictions (including archived) to prevent bypass
     total_predictions = Prediction.objects.filter(user=user).count()
@@ -299,14 +360,16 @@ def initiate_mpesa_payment(request):
     
     try:
         mpesa_number = request.POST.get('mpesa_number')
-        currency = request.POST.get('currency', 'USD')
-
+        currency = request.POST.get('currency', 'KSH')
+        plan_type = request.POST.get('plan_type')
+        
         if not mpesa_number and request.body:
              try:
                  import json
                  data = json.loads(request.body)
                  mpesa_number = data.get('mpesa_number')
-                 currency = data.get('currency', 'USD')
+                 currency = data.get('currency', 'KSH') # Default to KSH
+                 plan_type = data.get('plan_type', 'standard')
              except json.JSONDecodeError:
                  pass
         
@@ -327,11 +390,21 @@ def initiate_mpesa_payment(request):
             print(f"DEBUG: Invalid Length {len(mpesa_number)}")
             return JsonResponse({'error': 'Invalid M-Pesa number format'}, status=400)
         
-        # Determine amount based on currency
-        if currency == 'KSH':
-            amount = settings.SUBSCRIPTION_PRICE_KSH
+        # Determine amount based on plan_type (Security: Do not trust amount from client)
+        if plan_type == 'standard':
+            amount = 200.00
+            currency = 'KSH'
+        elif plan_type == 'starter':
+            amount = 500.00
+            currency = 'KSH'
+        elif plan_type == 'vip':
+            amount = 1000.00
+            currency = 'KSH'
         else:
-            amount = settings.SUBSCRIPTION_PRICE_USD
+             # Default fallback
+             amount = getattr(settings, 'SUBSCRIPTION_PRICE_KSH', 200.00)
+             plan_type = 'standard'
+             currency = 'KSH'
         
         # Create pending subscription
         subscription = Subscription.objects.create(
@@ -340,7 +413,8 @@ def initiate_mpesa_payment(request):
             payment_method='mpesa',
             amount=amount,
             currency=currency,
-            mpesa_number=mpesa_number
+            mpesa_number=mpesa_number,
+            plan_type=plan_type
         )
         
         # Update user profile with M-Pesa number

@@ -3,6 +3,12 @@
 
 {% block title %}Multi-Match Predictions - LEON GAMES PRO{% endblock %}
 
+{% block extra_head %}
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+{% endblock %}
+
 {% block extra_css %}
 <style>
     .prediction-container {
@@ -645,18 +651,18 @@
             };
 
             // Save to database
-            const saved = await savePrediction(newPrediction);
-            if (saved) {
-                newPrediction.timestamp = new Date().toLocaleString();
-                predictions.push(newPrediction);
-                updatePredictionsList();
+            // Note: Prediction is already saved by /api/predict/ endpoint
+            // Just add to local array and update display
+            newPrediction.timestamp = new Date().toLocaleString();
+            predictions.push(newPrediction);
+            updatePredictionsList();
 
-                // Reset form
-                categorySelect.value = '';
-                leagueSelect.innerHTML = '<option value="">Select League</option>';
-                homeTeamSelect.innerHTML = '<option value="">Select Home Team</option>';
-                awayTeamSelect.innerHTML = '<option value="">Select Away Team</option>';
-            }
+            // Reset form
+            categorySelect.value = '';
+            leagueSelect.innerHTML = '<option value="">Select League</option>';
+            homeTeamSelect.innerHTML = '<option value="">Select Home Team</option>';
+            awayTeamSelect.innerHTML = '<option value="">Select Away Team</option>';
+
 
         } catch (error) {
             console.error('Prediction error:', error);

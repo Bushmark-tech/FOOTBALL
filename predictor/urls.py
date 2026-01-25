@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 from . import auth_views
 from . import admin_views
+from . import api_views
 
 app_name = 'predictor'
 
@@ -51,12 +52,12 @@ urlpatterns = [
     path('subscribe/', auth_views.subscribe_view, name='subscribe'),
     
     # ========== API ENDPOINTS ==========
-    path('api/predict/', views.api_predict, name='api_predict'),
-    path('api/teams/', views.get_teams_by_category, name='get_teams_by_category'),
-    path('api/team-stats/', views.api_team_stats, name='api_team_stats'),
-    path('api/head-to-head/', views.api_head_to_head, name='api_head_to_head'),
-    path('api/market-odds/', views.api_market_odds, name='api_market_odds'),
-    path('api/multi-match-predictions/', views.multi_match_predictions_api, name='multi_match_predictions_api'),
+    path('api/predict/', api_views.api_predict, name='api_predict'),
+    path('api/teams/', api_views.get_teams_by_category, name='get_teams_by_category'),
+    path('api/team-stats/', api_views.api_team_stats, name='api_team_stats'),
+    path('api/head-to-head/', api_views.api_head_to_head, name='api_head_to_head'),
+    path('api/market-odds/', api_views.api_market_odds, name='api_market_odds'),
+    path('api/multi-match-predictions/', api_views.multi_match_predictions_api, name='multi_match_predictions_api'),
     path('api/mpesa/payment/', auth_views.initiate_mpesa_payment, name='mpesa_payment'),
     path('api/mpesa/callback/', auth_views.mpesa_callback, name='mpesa_callback'),
     
