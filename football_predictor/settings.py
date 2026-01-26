@@ -18,6 +18,10 @@ except ImportError:
 # ... (skip to keys)
 
 
+
+# Check if we are running on Render
+IS_RENDER = os.environ.get('RENDER')
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -92,8 +96,10 @@ WSGI_APPLICATION = 'football_predictor.wsgi.application'
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
 
+
 # Check if we are running on Render
-IS_RENDER = os.environ.get('RENDER')
+# IS_RENDER is now defined at the top of the file
+
 
 if IS_RENDER or not DEBUG:
     # In production (Render), we MUST use PostgreSQL
