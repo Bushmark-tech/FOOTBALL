@@ -233,7 +233,7 @@ def login_view(request):
                     return redirect(next_url)
             return redirect('predictor:home')
         else:
-            messages.error(request, 'Invalid email/username or password.')
+            messages.error(request, 'Invalid email or password.')
     
     return render(request, 'predictor/login.html', {'next': next_url})
 

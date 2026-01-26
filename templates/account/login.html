@@ -68,7 +68,7 @@
     document.querySelectorAll('#login_form input').forEach(input => {
         if (input.type !== 'checkbox') {
             input.classList.add('form-control');
-            if (input.name === 'login') input.placeholder = 'Username or Email';
+            if (input.name === 'login') input.placeholder = 'Email Address';
             if (input.name === 'password') input.placeholder = 'Password';
         }
     });
