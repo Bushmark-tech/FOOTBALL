@@ -22,6 +22,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', get_random_secret_key())
+if IS_RENDER and not os.environ.get('SECRET_KEY'):
+    print("WARNING: SECRET_KEY not set in environment. A new key is generated on every startup, which invalidates all sessions and tokens!")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # For local development, set DEBUG=True to see detailed errors
@@ -234,9 +236,13 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'Football Predictor <noreply@football-predictor.com>')
 
 # Site URL for emails
+# Site URL for emails
 SITE_URL = os.environ.get('SITE_URL', 'http://127.0.0.1:8000')
-if IS_RENDER:
-    SITE_URL = 'https://football-o48u.onrender.com'
+if IS_RENDER and not os.environ.get('SITE_URL'):
+    # Default to the primary custom domain if not specified, otherwise the Render URL
+    # If using a custom domain as primary:
+    SITE_URL = 'https://leon-football.com'
+
 
 # Google OAuth Settings
 SOCIALACCOUNT_PROVIDERS = {
@@ -299,10 +305,11 @@ else:
     MPESA_ACCESS_TOKEN_URL = 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
     MPESA_STK_PUSH_URL = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest' 
 
+
 # CSRF Settings
 CSRF_COOKIE_SECURE = os.environ.get('CSRF_COOKIE_SECURE', 'False').lower() == 'true'
 CSRF_COOKIE_HTTPONLY = False  # Must be False to allow JavaScript to read the token
-CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost:8000,http://127.0.0.1:8000,https://football-o48u.onrender.com,https://leon-football.com,https://www.leon-football.com').split(',')
+CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost:8000,http://127.0.0.1:8000,https://football-o48u.onrender.com,https://football-2-v5fy.onrender.com,https://leon-football.com,https://www.leon-football.com').split(',')
 CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in CSRF_TRUSTED_ORIGINS if origin.strip()]
 
 # Session Settings

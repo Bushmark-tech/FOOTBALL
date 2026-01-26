@@ -718,15 +718,105 @@ class ProfessionalFootballAnalytics:
     
     def calculate_team_strength(self, team_name, home_away='home'):
         try:
-            data = load_football_data()
-            form_string = get_team_recent_form_original(team_name, data)
-            # Basic calculation based on form
-            points = 0
-            for r in form_string[:5]:
-                if r == 'W': points += 3
-                elif r == 'D': points += 1
-            return min(1.0, max(0.0, points / 15.0 + (0.1 if home_away=='home' else 0)))
-        except: return 0.5
+            # 1. Determine dataset (Try 1, then 2)
+            data = load_football_data(1)
+            # Check v1 columns
+            if 'HomeTeam' in data.columns:
+                target_col = 'HomeTeam'
+                ver = "v1"
+            else:
+                target_col = 'Home'
+                ver = "v2"
+                
+            if not find_team_in_data(team_name, data, target_col):
+                # Try dataset 2
+                data = load_football_data(2)
+                if 'Home' in data.columns: ver = "v2"
+                else: ver = "v1" # Fallback
+                
+                # Check for team in data 2
+                target_col = 'Home' if ver == "v2" else 'HomeTeam'
+                if not find_team_in_data(team_name, data, target_col):
+                    return 0.5 # Team not found
+            
+            # 2. Extract matches
+            pd = safe_import_pandas()
+            if ver == "v2":
+                h_col, a_col, r_col = "Home", "Away", "Res"
+                score_h, score_a = "HG", "AG" # Guessing for v2, fallback below
+            else:
+                h_col, a_col, r_col = "HomeTeam", "AwayTeam", "FTR"
+                score_h, score_a = "FTHG", "FTAG"
+            
+            # Verify score cols exist
+            has_scores = score_h in data.columns and score_a in data.columns
+            if not has_scores and ver == "v2":
+                # Try alternatives for v2
+                if 'HomeGoals' in data.columns: score_h, score_a = 'HomeGoals', 'AwayGoals'; has_scores=True
+                elif 'FTHG' in data.columns: score_h, score_a = 'FTHG', 'FTAG'; has_scores=True
+            
+            team_matched = find_team_in_data(team_name, data, h_col)
+            if not team_matched: return 0.5
+            
+            tm = str(team_matched).strip()
+            
+            # Need Date for recency
+            if 'Date' in data.columns:
+                data["Date"] = pd.to_datetime(data["Date"], errors="coerce")
+                
+                mask = (data[h_col].astype(str).str.strip() == tm) | (data[a_col].astype(str).str.strip() == tm)
+                recent = data[mask].sort_values("Date", ascending=False).head(5)
+                
+                points = 0
+                goal_diff = 0
+                
+                for _, row in recent.iterrows():
+                    res = str(row[r_col])
+                    is_home = str(row[h_col]).strip() == tm
+                    
+                    # 3. Calculate Points (W=3, D=1)
+                    # Normalize result
+                    if res in ['1', 'D']: outcome = 'D'
+                    elif res in ['2', 'H']: outcome = 'H'
+                    elif res in ['0', 'A']: outcome = 'A'
+                    else: outcome = 'D'
+                    
+                    if outcome == 'D': 
+                        points += 1
+                    elif (outcome == 'H' and is_home) or (outcome == 'A' and not is_home):
+                        points += 3
+                    
+                    # 4. Calculate Goal Difference
+                    if has_scores:
+                        try:
+                            hg = float(row[score_h])
+                            ag = float(row[score_a])
+                            
+                            if is_home:
+                                goal_diff += (hg - ag)
+                            else:
+                                goal_diff += (ag - hg)
+                        except: pass
+                
+                # 5. Final Formula
+                # Max points = 15. Max expected GD ~10.
+                # Formula: (Points + (GD * 0.15)) / 16.5
+                # This gives a slight boost for high GD.
+                # Example: 5 wins (15 pts) + 10 GD = 15 + 1.5 = 16.5 -> 1.0 Strength
+                # Example: 5 wins (15 pts) + 1 GD = 15 + 0.15 = 15.15 -> ~0.91 Strength
+                
+                rating = (points + (goal_diff * 0.15)) / 16.5
+                
+                # Add home advantage bonus
+                if home_away == 'home':
+                    rating += 0.1
+                
+                return min(1.0, max(0.0, rating))
+                
+            return 0.5
+        except Exception as e: 
+            logger.warning(f"Error in strength calc: {e}")
+            return 0.5
     
     def get_head_to_head_stats(self, home_team, away_team):
         data = load_football_data()
