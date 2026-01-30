@@ -6,8 +6,10 @@ def add_plan_type_if_missing(apps, schema_editor):
     db_table = 'predictor_subscription'
     column_name = 'plan_type'
     
+    
     # Check if column exists
     from django.db import connection
+    exists = False
     with connection.cursor() as cursor:
         if connection.vendor == 'postgresql':
             cursor.execute(f"SELECT 1 FROM information_schema.columns WHERE table_name='{db_table}' AND column_name='{column_name}'")
@@ -21,14 +23,13 @@ def add_plan_type_if_missing(apps, schema_editor):
             
     if not exists:
         Subscription = apps.get_model('predictor', 'Subscription')
-        field = models.CharField(choices=[('standard', 'Standard Plan'), ('starter', 'Starter Plan'), ('vip', 'VIP Plan')], default='standard', max_length=20)
         # Add the field to the database
-        # We use raw SQL or schema_editor
-        if connection.vendor == 'postgresql':
-            cursor.execute(f"ALTER TABLE {db_table} ADD COLUMN {column_name} varchar(20) DEFAULT 'standard' NOT NULL")
-        else:
-            # SQLite handles DEFAULT in a specific way
-            cursor.execute(f"ALTER TABLE {db_table} ADD COLUMN {column_name} varchar(20) DEFAULT 'standard' NOT NULL")
+        with connection.cursor() as cursor:
+            if connection.vendor == 'postgresql':
+                cursor.execute(f"ALTER TABLE {db_table} ADD COLUMN {column_name} varchar(20) DEFAULT 'standard' NOT NULL")
+            else:
+                # SQLite handles DEFAULT in a specific way
+                cursor.execute(f"ALTER TABLE {db_table} ADD COLUMN {column_name} varchar(20) DEFAULT 'standard' NOT NULL")
 
 class Migration(migrations.Migration):
 
