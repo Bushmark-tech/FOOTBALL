@@ -58,7 +58,7 @@ urlpatterns = [
     path('api/team-stats/', api_views.api_team_stats, name='api_team_stats'),
     path('api/head-to-head/', api_views.api_head_to_head, name='api_head_to_head'),
     path('api/market-odds/', api_views.api_market_odds, name='api_market_odds'),
-    path('api/multi-match-predictions/', api_views.multi_match_predictions_api, name='multi_match_predictions_api'),
+
     path('api/mpesa/payment/', auth_views.initiate_mpesa_payment, name='mpesa_payment'),
     path('api/mpesa/callback/', auth_views.mpesa_callback, name='mpesa_callback'),
     

@@ -861,12 +861,7 @@ def predict(request):
     import json
     leagues_json = json.dumps(leagues_by_category)
     
-    # Check if multi-match mode is requested
-    if request.GET.get('multi') == 'true':
-        return render(request, 'predictor/predict_multi.html', {
-            'leagues_by_category': leagues_by_category,
-            'leagues_json': leagues_json
-        })
+
 
     import json
     logger.info(f"Predict View - Leagues Data Keys: {list(leagues_by_category.keys())}")
@@ -2292,14 +2287,41 @@ def result(request):
             else:
                 historical_probabilities = {'Home': 0.33, 'Draw': 0.33, 'Away': 0.34}
     elif 'saved_probabilities' in locals() and saved_probabilities:
-        # Fallback: Try to RECALCULATE true historical probabilities first
-        # This fixes issues where saved predictions had biased/incorrect probabilities due to old bugs (e.g. form stubs)
+        # Fallback: Try to RECALCULATE true historical H2H probabilities first
+        # Use calculate_probabilities_model2 which analyzes actual head-to-head match history
+        # NOT calculate_probabilities_original which uses team strength estimates
         try:
-            from .analytics import calculate_probabilities_original, load_football_data
-            # Load data
-            calc_data = load_football_data(1, use_cache=True)
-            # Calculate fresh
-            hist_raw = calculate_probabilities_original(home_team, away_team, calc_data)
+            from .analytics import calculate_probabilities_model2, calculate_probabilities_original, load_football_data
+            
+            # Determine which dataset to use based on team categories
+            other_teams = set()
+            main_teams = set()
+            try:
+                from .constants import LEAGUES_BY_CATEGORY
+                for cat, leagues in LEAGUES_BY_CATEGORY.items():
+                    for league, teams in leagues.items():
+                        if cat == 'European Leagues':
+                            main_teams.update(teams)
+                        else:
+                            other_teams.update(teams)
+            except Exception:
+                pass
+            
+            # Load appropriate dataset
+            if home_team in other_teams and away_team in other_teams:
+                calc_data = load_football_data(2, use_cache=True)
+                version = "v2"
+            else:
+                calc_data = load_football_data(1, use_cache=True)
+                version = "v1"
+            
+            # Try to calculate TRUE H2H probabilities from actual match history
+            hist_raw = calculate_probabilities_model2(home_team, away_team, calc_data, version=version)
+            
+            # If no H2H data exists, fall back to team strength estimates
+            if not hist_raw:
+                logger.info(f"[RESULT VIEW] No H2H data found, trying team strength estimates")
+                hist_raw = calculate_probabilities_original(home_team, away_team, calc_data, version=version)
             
             if hist_raw:
                 historical_probabilities = {
@@ -2311,7 +2333,7 @@ def result(request):
                 total_h = sum(historical_probabilities.values())
                 if total_h > 0:
                     historical_probabilities = {k: v/total_h for k, v in historical_probabilities.items()}
-                logger.info(f"[RESULT VIEW] Recalculated FRESH historical probabilities: Home={historical_probabilities['Home']*100:.1f}%, Draw={historical_probabilities['Draw']*100:.1f}%, Away={historical_probabilities['Away']*100:.1f}%")
+                logger.info(f"[RESULT VIEW] Recalculated FRESH H2H historical probabilities: Home={historical_probabilities['Home']*100:.1f}%, Draw={historical_probabilities['Draw']*100:.1f}%, Away={historical_probabilities['Away']*100:.1f}%")
             else:
                 historical_probabilities = saved_probabilities.copy()
                 logger.info(f"[RESULT VIEW] Could not recalculate historical, using saved: Home={historical_probabilities['Home']*100:.1f}%...")

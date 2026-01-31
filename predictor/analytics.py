@@ -200,23 +200,27 @@ def find_team_in_data(team_name, data, column_name):
     Returns the actual team name as it appears in the dataset, or None if not found.
     """
     if data is None or not hasattr(data, column_name):
+        logger.warning(f"[FIND_TEAM] Data is None or missing column {column_name}")
         return None
     
     # Get unique team names from the column
     try:
         unique_teams = data[column_name].dropna().unique()
+        logger.info(f"[FIND_TEAM] Searching for '{team_name}' in column '{column_name}' ({len(unique_teams)} unique values)")
     except Exception as e:
         logger.warning(f"Error getting unique teams from column {column_name}: {e}")
         return None
     
     # Strategy 1: Exact match (HIGHEST PRIORITY - most reliable)
     if team_name in unique_teams:
+        logger.info(f"[FIND_TEAM] ✓ Strategy 1 (Exact match): Found '{team_name}'")
         return team_name
     
     # Strategy 2: Normalized name match
     team_normalized = normalize_team_name(team_name)
     for team in unique_teams:
         if normalize_team_name(str(team)) == team_normalized:
+            logger.info(f"[FIND_TEAM] ✓ Strategy 2 (Normalized): '{team_name}' -> '{team}'")
             return team
             
     # Strategy 3: ID Mapping match
@@ -226,6 +230,8 @@ def find_team_in_data(team_name, data, column_name):
             target_id = team_mapping.get(team_name.strip())
             if target_id is None:
                 target_id = team_mapping.get(normalize_team_name(team_name))
+            
+            logger.info(f"[FIND_TEAM] Strategy 3 (ID Mapping): '{team_name}' -> ID {target_id}")
                 
             if target_id is not None and len(unique_teams) > 0:
                 # Check for ID (numeric) or Name matching ID
@@ -235,18 +241,27 @@ def find_team_in_data(team_name, data, column_name):
                     is_numeric = isinstance(sample, (int, float, np.integer, np.floating))
                 except:
                     is_numeric = isinstance(sample, (int, float))
+                
+                logger.info(f"[FIND_TEAM] Dataset is {'numeric (IDs)' if is_numeric else 'text (names)'}")
                     
                 if is_numeric:
                     if target_id in unique_teams:
+                        logger.info(f"[FIND_TEAM] ✓ Strategy 3: Found ID {target_id} in dataset")
                         return target_id
+                    else:
+                        logger.warning(f"[FIND_TEAM] ✗ ID {target_id} not in dataset. Sample IDs: {unique_teams[:5]}")
                 else:
                     for team in unique_teams:
                         candidate_id = team_mapping.get(str(team).strip())
                         if candidate_id == target_id:
+                            logger.info(f"[FIND_TEAM] ✓ Strategy 3: Matched '{team}' (ID {candidate_id})")
                             return team
-    except Exception:
-        pass
+        else:
+            logger.warning(f"[FIND_TEAM] Team mapping file not loaded")
+    except Exception as e:
+        logger.warning(f"[FIND_TEAM] Strategy 3 error: {e}")
         
+    logger.warning(f"[FIND_TEAM] ✗ Could not find '{team_name}' in dataset")
     return None
 
 def calculate_probabilities_model2(home, away, data, version="v2"):
@@ -266,11 +281,17 @@ def calculate_probabilities_model2(home, away, data, version="v2"):
 
     home_col, away_col, result_col = get_column_names(actual_version)
     
+    
     try:
         home_matched = find_team_in_data(home, data, home_col)
         away_matched = find_team_in_data(away, data, away_col)
         
-        if home_matched is None or away_matched is None: return None
+        logger.info(f"[H2H CALC] Searching for: '{home}' vs '{away}' in dataset (version={actual_version})")
+        logger.info(f"[H2H CALC] Matched: home='{home_matched}', away='{away_matched}'")
+        
+        if home_matched is None or away_matched is None:
+            logger.warning(f"[H2H CALC] Could not match teams in dataset. Home: {home_matched}, Away: {away_matched}")
+            return None
         
         # Determine numeric results logic for v2
         is_numeric = True if actual_version == "v2" else False
@@ -285,7 +306,29 @@ def calculate_probabilities_model2(home, away, data, version="v2"):
         total_dir2 = len(h2h_dir2)
         total = total_dir1 + total_dir2
         
-        if total == 0: return None
+        logger.info(f"[H2H CALC] Found {total_dir1} direct matches, {total_dir2} reverse matches (total: {total})")
+        
+        if total == 0:
+            logger.warning(f"[H2H CALC] No H2H matches found for {home} vs {away}")
+            return None
+        
+        # Determine numeric results logic based on actual data, not just version
+        # Check first match result to see if it's numeric
+        sample_res = None
+        if total_dir1 > 0: sample_res = h2h_dir1[result_col].iloc[0]
+        elif total_dir2 > 0: sample_res = h2h_dir2[result_col].iloc[0]
+        
+        is_numeric_res = False
+        if sample_res is not None:
+             try:
+                 # Check if it looks like a number
+                 float(sample_res)
+                 is_numeric_res = True
+             except:
+                 is_numeric_res = False
+        
+        # Override if specific values known in v2
+        if actual_version == "v2": is_numeric_res = True
         
         counts1 = h2h_dir1[result_col].value_counts() if total_dir1 > 0 else None
         counts2 = h2h_dir2[result_col].value_counts() if total_dir2 > 0 else None
@@ -296,11 +339,11 @@ def calculate_probabilities_model2(home, away, data, version="v2"):
         
         # Weights: Direct (1.0), Reverse (0.6)
         if total_dir1 > 0:
-            if actual_version == "v2" or is_numeric:
-                 # 2=Home, 1=Draw, 0=Away
-                 w_home += counts1.get(2, 0) * 1.0
-                 w_draw += counts1.get(1, 0) * 1.0
-                 w_away += counts1.get(0, 0) * 1.0
+            if is_numeric_res:
+                 # 2=Home, 1=Draw, 0=Away (Standard numeric encoding)
+                 w_home += counts1.get(2, 0) * 1.0 + counts1.get('2', 0) * 1.0
+                 w_draw += counts1.get(1, 0) * 1.0 + counts1.get('1', 0) * 1.0
+                 w_away += counts1.get(0, 0) * 1.0 + counts1.get('0', 0) * 1.0
             else:
                  w_home += counts1.get('H', 0) * 1.0
                  w_draw += counts1.get('D', 0) * 1.0
@@ -309,15 +352,27 @@ def calculate_probabilities_model2(home, away, data, version="v2"):
             
         if total_dir2 > 0:
             # Reversed: They Home = Our Away (Loss)
-            if actual_version == "v2" or is_numeric:
-                 # Flip: 2(Their Home) -> Our Away, 0(Their Away) -> Our Home
-                 w_home += counts2.get(0, 0) * 0.6
-                 w_draw += counts2.get(1, 0) * 0.6
-                 w_away += counts2.get(2, 0) * 0.6
+            if is_numeric_res:
+                 # Flip: 2(Their Home Win) -> Our Loss(Away Win for us means we lost as visitor?), 
+                 # wait: 
+                 # Direct match: Leeds (Home) vs Arsenal (Away). result=2 (Home Win) -> Leeds Win.
+                 # Reverse match: Arsenal (Home) vs Leeds (Away). result=2 (Home Win) -> Arsenal Win -> Leeds Loss.
+                 # So:
+                 # Their 2 (Home Win) -> Our Away Win (Loss for us) -> No, 'Away Team Win' key usually means 'Guest' won?
+                 # Let's align with return keys: "Home Team Win" (Us), "Away Team Win" (Them).
+                 
+                 # Logic for Reverse Match (We are Away):
+                 # Result 2 (Home Win) -> They Won -> We Lost -> Add to "Away Team Win" key (Opponent Win)
+                 # Result 0 (Away Win) -> They Lost -> We Won -> Add to "Home Team Win" key (We Won)
+                 # Result 1 (Draw) -> Draw -> Add to "Draw"
+                 
+                 w_home += counts2.get(0, 0) * 0.6 + counts2.get('0', 0) * 0.6  # We Won (They lost at home)
+                 w_draw += counts2.get(1, 0) * 0.6 + counts2.get('1', 0) * 0.6
+                 w_away += counts2.get(2, 0) * 0.6 + counts2.get('2', 0) * 0.6  # They Won (We lost away)
             else:
-                 w_home += counts2.get('A', 0) * 0.6
+                 w_home += counts2.get('A', 0) * 0.6  # We Won (They lost at home)
                  w_draw += counts2.get('D', 0) * 0.6
-                 w_away += counts2.get('H', 0) * 0.6
+                 w_away += counts2.get('H', 0) * 0.6  # They Won (We lost away)
             w_total += total_dir2 * 0.6
             
         # Smoothing
@@ -589,13 +644,22 @@ def advanced_predict_match(home_team, away_team, model1=None, model2=None, **kwa
         # Preprocess
         input_data = preprocess_for_models(home_team, away_team, model, data)
         
-        # Get Probs
+        # Get Probs - ALWAYS try H2H data first, regardless of model type
+        # calculate_probabilities_model2 analyzes actual head-to-head match history
+        # calculate_probabilities_original uses team strength estimates (fallback only)
         if model_type.startswith("Model2"):
+            # Model2: Try v2 dataset first, then v1
             probs = calculate_probabilities_model2(home_team, away_team, data, "v2")
             if not probs:
-                 probs = calculate_probabilities_original(home_team, away_team, data, "v1")
+                probs = calculate_probabilities_model2(home_team, away_team, data, "v1")
+            if not probs:
+                probs = calculate_probabilities_original(home_team, away_team, data, "v1")
         else:
-            probs = calculate_probabilities_original(home_team, away_team, data, "v1")
+            # Model1: Try v1 dataset H2H first, then fall back to strength estimates
+            probs = calculate_probabilities_model2(home_team, away_team, data, "v1")
+            if not probs:
+                # No H2H data found, use team strength estimates as fallback
+                probs = calculate_probabilities_original(home_team, away_team, data, "v1")
             
         # Predict
         is_regressor = False
