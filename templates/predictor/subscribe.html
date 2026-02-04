@@ -499,10 +499,81 @@
         </div>
 
         <!-- Subscription Plans Grid -->
+        <!-- Weekly Plans Section -->
+        <h2 style="text-align: center; color: #00d9a3; margin-bottom: 2rem; font-size: 1.8rem;">Weekly Plans (7 Days)
+        </h2>
+        <div class="plans-grid">
+            <!-- Weekly Basic -->
+            <div class="plan-card">
+                <div class="plan-icon"><i class="fas fa-calendar-alt" style="color: #00d9a3;"></i></div>
+                <h3 class="plan-name">Weekly Basic</h3>
+                <div class="plan-price">
+                    <div class="amount">KSh 100</div>
+                    <span class="period">per week</span>
+                </div>
+                <ul class="plan-features">
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>40 matches per week</span>
+                    </li>
+                    <li><i class="fas fa-check-circle"></i><span>Basic analytics</span></li>
+                    <li><i class="fas fa-check-circle"></i><span>All leagues access</span></li>
+                </ul>
+                <button class="plan-button primary" onclick="selectPlan('Weekly Basic', 100, 'weekly_basic')">
+                    <i class="fas fa-calendar-week"></i> Select Plan
+                </button>
+            </div>
+
+            <!-- Weekly Standard -->
+            <div class="plan-card">
+                <div class="plan-icon"><i class="fas fa-rocket" style="color: #00d9a3;"></i></div>
+                <h3 class="plan-name">Weekly Standard</h3>
+                <div class="plan-price">
+                    <div class="amount">KSh 300</div>
+                    <span class="period">per week</span>
+                </div>
+                <ul class="plan-features">
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>120 matches per week</span>
+                    </li>
+                    <li><i class="fas fa-check-circle"></i><span>Advanced analytics</span></li>
+                    <li><i class="fas fa-check-circle"></i><span>Priority support</span></li>
+                </ul>
+                <button class="plan-button primary" onclick="selectPlan('Weekly Standard', 300, 'weekly_standard')">
+                    <i class="fas fa-calendar-week"></i> Select Plan
+                </button>
+            </div>
+
+            <!-- Weekly Premium -->
+            <div class="plan-card">
+                <div class="plan-icon"><i class="fas fa-bolt" style="color: #fbbf24;"></i></div>
+                <h3 class="plan-name">Weekly Pro</h3>
+                <div class="plan-price">
+                    <div class="amount">KSh 600</div>
+                    <span class="period">per week</span>
+                </div>
+                <ul class="plan-features">
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>320 matches per week</span>
+                    </li>
+                    <li><i class="fas fa-check-circle"></i><span>Premium analytics</span></li>
+                    <li><i class="fas fa-check-circle"></i><span>24/7 Support</span></li>
+                </ul>
+                <button class="plan-button primary" onclick="selectPlan('Weekly Pro', 600, 'weekly_premium')">
+                    <i class="fas fa-calendar-week"></i> Select Plan
+                </button>
+            </div>
+        </div>
+
+        <!-- Monthly Plans Section -->
+        <h2 style="text-align: center; color: #00d9a3; margin-top: 3rem; margin-bottom: 2rem; font-size: 1.8rem;">
+            Monthly Plans (30 Days)</h2>
         <div class="plans-grid">
             <!-- Starter Plan -->
             <div class="plan-card">
-                <div class="plan-icon">🎉</div>
+                <div class="plan-icon"><i class="fas fa-star" style="color: #00d9a3;"></i></div>
                 <h3 class="plan-name">Starter Plan</h3>
                 <div class="plan-price">
                     <div class="amount">KSh 200</div>
@@ -530,7 +601,7 @@
             <!-- Standard Plan -->
             <div class="plan-card popular">
                 <div class="plan-badge">BEST VALUE</div>
-                <div class="plan-icon">⭐</div>
+                <div class="plan-icon"><i class="fas fa-gem" style="color: #00d9a3;"></i></div>
                 <h3 class="plan-name">Standard Plan</h3>
                 <div class="plan-price">
                     <div class="amount">KSh 500</div>
@@ -557,7 +628,7 @@
 
             <!-- VIP Plan -->
             <div class="plan-card premium">
-                <div class="plan-icon">♾️</div>
+                <div class="plan-icon"><i class="fas fa-infinity" style="color: #fbbf24;"></i></div>
                 <h3 class="plan-name">VIP Plan</h3>
                 <div class="plan-price">
                     <div class="amount" style="color: #fbbf24;">KSh 1,000</div>

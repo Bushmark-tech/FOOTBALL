@@ -448,8 +448,12 @@ def initiate_stk_push(request, phone_number, amount, subscription_id):
             
             # Use specific limit for this plan if set
             matches_limit = getattr(subscription, 'matches_limit', 0)
+            # Determine duration based on plan type
+            plan_durations = getattr(settings, 'PLAN_DURATIONS', {})
+            duration = plan_durations.get(subscription.plan_type, getattr(settings, 'SUBSCRIPTION_DURATION_DAYS', 30))
+            
             subscription.activate(
-                duration_days=getattr(settings, 'SUBSCRIPTION_DURATION_DAYS', 30),
+                duration_days=duration,
                 matches_limit=matches_limit
             )
             subscription.save()
@@ -604,8 +608,12 @@ def mpesa_callback(request):
                 if result_code == 0:
                     # Payment successful
                     subscription.status = 'active'
+                    # Determine duration based on plan type
+                    plan_durations = getattr(settings, 'PLAN_DURATIONS', {})
+                    duration = plan_durations.get(subscription.plan_type, getattr(settings, 'SUBSCRIPTION_DURATION_DAYS', 30))
+
                     subscription.activate(
-                        duration_days=settings.SUBSCRIPTION_DURATION_DAYS,
+                        duration_days=duration,
                         matches_limit=subscription.matches_limit
                     )
                     

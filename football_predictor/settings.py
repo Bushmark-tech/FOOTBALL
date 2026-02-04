@@ -279,14 +279,30 @@ SUBSCRIPTION_DURATION_DAYS = 30
 PLAN_PRICES = {
     'starter': 200.00,
     'standard': 500.00,
-    'vip': 1000.00
+    'vip': 1000.00,
+    'weekly_basic': 100.00,
+    'weekly_standard': 300.00,
+    'weekly_premium': 600.00
 }
 
-# Plan Match Limits (Total per month)
+# Plan Match Limits (Total per month or week)
 PLAN_MATCH_LIMITS = {
     'starter': 210,
     'standard': 600,
-    'vip': 1500
+    'vip': 1500,
+    'weekly_basic': 40,
+    'weekly_standard': 120,
+    'weekly_premium': 320
+}
+
+# Plan Durations (Days)
+PLAN_DURATIONS = {
+    'starter': 30,
+    'standard': 30,
+    'vip': 30,
+    'weekly_basic': 7,
+    'weekly_standard': 7,
+    'weekly_premium': 7
 }
 
 # Legacy support
