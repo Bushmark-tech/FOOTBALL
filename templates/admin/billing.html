@@ -1,4 +1,4 @@
-﻿{% extends 'admin/dashboard_base.html' %}
+{% extends 'admin/dashboard_base.html' %}
 
 {% block title %}Billing & Subscriptions - Admin Dashboard{% endblock %}
 {% block page_title %}Billing Management{% endblock %}
@@ -119,9 +119,11 @@
                             {% if subscription.plan_type == 'vip' %}
                             <span class="badge bg-warning text-dark border"><i class="fas fa-crown me-1"></i>VIP</span>
                             {% elif subscription.plan_type == 'starter' %}
-                            <span class="badge bg-info text-dark border">Starter</span>
+                            <span class="badge bg-info text-dark border"><i class="fas fa-star me-1"></i>Starter</span>
+                            {% elif 'weekly' in subscription.plan_type %}
+                            <span class="badge bg-primary text-white border"><i class="fas fa-calendar-week me-1"></i>{{ subscription.plan_type|title|cut:'_' }}</span>
                             {% else %}
-                            <span class="badge bg-light text-dark border">Standard</span>
+                            <span class="badge bg-light text-dark border"><i class="fas fa-gem me-1"></i>Standard</span>
                             {% endif %}
                         </td>
                         <td>
@@ -145,7 +147,7 @@
                             {% if subscription.end_date %}
                             {{ subscription.end_date|date:"M d, Y" }}
                             {% else %}
-                            â€”
+                            —
                             {% endif %}
                         </td>
                         <td>
@@ -226,7 +228,7 @@
                             {% if subscription.end_date %}
                             to {{ subscription.end_date|date:"M d, Y" }}
                             {% else %}
-                            to â€”
+                            to —
                             {% endif %}
                         </p>
                     </div>
@@ -328,6 +330,10 @@
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // Safe access to variables provided by Django
+        var revenueLabels = {{ revenue_labels|safe }};
+        var revenueData = {{ revenue_data|safe }};
+
         const ctx = document.getElementById('revenueChart').getContext('2d');
         const gradient = ctx.createLinearGradient(0, 0, 0, 120);
         gradient.addColorStop(0, 'rgba(34, 197, 94, 0.15)');
@@ -336,47 +342,47 @@
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: {{ revenue_labels| safe }},
-        datasets: [{
-            label: 'Daily Revenue (KES)',
-            data: {{ revenue_data| safe }},
-        borderColor: '#22c55e',
-        backgroundColor: gradient,
-        borderWidth: 2,
-        pointRadius: 0,
-        pointHoverRadius: 4,
-        fill: true,
-        tension: 0.4
+                labels: revenueLabels,
+                datasets: [{
+                    label: 'Daily Revenue (KES)',
+                    data: revenueData,
+                    borderColor: '#22c55e',
+                    backgroundColor: gradient,
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+                    fill: true,
+                    tension: 0.4
                 }]
             },
-        options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false },
-            tooltip: {
-                mode: 'index',
-                intersect: false,
-            }
-        },
-        scales: {
-            x: {
-                grid: { display: false },
-                ticks: {
-                    font: { size: 10 },
-                    maxTicksLimit: 7
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            font: { size: 10 },
+                            maxTicksLimit: 7
+                        }
+                    },
+                    y: {
+                        display: false
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
                 }
-            },
-            y: {
-                display: false
             }
-        },
-        interaction: {
-            mode: 'nearest',
-            axis: 'x',
-            intersect: false
-        }
-    }
         });
     });
 </script>
