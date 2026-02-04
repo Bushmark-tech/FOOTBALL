@@ -372,7 +372,7 @@ def initiate_mpesa_payment(request):
         # Determine amount based on plan_type (Security: Do not trust amount from client)
         # Determine amount based on plan_type and match limit
         plan_prices = getattr(settings, 'PLAN_PRICES', {'starter': 200, 'standard': 500, 'vip': 1000})
-        plan_limits = getattr(settings, 'PLAN_MATCH_LIMITS', {'starter': 300, 'standard': 600, 'vip': 1500})
+        plan_limits = getattr(settings, 'PLAN_MATCH_LIMITS', {'starter': 210, 'standard': 600, 'vip': 1500})
         
         if plan_type in plan_prices:
             amount = plan_prices[plan_type]
@@ -382,7 +382,7 @@ def initiate_mpesa_payment(request):
             # Fallback
             plan_type = 'starter'
             amount = 200.00
-            matches_limit = 300
+            matches_limit = 210
             currency = 'KSH'
         
         # Create pending subscription

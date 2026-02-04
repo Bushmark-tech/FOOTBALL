@@ -284,7 +284,7 @@ PLAN_PRICES = {
 
 # Plan Match Limits (Total per month)
 PLAN_MATCH_LIMITS = {
-    'starter': 300,
+    'starter': 210,
     'standard': 600,
     'vip': 1500
 }
