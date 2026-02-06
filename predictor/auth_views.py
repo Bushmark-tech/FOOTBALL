@@ -413,7 +413,6 @@ def initiate_mpesa_payment(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Method not allowed'}, status=405)
     
-    logger.debug(f"DEBUG PAYMENT REQUEST: Body={request.body}")
     logger.debug(f"DEBUG PAYMENT REQUEST: Headers={request.content_type}")
     
     try:
