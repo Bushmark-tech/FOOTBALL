@@ -19,6 +19,7 @@ urlpatterns = [
     # User Management
     path('admin/users/', admin_views.admin_users, name='admin_users'),
     path('admin/users/audit/', admin_views.admin_user_audit, name='admin_user_audit'),
+    path('admin/security/action/', admin_views.admin_security_action, name='admin_security_action'),
     path('admin/users/<int:user_id>/', admin_views.admin_user_detail, name='admin_user_detail'),
     path('admin/users/<int:user_id>/action/', admin_views.admin_user_action, name='admin_user_action'),
     

@@ -45,6 +45,38 @@
         </div>
     </div>
 
+    <!-- Bulk Actions -->
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-body p-3">
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <span class="fw-bold me-2"><i class="fas fa-tools"></i> Bulk Security Actions:</span>
+                <form action="{% url 'predictor:admin_security_action' %}" method="POST" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="delete_ghosts">
+                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                        onclick="return confirm('Search and destroy all ghost users (Joined >24h, 0 matches)?')">
+                        <i class="fas fa-trash-alt"></i> Delete All Ghosts
+                    </button>
+                </form>
+                <form action="{% url 'predictor:admin_security_action' %}" method="POST" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="cleanup_pending">
+                    <button type="submit" class="btn btn-sm btn-outline-warning"
+                        onclick="return confirm('Delete all accounts unverified for >7 days?')">
+                        <i class="fas fa-user-clock"></i> Cleanup Pending (7d+)
+                    </button>
+                </form>
+                <form action="{% url 'predictor:admin_security_action' %}" method="POST" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="block_future_browsers">
+                    <button type="submit" class="btn btn-sm btn-outline-info">
+                        <i class="fas fa-shield-virus"></i> Deactivate Future Browsers
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- IP Clusters -->
     <div class="card mb-4 border-danger">
         <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
@@ -76,7 +108,15 @@
                             </div>
                         </td>
                         <td>
-                            <button class="btn btn-sm btn-outline-danger">Block IP</button>
+                            <form action="{% url 'predictor:admin_security_action' %}" method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="block_ip">
+                                <input type="hidden" name="ip" value="{{ cluster.last_ip }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('Deactivate all users from IP {{ cluster.last_ip }}?')">
+                                    <i class="fas fa-ban"></i> Block IP
+                                </button>
+                            </form>
                         </td>
                     </tr>
                     {% empty %}
@@ -108,12 +148,20 @@
                 <tbody>
                     {% for user in future_browsers %}
                     <tr>
-                        <td><strong>{{ user.username }}</strong></td>
+                        <td><strong><a href="{% url 'predictor:admin_user_detail' user.id %}">{{ user.username
+                                    }}</a></strong></td>
                         <td><small class="text-muted">{{ user.profile.last_device }}</small></td>
                         <td><code>{{ user.profile.last_ip|default:"None" }}</code></td>
                         <td>{{ user.date_joined|date:"M d, H:i" }}</td>
                         <td>
-                            <button class="btn btn-sm btn-outline-danger">Flag</button>
+                            <form action="{% url 'predictor:admin_user_action' user.id %}" method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="toggle_active">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-user-slash"></i> {% if user.is_active %}Deactivate{% else
+                                    %}Activate{% endif %}
+                                </button>
+                            </form>
                         </td>
                     </tr>
                     {% empty %}
@@ -148,7 +196,8 @@
                         <tbody>
                             {% for user in suspicious_emails %}
                             <tr>
-                                <td><strong>{{ user.username }}</strong></td>
+                                <td><strong><a href="{% url 'predictor:admin_user_detail' user.id %}">{{ user.username
+                                            }}</a></strong></td>
                                 <td><code class="text-warning">{{ user.email }}</code></td>
                                 <td>{{ user.date_joined|date:"M d, Y" }}</td>
                                 <td>
@@ -186,7 +235,8 @@
                         <tbody>
                             {% for user in ghost_users %}
                             <tr>
-                                <td><strong>{{ user.username }}</strong></td>
+                                <td><strong><a href="{% url 'predictor:admin_user_detail' user.id %}">{{ user.username
+                                            }}</a></strong></td>
                                 <td>{{ user.date_joined|date:"M d, H:i" }}</td>
                                 <td><code>{{ user.profile.last_ip|default:"None" }}</code></td>
                                 <td>

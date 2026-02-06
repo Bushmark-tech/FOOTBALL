@@ -293,6 +293,67 @@ def admin_user_audit(request):
 
 
 @admin_required
+@require_http_methods(["POST"])
+def admin_security_action(request):
+    """Handle bulk security actions from the audit dashboard"""
+    action = request.POST.get('action')
+    from django.db.models import Count
+    
+    try:
+        if action == 'delete_ghosts':
+            # Ghosts: Joined > 24h ago, 0 predictions, not staff
+            one_day_ago = timezone.now() - timedelta(days=1)
+            ghosts = User.objects.annotate(
+                pred_count=Count('prediction')
+            ).filter(
+                date_joined__lt=one_day_ago,
+                pred_count=0,
+                is_staff=False
+            )
+            count = ghosts.count()
+            ghosts.delete()
+            messages.success(request, f'Successfully deleted {count} ghost users.')
+            logger.warning(f"Admin {request.user.username} deleted {count} ghost users.")
+            
+        elif action == 'cleanup_pending':
+            # Users with unverified emails older than 7 days
+            seven_days_ago = timezone.now() - timedelta(days=7)
+            pending = User.objects.filter(
+                date_joined__lt=seven_days_ago,
+                profile__email_verified=False,
+                is_staff=False
+            )
+            count = pending.count()
+            pending.delete()
+            messages.success(request, f'Successfully deleted {count} unverified pending accounts (7d+).')
+            
+        elif action == 'block_future_browsers':
+            # Block users using Chrome/14X or Chrome/15X
+            future_users = User.objects.filter(
+                Q(profile__last_device__contains='Chrome/14') |
+                Q(profile__last_device__contains='Chrome/15')
+            ).filter(is_staff=False)
+            count = future_users.count()
+            # We deactivate them rather than delete for audit trail
+            future_users.update(is_active=False)
+            messages.success(request, f'Deactivated {count} users with suspicious future browser versions.')
+            
+        elif action == 'block_ip':
+            ip = request.POST.get('ip')
+            if ip:
+                users = User.objects.filter(profile__last_ip=ip).filter(is_staff=False)
+                count = users.count()
+                users.update(is_active=False)
+                messages.success(request, f'Blocked IP {ip} and deactivated {count} linked accounts.')
+                logger.warning(f"Admin {request.user.username} blocked IP {ip}")
+            
+    except Exception as e:
+        messages.error(request, f'Security action failed: {str(e)}')
+        
+    return redirect('predictor:admin_user_audit')
+
+
+@admin_required
 def admin_user_detail(request, user_id):
     """Detailed view and control for individual user"""
     
