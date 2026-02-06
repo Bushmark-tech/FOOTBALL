@@ -322,6 +322,7 @@ class UserProfile(models.Model):
     last_ip = models.GenericIPAddressField(blank=True, null=True)
     last_device = models.CharField(max_length=255, blank=True, null=True)
     last_location = models.CharField(max_length=255, blank=True, null=True)
+    last_activity = models.DateTimeField(null=True, blank=True)
     
     def __str__(self):
         return f"{self.user.username} - {self.free_matches_used}/{self.free_matches_limit} free matches"
@@ -435,3 +436,20 @@ class Subscription(models.Model):
             models.Index(fields=['status', 'end_date']),
             models.Index(fields=['mpesa_transaction_id']),
         ]
+
+
+# --- SIGNALS ---
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    """Automatically create a UserProfile when a User is created."""
+    if created:
+        UserProfile.objects.create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    """Ensure UserProfile is saved when User is saved."""
+    if hasattr(instance, 'profile'):
+        instance.profile.save()
