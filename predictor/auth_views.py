@@ -404,7 +404,6 @@ def subscribe_view(request):
         return redirect('predictor:home')
 
 
-@csrf_exempt
 @ratelimit(key='user', rate='10/h', block=True)
 def initiate_mpesa_payment(request):
     """Initiate M-Pesa payment."""
