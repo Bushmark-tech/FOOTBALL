@@ -272,12 +272,20 @@ def admin_user_audit(request):
         user_count=Count('user')
     ).filter(user_count__gt=3).order_by('-user_count')
 
+    # 5. Future/Spoofed Browsers (Chrome > 140)
+    future_browsers = User.objects.filter(
+        Q(profile__last_device__contains='Chrome/14') |
+        Q(profile__last_device__contains='Chrome/15') |
+        Q(profile__last_device__contains='Firefox/14')
+    ).select_related('profile').order_by('-date_joined')[:50]
+
     context = {
         'ip_clusters': ip_clusters,
         'ip_cluster_users': ip_cluster_users,
         'suspicious_emails': suspicious_emails,
         'ghost_users': ghost_users,
         'device_clusters': device_clusters,
+        'future_browsers': future_browsers,
         'is_admin': True,
     }
     

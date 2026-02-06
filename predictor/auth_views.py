@@ -15,9 +15,17 @@ import requests
 import base64
 import json
 
-from datetime import datetime
-
 logger = logging.getLogger(__name__)
+
+
+def get_client_ip(request):
+    """Helper to extract client IP including from behind proxies like Render/Cloudflare."""
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0].strip()
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
 
 
 def check_subscription_status(user):
@@ -356,8 +364,17 @@ def register_view(request):
             user.is_active = False
             user.save()
             
-            # Create user profile with 1 free match
-            UserProfile.objects.create(user=user, free_matches_limit=1)
+            # Create user profile with 1 free match and tracking info
+            ip_addr = get_client_ip(request)
+            ua_string = request.META.get('HTTP_USER_AGENT', '')[:255]
+            
+            UserProfile.objects.create(
+                user=user, 
+                free_matches_limit=1,
+                last_ip=ip_addr,
+                last_device=ua_string,
+                last_activity=timezone.now()
+            )
             
             # Send Verification Email
             if send_verification_email(user, request):

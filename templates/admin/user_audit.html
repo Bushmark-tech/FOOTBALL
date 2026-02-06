@@ -39,8 +39,8 @@
                 <div class="stat-icon bg-soft-secondary text-secondary">
                     <i class="fas fa-fingerprint"></i>
                 </div>
-                <div class="stat-number">{{ device_clusters.count }}</div>
-                <div class="stat-label">Device Clones</div>
+                <div class="stat-number">{{ future_browsers.count }}</div>
+                <div class="stat-label">Future Browsers</div>
             </div>
         </div>
     </div>
@@ -82,6 +82,44 @@
                     {% empty %}
                     <tr>
                         <td colspan="4" class="text-center py-4 text-muted">No high-density IP clusters found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Future/Spoofed Browsers -->
+    <div class="card mb-4 border-info">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="fas fa-robot"></i> Future/Spoofed Browsers (Suspicious UA)</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>User Agent</th>
+                        <th>IP Address</th>
+                        <th>Joined</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in future_browsers %}
+                    <tr>
+                        <td><strong>{{ user.username }}</strong></td>
+                        <td><small class="text-muted">{{ user.profile.last_device }}</small></td>
+                        <td><code>{{ user.profile.last_ip|default:"None" }}</code></td>
+                        <td>{{ user.date_joined|date:"M d, H:i" }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-danger">Flag</button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-muted">No "Future Browsers" detected (UA Version >
+                            140).</td>
                     </tr>
                     {% endfor %}
                 </tbody>
