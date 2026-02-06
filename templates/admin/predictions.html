@@ -232,5 +232,26 @@
     .progress {
         background-color: #e5e7eb;
     }
+
+    /* Fix table visibility - Force black text and white background */
+    .table {
+        background-color: #ffffff !important;
+    }
+
+    .table tbody td {
+        color: #000000 !important;
+        font-weight: 500;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f8f9fa !important;
+        color: #000000 !important;
+    }
+
+    .table thead th {
+        color: #333333 !important;
+        background-color: #f1f5f9 !important;
+        font-weight: 700;
+    }
 </style>
 {% endblock %}
