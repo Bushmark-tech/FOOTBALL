@@ -183,6 +183,9 @@ def subscription_required(view_func):
     return wrapper
 
 
+from django_ratelimit.decorators import ratelimit
+
+@ratelimit(key='ip', rate='5/m', block=True)
 def login_view(request):
     """Login view with Google OAuth option and Email support."""
     # Get the redirection target
@@ -233,28 +236,61 @@ def login_view(request):
                     return redirect(next_url)
             return redirect('predictor:home')
         else:
+            # Check for inactive user (email verification pending)
+            try:
+                # We need to find the user first to check credentials manually
+                # This mirrors the logic used above to find username_to_auth
+                user_check = User.objects.filter(username=username_to_auth).first()
+                if user_check and user_check.check_password(password):
+                    if not user_check.is_active:
+                         messages.error(request, 'Your account is not active. Please check your email and click the verification link.')
+                         return render(request, 'predictor/login.html', {'next': next_url})
+            except Exception:
+                pass
+                
             messages.error(request, 'Invalid email or password.')
     
     return render(request, 'predictor/login.html', {'next': next_url})
 
 
+import re
+from .email_utils import send_verification_email
+
+@ratelimit(key='ip', rate='3/m', block=True)
 def register_view(request):
-    """Registration view with Google Email restriction."""
+    """Registration view with enhanced security and email verification."""
     if request.user.is_authenticated:
         return redirect('predictor:home')
     
     if request.method == 'POST':
-        username = request.POST.get('username', '').strip()
+        # Removed explicit username input
         email = request.POST.get('email', '').strip()
         password = request.POST.get('password', '').strip() or request.POST.get('password1', '').strip()
         password_confirm = request.POST.get('password_confirm', '').strip() or request.POST.get('password2', '').strip()
         
-        # Validation: Google Email Only
-        if not email or not email.strip().lower().endswith('@gmail.com'):
-             messages.error(request, 'Registration is restricted to valid Google (@gmail.com) email addresses only.')
+        # Security: Basic validated data check
+        if not email or not password:
+             messages.error(request, 'All fields are required.')
+             return render(request, 'predictor/register.html')
+
+        # 1. Regex Validation for Email
+        # More robust regex than simple user@domain
+        email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_regex, email):
+             messages.error(request, 'Please enter a valid email address.')
              return render(request, 'predictor/register.html')
         
-        # Validation: Unique Email
+        # 2. Block Disposable Email Providers (Security)
+        disposable_domains = [
+            'tempmail.com', 'throwawaymail.com', 'mailinator.com', 'guerrillamail.com', 
+            'yopmail.com', '10minutemail.com', 'sharklasers.com', 'temp-mail.org'
+        ]
+        domain_part = email.split('@')[1].lower() if '@' in email else ''
+        if domain_part in disposable_domains:
+             messages.error(request, 'Temporary or disposable email addresses are not allowed.')
+             return render(request, 'predictor/register.html')
+
+        # 3. Unique Email Check
         if User.objects.filter(email=email).exists():
              messages.error(request, 'This email address is already registered. Please login.')
              return render(request, 'predictor/register.html')
@@ -263,27 +299,50 @@ def register_view(request):
             messages.error(request, 'Passwords do not match.')
             return render(request, 'predictor/register.html')
         
-        if User.objects.filter(username=username).exists():
-            messages.error(request, 'Username already exists.')
+        # Password Strength Check (Basic)
+        if len(password) < 8:
+            messages.error(request, 'Password must be at least 8 characters long.')
             return render(request, 'predictor/register.html')
         
+        # Set username to email (or derive it if needed, but email as username is simplest)
+        # We need to ensure username is unique, which email already is.
+        # But Django username has length limit (150).
+        username = email
+        if len(username) > 150:
+            username = username[:150]
+            
+        # Check if this username already exists (unlikely if email check passed, unless manual username collision)
+        if User.objects.filter(username=username).exists():
+             # Fallback if username taken but email not (rare edge case with derived usernames)
+             username = email.split('@')[0] + '_' + str(timezone.now().timestamp()).replace('.', '')
+        
         try:
+            # Create user but set as INACTIVE until email verified
             user = User.objects.create_user(
                 username=username,
                 email=email,
                 password=password
             )
+            user.is_active = False
+            user.save()
             
             # Create user profile with 1 free match
             UserProfile.objects.create(user=user, free_matches_limit=1)
             
-            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            messages.success(request, f'Welcome! Account created for {email}.')
-            return redirect('predictor:home')
+            # Send Verification Email
+            if send_verification_email(user, request):
+                logger.info(f"New user registered and verification email sent: {email}")
+                return render(request, 'predictor/verification_sent.html', {'email': email})
+            else:
+                # If email fails, delete user so they can try again (or handle gracefully)
+                user.delete()
+                logger.error(f"Failed to send verification email to {email}")
+                messages.error(request, 'Failed to send verification email. Please check your email address and try again.')
+                return render(request, 'predictor/register.html')
             
         except Exception as e:
             logger.error(f"Registration error: {e}")
-            messages.error(request, 'An error occurred during registration.')
+            messages.error(request, 'An error occurred during registration. Please try again.')
             return render(request, 'predictor/register.html')
     
     return render(request, 'predictor/register.html')
@@ -326,6 +385,7 @@ def subscribe_view(request):
 
 
 @csrf_exempt
+@ratelimit(key='user', rate='10/h', block=True)
 def initiate_mpesa_payment(request):
     """Initiate M-Pesa payment."""
     if not request.user.is_authenticated:

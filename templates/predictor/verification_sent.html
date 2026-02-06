@@ -1,0 +1,45 @@
+{% extends 'predictor/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-lg border-0 rounded-lg mt-5">
+            <div class="card-header bg-primary text-white text-center py-4">
+                <h3 class="font-weight-light my-2">Verify Your Email</h3>
+            </div>
+            <div class="card-body text-center p-5">
+                <div class="mb-4">
+                    <i class="fas fa-envelope-open-text fa-4x text-primary"></i>
+                </div>
+
+                <h4 class="mb-3">Verification Email Sent!</h4>
+
+                <p class="lead mb-4">
+                    We've sent a verification link to <strong>{{ email }}</strong>.
+                </p>
+
+                <p class="text-muted mb-4">
+                    Please check your inbox (and spam folder) and click the link to activate your account.
+                    The link will expire in 24 hours.
+                </p>
+
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    You won't be able to log in until your email address is verified.
+                </div>
+
+                <div class="mt-4">
+                    <a href="{% url 'predictor:login' %}" class="btn btn-outline-primary">
+                        Return to Login
+                    </a>
+                </div>
+            </div>
+            <div class="card-footer text-center py-3">
+                <div class="small">
+                    <a href="{% url 'predictor:register' %}">Mistyped email? Register again</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
