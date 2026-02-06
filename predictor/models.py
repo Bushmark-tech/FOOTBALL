@@ -318,6 +318,11 @@ class UserProfile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+    # Device Tracking
+    last_ip = models.GenericIPAddressField(blank=True, null=True)
+    last_device = models.CharField(max_length=255, blank=True, null=True)
+    last_location = models.CharField(max_length=255, blank=True, null=True)
+    
     def __str__(self):
         return f"{self.user.username} - {self.free_matches_used}/{self.free_matches_limit} free matches"
     

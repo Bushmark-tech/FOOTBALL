@@ -228,7 +228,27 @@ def login_view(request):
         
         if user:
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            UserProfile.objects.get_or_create(user=user)
+            profile, _ = UserProfile.objects.get_or_create(user=user)
+            
+            # --- Device Tracking Logic ---
+            try:
+                # Capture IP
+                x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+                if x_forwarded_for:
+                    ip = x_forwarded_for.split(',')[0].strip()
+                else:
+                    ip = request.META.get('REMOTE_ADDR')
+                
+                # Capture User Agent
+                user_agent = request.META.get('HTTP_USER_AGENT', '')
+                
+                # Update Profile
+                profile.last_ip = ip
+                profile.last_device = user_agent[:255] # Truncate to fit field
+                profile.save()
+            except Exception as e:
+                logger.warning(f"Failed to track device for user {user.username}: {e}")
+            # -----------------------------
             messages.success(request, f'Welcome back, {user.username}!')
             
             if next_url and next_url != 'predictor:home':

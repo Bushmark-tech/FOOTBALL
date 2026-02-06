@@ -224,7 +224,7 @@ class BillingUsageAdmin(admin.ModelAdmin):
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
     """Enhanced admin for user profiles"""
-    list_display = ['user', 'email_verified_display', 'user_is_active', 'user_last_login', 'free_matches_used', 'free_matches_limit', 'created_at']
+    list_display = ['user', 'email_verified_display', 'user_is_active', 'user_last_login', 'last_ip', 'last_device', 'free_matches_used', 'created_at']
     list_filter = ['email_verified', 'user__is_active', 'user__last_login', 'created_at']
     search_fields = ['user__username', 'user__email', 'mpesa_number']
     readonly_fields = ['created_at', 'updated_at', 'token_status']
@@ -241,6 +241,10 @@ class UserProfileAdmin(admin.ModelAdmin):
         }),
         ('Payment Information', {
             'fields': ('mpesa_number',)
+        }),
+        ('Device Information', {
+            'fields': ('last_ip', 'last_device', 'last_location'),
+            'classes': ('collapse',)
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at')
