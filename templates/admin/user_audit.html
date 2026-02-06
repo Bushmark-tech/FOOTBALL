@@ -53,16 +53,14 @@
                 <form action="{% url 'predictor:admin_security_action' %}" method="POST" class="d-inline">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="delete_ghosts">
-                    <button type="submit" class="btn btn-sm btn-outline-danger"
-                        onclick="return confirm('Search and destroy all ghost users (Joined >24h, 0 matches)?')">
+                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Search and destroy all ghost users?')">
                         <i class="fas fa-trash-alt"></i> Delete All Ghosts
                     </button>
                 </form>
                 <form action="{% url 'predictor:admin_security_action' %}" method="POST" class="d-inline">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="cleanup_pending">
-                    <button type="submit" class="btn btn-sm btn-outline-warning"
-                        onclick="return confirm('Delete all accounts unverified for >7 days?')">
+                    <button type="submit" class="btn btn-sm btn-outline-warning" onclick="return confirm('Delete unverified accounts?')">
                         <i class="fas fa-user-clock"></i> Cleanup Pending (7d+)
                     </button>
                 </form>
@@ -100,9 +98,9 @@
                         <td><span class="badge bg-danger rounded-pill">{{ cluster.user_count }}</span></td>
                         <td>
                             <div class="avatar-group">
-                                {% for user in ip_cluster_users %}
-                                {% if user.profile.last_ip == cluster.last_ip %}
-                                <span class="badge bg-soft-primary text-primary mb-1">{{ user.username }}</span>
+                                {% for u in ip_cluster_users %}
+                                {% if u.profile.last_ip == cluster.last_ip %}
+                                <span class="badge bg-soft-primary text-primary mb-1">{{ u.username }}</span>
                                 {% endif %}
                                 {% endfor %}
                             </div>
@@ -112,142 +110,92 @@
                                 {% csrf_token %}
                                 <input type="hidden" name="action" value="block_ip">
                                 <input type="hidden" name="ip" value="{{ cluster.last_ip }}">
-                                <button type="submit" class="btn btn-sm btn-outline-danger"
-                                    onclick="return confirm('Deactivate all users from IP {{ cluster.last_ip }}?')">
-                                    <i class="fas fa-ban"></i> Block IP
-                                </button>
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Block IP</button>
                             </form>
                         </td>
                     </tr>
                     {% empty %}
-                    <tr>
-                        <td colspan="4" class="text-center py-4 text-muted">No high-density IP clusters found.</td>
-                    </tr>
+                    <tr><td colspan="4" class="text-center py-4 text-muted">No high-density IP clusters found.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- Future/Spoofed Browsers -->
+    <!-- Future Browsers -->
     <div class="card mb-4 border-info">
         <div class="card-header bg-info text-white">
-            <h5 class="mb-0"><i class="fas fa-robot"></i> Future/Spoofed Browsers (Suspicious UA)</h5>
+            <h5 class="mb-0"><i class="fas fa-robot"></i> Future Browsers (Suspicious UA)</h5>
         </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle">
                 <thead>
-                    <tr>
-                        <th>Username</th>
-                        <th>User Agent</th>
-                        <th>IP Address</th>
-                        <th>Joined</th>
-                        <th>Action</th>
-                    </tr>
+                    <tr><th>Username</th><th>User Agent</th><th>IP Address</th><th>Joined</th><th>Action</th></tr>
                 </thead>
                 <tbody>
-                    {% for user in future_browsers %}
+                    {% for u in future_browsers %}
                     <tr>
-                        <td><strong><a href="{% url 'predictor:admin_user_detail' user.id %}">{{ user.username
-                                    }}</a></strong></td>
-                        <td><small class="text-muted">{{ user.profile.last_device }}</small></td>
-                        <td><code>{{ user.profile.last_ip|default:"None" }}</code></td>
-                        <td>{{ user.date_joined|date:"M d, H:i" }}</td>
+                        <td><strong><a href="{% url 'predictor:admin_user_detail' u.id %}">{{ u.username }}</a></strong></td>
+                        <td><small class="text-muted">{{ u.profile.last_device }}</small></td>
+                        <td><code>{{ u.profile.last_ip|default:"None" }}</code></td>
+                        <td>{{ u.date_joined|date:"M d, H:i" }}</td>
                         <td>
-                            <form action="{% url 'predictor:admin_user_action' user.id %}" method="POST">
+                            <form action="{% url 'predictor:admin_user_action' u.id %}" method="POST">
                                 {% csrf_token %}
                                 <input type="hidden" name="action" value="toggle_active">
                                 <button type="submit" class="btn btn-sm btn-outline-danger">
-                                    <i class="fas fa-user-slash"></i> {% if user.is_active %}Deactivate{% else
-                                    %}Activate{% endif %}
+                                    <i class="fas fa-user-slash"></i>
+                                    {% if u.is_active %}Deactivate{% else %}Activate{% endif %}
                                 </button>
                             </form>
                         </td>
                     </tr>
                     {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center py-4 text-muted">No "Future Browsers" detected (UA Version >
-                            140).</td>
-                    </tr>
+                    <tr><td colspan="5" class="text-center py-4 text-muted">No "Future Browsers" detected.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- Suspicious Emails & Ghost Users Side-by-Side -->
+    <!-- Side-by-Side -->
     <div class="row">
-        <!-- Suspicious Emails -->
         <div class="col-xl-6">
             <div class="card mb-4 border-warning">
-                <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0"><i class="fas fa-envelope-open-text"></i> Disposable/Suspicious Emails</h5>
-                </div>
-                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                <div class="card-header bg-warning text-dark"><h5 class="mb-0">Disposable Emails</h5></div>
+                <div class="table-responsive">
                     <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Username</th>
-                                <th>Email</th>
-                                <th>Joined</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>Username</th><th>Email</th><th>Status</th></tr></thead>
                         <tbody>
-                            {% for user in suspicious_emails %}
+                            {% for u in suspicious_emails %}
                             <tr>
-                                <td><strong><a href="{% url 'predictor:admin_user_detail' user.id %}">{{ user.username
-                                            }}</a></strong></td>
-                                <td><code class="text-warning">{{ user.email }}</code></td>
-                                <td>{{ user.date_joined|date:"M d, Y" }}</td>
-                                <td>
-                                    {% if user.is_active %}<span class="text-success fas fa-check-circle"></span>
-                                    {% else %}<span class="text-danger fas fa-times-circle"></span>{% endif %}
-                                </td>
+                                <td><a href="{% url 'predictor:admin_user_detail' u.id %}">{{ u.username }}</a></td>
+                                <td><code class="text-warning">{{ u.email }}</code></td>
+                                <td>{% if u.is_active %}Active{% else %}Blocked{% endif %}</td>
                             </tr>
                             {% empty %}
-                            <tr>
-                                <td colspan="4" class="text-center py-3">No suspicious emails found.</td>
-                            </tr>
+                            <tr><td colspan="3" class="text-center py-3">No suspicious emails.</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
-
-        <!-- Ghost Users -->
         <div class="col-xl-6">
             <div class="card mb-4 border-secondary">
-                <div class="card-header bg-secondary text-white">
-                    <h5 class="mb-0"><i class="fas fa-user-slash"></i> Inactive Signups (Ghost Users)</h5>
-                </div>
-                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                <div class="card-header bg-secondary text-white"><h5 class="mb-0">Ghost Users</h5></div>
+                <div class="table-responsive">
                     <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Username</th>
-                                <th>Joined</th>
-                                <th>Last IP</th>
-                                <th>Verification</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>Username</th><th>Joined</th><th>Verification</th></tr></thead>
                         <tbody>
-                            {% for user in ghost_users %}
+                            {% for u in ghost_users %}
                             <tr>
-                                <td><strong><a href="{% url 'predictor:admin_user_detail' user.id %}">{{ user.username
-                                            }}</a></strong></td>
-                                <td>{{ user.date_joined|date:"M d, H:i" }}</td>
-                                <td><code>{{ user.profile.last_ip|default:"None" }}</code></td>
-                                <td>
-                                    {% if user.profile.email_verified %}<span class="badge bg-success">Verified</span>
-                                    {% else %}<span class="badge bg-light text-dark border">Pending</span>{% endif %}
-                                </td>
+                                <td><a href="{% url 'predictor:admin_user_detail' u.id %}">{{ u.username }}</a></td>
+                                <td>{{ u.date_joined|date:"M d" }}</td>
+                                <td>{% if u.profile.email_verified %}Yes{% else %}Pending{% endif %}</td>
                             </tr>
                             {% empty %}
-                            <tr>
-                                <td colspan="4" class="text-center py-3">No ghost users found.</td>
-                            </tr>
+                            <tr><td colspan="3" class="text-center py-3">No ghosts.</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -258,61 +206,15 @@
 </div>
 
 <style>
-    .bg-soft-danger {
-        background-color: rgba(239, 68, 68, 0.1);
-    }
-
-    .bg-soft-warning {
-        background-color: rgba(245, 158, 11, 0.1);
-    }
-
-    .bg-soft-info {
-        background-color: rgba(59, 130, 246, 0.1);
-    }
-
-    .bg-soft-secondary {
-        background-color: rgba(107, 114, 128, 0.1);
-    }
-
-    .bg-soft-primary {
-        background-color: rgba(79, 70, 229, 0.1);
-    }
-
-    .stat-card {
-        padding: 1.5rem;
-        border: none;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        text-align: center;
-    }
-
-    .stat-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1rem;
-        font-size: 1.5rem;
-    }
-
-    .stat-number {
-        font-size: 1.75rem;
-        font-weight: 700;
-        margin-bottom: 0.25rem;
-        color: #111827;
-    }
-
-    .stat-label {
-        font-size: 0.875rem;
-        color: #6b7280;
-        font-weight: 500;
-    }
-
-    .avatar-group .badge {
-        font-size: 0.7rem;
-        margin-right: 4px;
-    }
+    .bg-soft-danger { background-color: rgba(239, 68, 68, 0.1); }
+    .bg-soft-warning { background-color: rgba(245, 158, 11, 0.1); }
+    .bg-soft-info { background-color: rgba(59, 130, 246, 0.1); }
+    .bg-soft-secondary { background-color: rgba(107, 114, 128, 0.1); }
+    .bg-soft-primary { background-color: rgba(79, 70, 229, 0.1); }
+    .stat-card { padding: 1.5rem; border: none; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); text-align: center; }
+    .stat-icon { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 1.5rem; }
+    .stat-number { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; color: #111827; }
+    .stat-label { font-size: 0.875rem; color: #6b7280; font-weight: 500; }
+    .avatar-group .badge { font-size: 0.7rem; margin-right: 4px; }
 </style>
 {% endblock %}
