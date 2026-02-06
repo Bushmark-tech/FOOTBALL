@@ -595,6 +595,13 @@
                 </a>
             </li>
             <li>
+                <a href="{% url 'predictor:admin_user_audit' %}"
+                    class="{% if request.resolver_match.url_name == 'admin_user_audit' %}active{% endif %}">
+                    <i class="fas fa-user-shield"></i>
+                    <span>Security Audit</span>
+                </a>
+            </li>
+            <li>
                 <a href="{% url 'predictor:admin_predictions' %}"
                     class="{% if request.resolver_match.url_name == 'admin_predictions' %}active{% endif %}">
                     <i class="fas fa-trophy"></i>
