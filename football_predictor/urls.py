@@ -7,9 +7,12 @@ from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 
+from django.views.generic.base import TemplateView
+
 urlpatterns = [
     path('system-core-database/', admin.site.urls),
     path('accounts/', include('allauth.urls')),  # Google OAuth URLs
+    path('robots.txt', TemplateView.as_view(template_name="robots.txt", content_type="text/plain")),
     
     # Password Reset URLs
     path('password_reset/', auth_views.PasswordResetView.as_view(extra_email_context={'domain': 'leon-football.com', 'protocol': 'https'}), name='password_reset'),

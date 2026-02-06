@@ -197,6 +197,11 @@ def login_view(request):
         return redirect('predictor:home')
     
     if request.method == 'POST':
+        # Honeypot check
+        if request.POST.get('website'):
+            logger.warning(f"Bot login blocked: {request.POST.get('username')} filled honeypot.")
+            return redirect('predictor:login')
+            
         username_or_email = request.POST.get('username', '').strip()
         password = request.POST.get('password', '').strip()
         next_url = request.POST.get('next', next_url)
@@ -283,6 +288,11 @@ def register_view(request):
         return redirect('predictor:home')
     
     if request.method == 'POST':
+        # 0. Honeypot check (for bots)
+        if request.POST.get('website'):
+            logger.warning(f"Bot registration blocked: {request.POST.get('email')} filled honeypot.")
+            return redirect('predictor:home')
+            
         # Removed explicit username input
         email = request.POST.get('email', '').strip()
         password = request.POST.get('password', '').strip() or request.POST.get('password1', '').strip()

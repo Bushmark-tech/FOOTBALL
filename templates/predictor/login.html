@@ -301,6 +301,11 @@
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{{ next }}">
 
+                <!-- Honeypot field (hidden from humans) -->
+                <div style="display:none;">
+                    <input type="text" name="website" tabindex="-1" autocomplete="off">
+                </div>
+
                 <div class="form-group">
                     <input type="text" name="username" class="form-control" placeholder="Email or Username" required
                         autofocus>
