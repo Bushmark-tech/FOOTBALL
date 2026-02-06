@@ -149,13 +149,13 @@
                 </div>
                 <div class="col-12 col-md-3">
                     <select name="filter" class="form-select border-0 bg-light fw-bold">
-                        <option value="all" {% if filter_type == 'all' %}selected{% endif %}>All Users</option>
-                        <option value="active" {% if filter_type == 'active' %}selected{% endif %}>Active (7d)</option>
-                        <option value="inactive" {% if filter_type == 'inactive' %}selected{% endif %}>Inactive (30d+)
+                        <option value="all" {% if filter_type=='all' %}selected{% endif %}>All Users</option>
+                        <option value="active" {% if filter_type=='active' %}selected{% endif %}>Active (7d)</option>
+                        <option value="inactive" {% if filter_type=='inactive' %}selected{% endif %}>Inactive (30d+)
                         </option>
-                        <option value="subscribed" {% if filter_type == 'subscribed' %}selected{% endif %}>Subscribed
+                        <option value="subscribed" {% if filter_type=='subscribed' %}selected{% endif %}>Subscribed
                         </option>
-                        <option value="staff" {% if filter_type == 'staff' %}selected{% endif %}>Staff Only</option>
+                        <option value="staff" {% if filter_type=='staff' %}selected{% endif %}>Staff Only</option>
                     </select>
                 </div>
                 <div class="col-6 col-md-2">
@@ -244,7 +244,7 @@
                                 <i class="fas fa-user me-1"></i>Free Tier
                             </span>
                             <div class="plan-details">
-                                <small class="text-danger">Limit: {{ u.profile.free_matches_limit|default:5 }}
+                                <small class="text-danger">Limit: {{ u.profile.free_matches_limit|default:1 }}
                                     matches</small>
                             </div>
                             {% endif %}

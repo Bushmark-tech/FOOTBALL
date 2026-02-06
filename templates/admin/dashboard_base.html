@@ -33,10 +33,10 @@
 
             /* Main Colors */
             --main-bg: #f5f7fa;
-            --card-bg: #ffffff;
-            --text-primary: #2d3748;
-            --text-secondary: #718096;
-            --border-color: #e2e8f0;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --border-color: rgba(255, 255, 255, 0.1);
 
             /* Shadows */
             --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
@@ -60,6 +60,10 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             color: var(--text-primary);
             overflow-x: hidden;
+            min-height: 100vh;
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+            url("{% static 'images/background.png' %}") no-repeat center center fixed;
+            background-size: cover;
         }
 
         /* ========== SIDEBAR ========== */
@@ -207,7 +211,8 @@
 
         /* ========== TOPBAR ========== */
         .topbar {
-            background: white;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
             padding: 1.25rem 2rem;
             box-shadow: var(--shadow-sm);
             display: flex;
@@ -281,6 +286,7 @@
             box-shadow: var(--shadow-sm);
             transition: var(--transition);
             background: var(--card-bg);
+            backdrop-filter: blur(10px);
             overflow: hidden;
         }
 
@@ -290,7 +296,7 @@
         }
 
         .card-header {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            background: rgba(255, 255, 255, 0.05);
             border-bottom: 1px solid var(--border-color);
             padding: 1rem 1.5rem;
             font-weight: 700;
@@ -413,7 +419,7 @@
             text-transform: uppercase;
             font-size: 0.75rem;
             letter-spacing: 0.05em;
-            background: #f8f9fa;
+            background: rgba(255, 255, 255, 0.05);
             border-bottom: 2px solid var(--border-color);
             padding: 1rem;
         }
@@ -425,7 +431,7 @@
         }
 
         .table-hover tbody tr:hover {
-            background: #f8f9fa;
+            background: rgba(255, 255, 255, 0.05);
         }
 
         /* ========== BADGES ========== */
