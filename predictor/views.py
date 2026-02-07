@@ -252,12 +252,16 @@ def process_prediction_probabilities(advanced_result):
         # Fallback to equal probabilities if total is 0
         probabilities = {"Home": round(0.333, 6), "Draw": round(0.334, 6), "Away": round(0.333, 6)}
     
-    # Calculate double chance outcome
-    outcome = calculate_double_chance(
-        probabilities.get("Home", 0.33),
-        probabilities.get("Draw", 0.33),
-        probabilities.get("Away", 0.33)
-    )
+    # Calculate double chance outcome, unless already specified in advanced_result
+    adv_outcome = advanced_result.get('outcome')
+    if adv_outcome in ['1X', 'X2', '12']:
+        outcome = adv_outcome
+    else:
+        outcome = calculate_double_chance(
+            probabilities.get("Home", 0.33),
+            probabilities.get("Draw", 0.33),
+            probabilities.get("Away", 0.33)
+        )
     
     return probabilities, outcome
 
@@ -315,8 +319,8 @@ def calculate_double_chance(prob_home, prob_draw, prob_away):
     
     # Thresholds (updated to match analytics.py improved logic)
     # Use double chance when confidence is low or outcomes are close
-    CLEAR_WIN_THRESHOLD = 0.45  # 45% - must have at least this confidence for single outcome
-    UNCERTAINTY_THRESHOLD = 0.08  # 8% - if top two are within this, use double chance
+    CLEAR_WIN_THRESHOLD = 0.38  # 38% - lowered to catch Man Utd (39%) as Clear Win
+    UNCERTAINTY_THRESHOLD = 0.05  # 5% - only use double chance if really close
     DOUBLE_CHANCE_MIN_ADVANTAGE = 0.10  # 10% - double chance must be this much better to use it
     
     # Calculate double chance probabilities
@@ -333,8 +337,8 @@ def calculate_double_chance(prob_home, prob_draw, prob_away):
     # Match the logic from analytics.py for consistency
     prob_difference = best_single_prob - second_best_single_prob
     
-    # Use double chance if confidence is low (< 45%) OR outcomes are close (< 8%)
-    if best_single_prob < CLEAR_WIN_THRESHOLD or prob_difference < UNCERTAINTY_THRESHOLD:
+    # If difference is less than threshold (e.g. 5%), use double chance
+    if best_single_prob < CLEAR_WIN_THRESHOLD and prob_difference < UNCERTAINTY_THRESHOLD:
         return best_double_name
     
     # Default to the best single outcome
@@ -693,20 +697,18 @@ def predict(request):
                             away_score = home_score
                     elif outcome == "12":
                         # Home or Away - no draw
-                        prob_12 = probabilities.get("Home", 0) + probabilities.get("Away", 0)
-                        if probabilities.get("Home", 0) > probabilities.get("Away", 0):
-                            # Home more likely
-                            home_score = random.choice([2, 3])
+                        if probabilities.get("Home", 0) >= probabilities.get("Away", 0):
+                            # Home more likely or equal -> Home Win
+                            home_score = random.choice([1, 2, 3])
                             away_score = random.choice([0, 1])
-                        else:  # Away more likely
-                            away_score = random.choice([2, 3])
+                            if home_score <= away_score: home_score = away_score + 1
+                        else:
+                            # Away more likely -> Away Win
+                            away_score = random.choice([1, 2, 3])
                             home_score = random.choice([0, 1])
-                        # Ensure no draw
-                        if home_score == away_score:
-                            if home_score == 0:
-                                home_score = 1
-                            else:
-                                away_score = home_score + 1
+                            if away_score <= home_score: away_score = home_score + 1
+                        # Double check no draw
+                        if home_score == away_score: home_score += 1
                     else:  # Draw
                         # Draw scores are usually low, but can vary based on team strength
                         if max_prob > 0.4:  # High draw probability

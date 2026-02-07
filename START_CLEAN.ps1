@@ -20,6 +20,10 @@ if ($port8001) {
 
 Start-Sleep -Seconds 2
 
+Write-Host "Creating cache table..." -ForegroundColor Cyan
+python manage.py createcachetable
+Write-Host "Cache table check complete." -ForegroundColor Green
+
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "Starting Django Server (Port 8000)..." -ForegroundColor Cyan

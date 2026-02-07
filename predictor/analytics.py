@@ -308,8 +308,8 @@ def calculate_probabilities_model2(home, away, data, version="v2"):
         
         logger.info(f"[H2H CALC] Found {total_dir1} direct matches, {total_dir2} reverse matches (total: {total})")
         
-        if total == 0:
-            logger.warning(f"[H2H CALC] No H2H matches found for {home} vs {away}")
+        if total < 2:
+            logger.warning(f"[H2H CALC] Insufficient H2H matches ({total}) for robust probability. Ignoring.")
             return None
         
         # Determine numeric results logic based on actual data, not just version
@@ -703,8 +703,9 @@ def advanced_predict_match(home_team, away_team, model1=None, model2=None, **kwa
                  # Clean logging for stats debug
                  logger.info(f"Stats Debug | Team A: {stat_home:.2f}, Draw: {stat_draw:.2f}, Team B: {stat_away:.2f}")
                  
-                 # Logic 1: If Statistics are Very Strong (>45%), trust them
-                 STRONG_STAT_THRESHOLD = 0.45
+                 # Logic 1: If Statistics are Very Strong (>55%), trust them
+                 # Increased from 0.45 to 0.55 to prevents 1-match history (50%) from overriding models
+                 STRONG_STAT_THRESHOLD = 0.55
                  
                  stat_outcome = None
                  stat_conf = 0
@@ -726,13 +727,41 @@ def advanced_predict_match(home_team, away_team, model1=None, model2=None, **kwa
                       prob_dict = {0: stat_away, 1: stat_draw, 2: stat_home}
                  
                  # Logic 2: If Model is just Draw (often default) but Stats lean one way
-                 elif outcome == "Draw" and abs(stat_home - stat_away) > 0.10:
-                      if stat_home > stat_away:
+                 # Combine Model (Draw) + Stats (Winner) -> Double Chance
+                 # Reduced threshold to 1% to catch small advantages like Villa (38%) vs Bournemouth (36%)
+                 elif outcome == "Draw" and abs(stat_home - stat_away) > 0.01:
+                      # Enhanced Logic: If one team is statistically strong enough (>38%), force a WIN
+                      if stat_home > 0.38:
                            outcome = "Home"; prediction = 2; confidence = stat_home
                            prob_dict = {0: stat_away, 1: stat_draw, 2: stat_home}
-                      else:
+                      elif stat_away > 0.38:
                            outcome = "Away"; prediction = 0; confidence = stat_away
                            prob_dict = {0: stat_away, 1: stat_draw, 2: stat_home}
+                      # Otherwise, if stats just lean one way but aren't dominant, use Double Chance
+                      elif stat_home > stat_away:
+                           outcome = "1X"; prediction = 3; confidence = stat_home + stat_draw
+                           prob_dict = {0: stat_away, 1: stat_draw, 2: stat_home}
+                      else:
+                           outcome = "X2"; prediction = 4; confidence = stat_away + stat_draw
+                           prob_dict = {0: stat_away, 1: stat_draw, 2: stat_home}
+
+                 # Logic 3: Prioritize Model if it aligns with Stats (even if Stats are slightly stronger)
+                 # If Model Outcome is NOT Draw, and it matches the direction of the highest Stat probability
+                 # Then keep the Model Outcome (don't let small stat differences override it)
+                 elif outcome != "Draw":
+                      # Find which stat is highest
+                      best_stat = max(stat_home, stat_draw, stat_away)
+                      best_stat_outcome = "Draw"
+                      if best_stat == stat_home: best_stat_outcome = "Home"
+                      elif best_stat == stat_away: best_stat_outcome = "Away"
+                      
+                      # If Model agrees with Best Stat, KEEP Model (it might be 1X or X2 double chance in reality)
+                      if outcome == best_stat_outcome:
+                           pass # Keep original model prediction
+                      
+                      # If Model is close to Best Stat (within 10%), give Model benefit of doubt
+                      elif best_stat - confidence < 0.10:
+                           pass # Keep original model prediction
         
         # Historical Display Probs
         historical_probs = {
