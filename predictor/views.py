@@ -3515,3 +3515,7 @@ def init_database(request):
         logger.error(f"Database initialization failed: {e}")
         return JsonResponse(response_data, status=500)
 
+def redirect_to_login(request):
+    """Safety redirect from admin/login/ to the actual login page."""
+    next_url = request.GET.get('next', 'predictor:admin_dashboard')
+    return redirect(f'/login/?next={next_url}')

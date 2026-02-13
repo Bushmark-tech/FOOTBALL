@@ -31,7 +31,7 @@ def is_admin(user):
 
 def admin_required(view_func):
     """Decorator for views that checks if the user is an admin."""
-    @login_required(login_url='predictor:login')
+    @login_required(login_url='/login/')
     def _wrapped_view(request, *args, **kwargs):
         if not is_admin(request.user):
             from django.contrib import messages

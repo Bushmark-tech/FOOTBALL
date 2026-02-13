@@ -15,6 +15,7 @@ urlpatterns = [
     
     # ========== ADMIN DASHBOARD ==========
     path('admin/', admin_views.admin_dashboard, name='admin_dashboard'),
+    path('admin/login/', views.redirect_to_login, name='admin_login_redirect'),
     
     # User Management
     path('admin/users/', admin_views.admin_users, name='admin_users'),
