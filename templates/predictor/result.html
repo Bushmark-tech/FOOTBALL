@@ -1615,41 +1615,57 @@
             }, 300);
         }
 
-        // Update Historical Probabilities display
+        // Update Historical Probabilities display with proper rounding to 100%
         function updateHistoricalProbabilities() {
             // Find all elements with data-prob attribute in the Historical Probabilities section
-            const histProbElements = document.querySelectorAll('[data-prob]');
+            const histElements = {
+                home: document.querySelector('[data-prob="{{ historical_probabilities.Home }}"]'),
+                draw: document.querySelector('[data-prob="{{ historical_probabilities.Draw }}"]'),
+                away: document.querySelector('[data-prob="{{ historical_probabilities.Away }}"]')
+            };
 
-            histProbElements.forEach(function (elem) {
-                const probValue = parseFloat(elem.getAttribute('data-prob'));
+            if (histElements.home && histElements.draw && histElements.away) {
+                let p_h = parseFloat(histElements.home.getAttribute('data-prob'));
+                let p_d = parseFloat(histElements.draw.getAttribute('data-prob'));
+                let p_a = parseFloat(histElements.away.getAttribute('data-prob'));
 
-                if (!isNaN(probValue)) {
-                    // Handle both decimal (0-1) and percentage (0-100) formats
-                    let percentage;
-                    if (probValue > 1) {
-                        // Already in percentage format (0-100)
-                        percentage = Math.round(probValue);
-                    } else {
-                        // In decimal format (0-1), convert to percentage
-                        percentage = Math.round(probValue * 100);
-                    }
+                // Handle both decimal (0-1) and percentage (0-100) formats
+                let h_val = p_h > 1 ? p_h : p_h * 100;
+                let d_val = p_d > 1 ? p_d : p_d * 100;
+                let a_val = p_a > 1 ? p_a : p_a * 100;
 
-                    // Update the text content
-                    elem.textContent = percentage + '%';
+                // Initial rounding
+                let h_round = Math.round(h_val);
+                let d_round = Math.round(d_val);
+                let a_round = Math.round(a_val);
 
-                    // Find the corresponding progress bar (sibling element with class prob-home-hist, prob-draw-hist, or prob-away-hist)
-                    const parent = elem.parentElement;
-                    if (parent) {
-                        const progressBar = parent.querySelector('.prob-home-hist, .prob-draw-hist, .prob-away-hist');
-                        if (progressBar) {
-                            // Update progress bar width with animation
-                            setTimeout(() => {
-                                progressBar.style.width = percentage + '%';
-                            }, 100);
-                        }
-                    }
+                // Normalization to 100%
+                let total = h_round + d_round + a_round;
+                if (total !== 100 && total > 0) {
+                    const diff = 100 - total;
+                    // Adjust the largest one to minimize visual impact
+                    if (h_round >= d_round && h_round >= a_round) h_round += diff;
+                    else if (d_round >= h_round && d_round >= a_round) d_round += diff;
+                    else a_round += diff;
                 }
-            });
+
+                // Update text and bars
+                histElements.home.textContent = h_round + '%';
+                histElements.draw.textContent = d_round + '%';
+                histElements.away.textContent = a_round + '%';
+
+                const bars = {
+                    home: document.querySelector('.prob-home-hist'),
+                    draw: document.querySelector('.prob-draw-hist'),
+                    away: document.querySelector('.prob-away-hist')
+                };
+
+                setTimeout(() => {
+                    if (bars.home) bars.home.style.width = h_round + '%';
+                    if (bars.draw) bars.draw.style.width = d_round + '%';
+                    if (bars.away) bars.away.style.width = a_round + '%';
+                }, 100);
+            }
         }
 
         // Call updateHistoricalProbabilities when page loads

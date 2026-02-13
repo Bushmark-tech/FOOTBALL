@@ -497,28 +497,33 @@ def calculate_probabilities_original(home, away, data, version="v1"):
     diff = enhanced['home_strength'] - enhanced['away_strength']
     logger.info(f"Prob Calc for {home} vs {away}: HomeStr={enhanced['home_strength']:.4f}, AwayStr={enhanced['away_strength']:.4f}, Diff={diff:.4f}")
     
-    # Use curve
-    # Use curve
     # Calculate probability curve based on team strength difference
-    # Tuned to be conservative: max 49% for strong favorites
-    if abs(diff) < 0.05:  # Very close
-        p_h, p_d, p_a = 0.35, 0.35, 0.30
+    # Tuned and granular logic based on user logic requirements
+    if abs(diff) < 0.03:  # Very close
+        p_h, p_d, p_a = 0.33, 0.34, 0.33
+    elif diff > 0.35:     # Very Strong Home Advantage
+        p_h, p_d, p_a = 0.65, 0.20, 0.15
     elif diff > 0.20:     # Strong Home Advantage
-        p_h, p_d, p_a = 0.49, 0.30, 0.21
-    elif diff > 0.10:     # Significant Home Advantage
-        p_h, p_d, p_a = 0.45, 0.30, 0.25
+        p_h, p_d, p_a = 0.58, 0.24, 0.18
+    elif diff > 0.12:     # Significant Home Advantage
+        p_h, p_d, p_a = 0.48, 0.28, 0.24
     elif diff > 0.05:     # Moderate Home Advantage
         p_h, p_d, p_a = 0.40, 0.32, 0.28
+    elif diff > 0.03:     # Slight Home Advantage
+        p_h, p_d, p_a = 0.36, 0.34, 0.30
+    elif diff < -0.35:    # Very Strong Away Advantage
+        p_h, p_d, p_a = 0.15, 0.20, 0.65
     elif diff < -0.20:    # Strong Away Advantage
-        p_h, p_d, p_a = 0.21, 0.30, 0.49
-    elif diff < -0.10:    # Significant Away Advantage
-        p_h, p_d, p_a = 0.25, 0.30, 0.45
+        p_h, p_d, p_a = 0.18, 0.24, 0.58
+    elif diff < -0.12:    # Significant Away Advantage
+        p_h, p_d, p_a = 0.24, 0.28, 0.48
     elif diff < -0.05:    # Moderate Away Advantage
         p_h, p_d, p_a = 0.28, 0.32, 0.40
+    elif diff < -0.03:    # Slight Away Advantage
+        p_h, p_d, p_a = 0.30, 0.34, 0.36
     else:
-        # Fallback for edge cases
-        if diff > 0: p_h, p_d, p_a = 0.40, 0.32, 0.28
-        else: p_h, p_d, p_a = 0.28, 0.32, 0.40
+        # Final fallback
+        p_h, p_d, p_a = 0.33, 0.34, 0.33
         
     return {"Home Team Win": p_h*100, "Draw": p_d*100, "Away Team Win": p_a*100}
 

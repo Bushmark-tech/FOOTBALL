@@ -15,13 +15,13 @@ echo ========================================
 echo.
 
 REM Start Django server in a new window
-start "Django Server" cmd /k "cd /d %~dp0 && python manage.py runserver"
+start "Django Server" cmd /k "cd /d %~dp0 && call venv\Scripts\activate.bat && python manage.py runserver"
 
 REM Wait a moment for Django to start (using ping with error suppression)
 ping 127.0.0.1 -n 3 >nul 2>nul
 
 REM Start FastAPI server in a new window  
-start "FastAPI Server" cmd /k "cd /d %~dp0 && python run_api.py"
+start "FastAPI Server" cmd /k "cd /d %~dp0 && call venv\Scripts\activate.bat && python run_api.py"
 
 echo.
 echo Both servers are starting in separate windows...

@@ -1,4 +1,5 @@
 {% extends 'predictor/base.html' %}
+{% load static %}
 
 {% block title %}Dashboard - LEON GAMES PRO{% endblock %}
 
@@ -466,6 +467,28 @@
             padding: 3rem 1.5rem;
         }
     }
+
+    /* Hero Ball Animation */
+    .hero-ball {
+        display: block;
+        width: 4rem;
+        /* Increased size for better visibility */
+        height: 4rem;
+        margin: 1rem auto;
+        /* Center horizontally with margin */
+        animation: ball-spin 6s linear infinite;
+        filter: drop-shadow(0 0 20px rgba(0, 217, 163, 0.6));
+    }
+
+    @keyframes ball-spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
 </style>
 {% endblock %}
 
@@ -474,7 +497,8 @@
 <section class="hero-dashboard">
     <div class="container">
         <div class="hero-content" data-aos="fade-down">
-            <h1 class="hero-title">WELCOME TO OUR PREDICTIONS SITE 🎯</h1>
+            <h1 class="hero-title">WELCOME TO OUR PREDICTIONS SITE</h1>
+            <img src="{% static 'images/soccer_ball.svg' %}" class="hero-ball" alt="Football">
             <p class="hero-subtitle">Make your predictions with our AI-powered analytics</p>
         </div>
     </div>
