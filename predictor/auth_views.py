@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.conf import settings
 from .models import UserProfile, Subscription, Prediction
 import logging
+from datetime import datetime
 import requests
 import base64
 import json
@@ -449,7 +450,6 @@ def initiate_mpesa_payment(request):
         
         if not mpesa_number and request.body:
              try:
-                 import json
                  data = json.loads(request.body)
                  mpesa_number = data.get('mpesa_number')
                  currency = data.get('currency', 'KSH') # Default to KSH
