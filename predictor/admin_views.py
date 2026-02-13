@@ -18,6 +18,7 @@ import logging
 import json
 
 from .models import Prediction, BillingUsage, UserProfile, Subscription, Team, Match, League
+from .constants import DISPOSABLE_EMAIL_DOMAINS
 from django.db.models.functions import Lower
 
 logger = logging.getLogger(__name__)
@@ -245,16 +246,13 @@ def admin_user_audit(request):
     ip_cluster_users = User.objects.filter(profile__last_ip__in=clustered_ips).select_related('profile').order_by('profile__last_ip')
     
     # 2. Suspicious Email Domains
-    disposable_domains = [
-        'mailinator.com', 'tempmail.com', 'throwawaymail.com', 'guerrillamail.com', 
-        'yopmail.com', '10minutemail.com', 'sharklasers.com', 'temp-mail.org'
-    ]
-    
     suspicious_emails = User.objects.filter(
         Q(email__icontains='mailinator') | 
         Q(email__icontains='tempmail') |
         Q(email__icontains='yopmail') |
-        Q(email__icontains='10minute')
+        Q(email__icontains='10minute') |
+        Q(email__icontains='throwawaymail') |
+        Q(email__icontains='guerrillamail')
     ).order_by('-date_joined')[:50]
 
     # 3. Low Engagement (Joined > 24h ago, 0 predictions)
@@ -271,13 +269,12 @@ def admin_user_audit(request):
     device_clusters = UserProfile.objects.exclude(last_device__isnull=True).values('last_device').annotate(
         user_count=Count('user')
     ).filter(user_count__gt=3).order_by('-user_count')
-
-    # 5. Future/Spoofed Browsers (Chrome > 140)
+    # 5. Future/Spoofed Browsers (Impossible versions like Chrome 200+ in 2026)
     future_browsers = User.objects.filter(
-        Q(profile__last_device__contains='Chrome/14') |
-        Q(profile__last_device__contains='Chrome/15') |
-        Q(profile__last_device__contains='Firefox/14')
+        Q(profile__last_device__contains='Chrome/2') |
+        Q(profile__last_device__contains='Firefox/2')
     ).select_related('profile').order_by('-date_joined')[:50]
+
 
     context = {
         'ip_clusters': ip_clusters,
@@ -328,15 +325,15 @@ def admin_security_action(request):
             messages.success(request, f'Successfully deleted {count} unverified pending accounts (7d+).')
             
         elif action == 'block_future_browsers':
-            # Block users using Chrome/14X or Chrome/15X
+            # Block users using impossible versions like Chrome/2XX or Firefox/2XX
             future_users = User.objects.filter(
-                Q(profile__last_device__contains='Chrome/14') |
-                Q(profile__last_device__contains='Chrome/15')
+                Q(profile__last_device__contains='Chrome/2') |
+                Q(profile__last_device__contains='Firefox/2')
             ).filter(is_staff=False)
             count = future_users.count()
             # We deactivate them rather than delete for audit trail
             future_users.update(is_active=False)
-            messages.success(request, f'Deactivated {count} users with suspicious future browser versions.')
+            messages.success(request, f'Deactivated {count} users with impossible future browser versions (200+).')
             
         elif action == 'block_ip':
             ip = request.POST.get('ip')

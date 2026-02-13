@@ -27,3 +27,30 @@ LEAGUES_BY_CATEGORY = {
         "Romania League": sorted(['CFR Cluj', 'Csikszereda M. Ciuc', 'Din. Bucuresti', 'FC Arges', 'FC Botosani', 'FC Hermannstadt', 'FC Rapid Bucuresti', 'FCSB', 'Farul Constanta', 'Metaloglobus Bucharest', 'Otelul', 'Petrolul', 'U. Cluj', 'UTA Arad', 'Unirea Slobozia', 'Univ. Craiova'])
     }
 }
+
+# List of disposable/temporary email domains to block during registration
+# Updated periodically to combat bots and spam accounts
+DISPOSABLE_EMAIL_DOMAINS = [
+    '10minutemail.com', '10minutemail.net', '10minutemail.org', 
+    '20minutemail.com', '60minutemail.com', '7daysmail.com',
+    'armyspy.com', 'binkmail.com', 'bobmail.info', 'bugmenot.com',
+    'burnermail.io', 'cachedmail.com', 'crazymailing.com', 'dayrep.com',
+    'discard.email', 'dispostable.com', 'disroot.org', 'dropmail.me', 'einrot.com',
+    'fakaitemp.com', 'fake-mail.net', 'fakeinbox.com', 'filzmail.com',
+    'getairmail.com', 'getnada.com', 'grr.la', 'guerrillamail.biz', 'guerrillamail.com',
+    'guerrillamail.de', 'guerrillamail.net', 'guerrillamail.org', 'hi2.in', 
+    'incognitomail.org', 'inboxalias.com', 'instamail.org', 'jetable.org',
+    'jourrapide.com', 'mail-fake.com', 'mail-temp.com', 'mail1a.com',
+    'mailcatch.com', 'mailforspam.com', 'mailgenerator.net', 'mailinator.com',
+    'mailnesia.com', 'mailnull.com', 'mailtemp.net', 'mailtothis.com', 'meltmail.com',
+    'mintemail.com', 'moakt.com', 'mytrashmail.com', 'nada.ltd', 'net-temp.com',
+    'notsharingmy.info', 'nowmymail.com', 'objectmail.com', 'pancakemail.com', 'pochta.la',
+    'pookmail.com', 'proxypost.net', 'quickmail.nl', 'rhyta.com',
+    'safetymail.info', 'sharklasers.com', 'slmail.me', 'spam4.me',
+    'spamavert.com', 'spambob.com', 'spamcorptastic.com', 'spamgourmet.com', 'superrito.com',
+    'teleworm.us', 'temp-mail.org', 'temp-mail.ru', 'tempmail.com', 'tempmail.de',
+    'tempmail.net', 'tempmailaddress.com', 'tempmailgen.com', 'tempmailid.com',
+    'tempmailplus.com', 'throwawaymail.com', 'trash-mail.at', 'trash-mail.com', 'trashmail.com',
+    'trashmail.me', 'trashmail.net', 'vpost.me', 'vrtm.com',
+    'yopmail.com', 'zapymail.com', 'zero-spam.com', 'zoidmail.com'
+]

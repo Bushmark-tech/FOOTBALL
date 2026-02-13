@@ -10,6 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from django.conf import settings
 from .models import UserProfile, Subscription, Prediction
+from .constants import DISPOSABLE_EMAIL_DOMAINS
 import logging
 from datetime import datetime
 import requests
@@ -320,12 +321,8 @@ def register_view(request):
              return render(request, 'predictor/register.html')
         
         # 2. Block Disposable Email Providers (Security)
-        disposable_domains = [
-            'tempmail.com', 'throwawaymail.com', 'mailinator.com', 'guerrillamail.com', 
-            'yopmail.com', '10minutemail.com', 'sharklasers.com', 'temp-mail.org'
-        ]
         domain_part = email.split('@')[1].lower() if '@' in email else ''
-        if domain_part in disposable_domains:
+        if domain_part in DISPOSABLE_EMAIL_DOMAINS:
              messages.error(request, 'Temporary or disposable email addresses are not allowed.')
              return render(request, 'predictor/register.html')
 

@@ -29,12 +29,25 @@ class ScannerBlockerMiddleware:
 
     def __call__(self, request):
         path = request.path.lower()
+        user_agent = request.META.get('HTTP_USER_AGENT', '')
         
-        # Check if path contains any blocked patterns
+        # 1. Block by User-Agent (Common Bot/Scanner tools)
+        blocked_uas = [
+            'python-requests',
+            'python-aiohttp',
+            'go-http-client',
+            'node-fetch',
+            'curl/',
+            'wget',
+        ]
+        
+        for ua in blocked_uas:
+            if ua.lower() in user_agent.lower():
+                return HttpResponseForbidden("Access Denied: Automated Tooling Not Allowed")
+        
+        # 2. Block by Path patterns
         for pattern in self.BLOCKED_PATTERNS:
             if pattern in path:
-                # Log usage if needed, or just block silently
-                # print(f"Blocked scanner: {request.META.get('REMOTE_ADDR')} tried {path}")
                 return HttpResponseForbidden("Access Denied: Bot Activity Detected")
 
         response = self.get_response(request)
