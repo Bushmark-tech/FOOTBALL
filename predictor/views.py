@@ -813,9 +813,18 @@ def predict(request):
                     
                     # Extract H2H probabilities from advanced_result if available
                     h2h_probs = advanced_result.get('historical_probs', {}) if advanced_result else {}
-                    h2h_home = h2h_probs.get('Home Team Win', 0) / 100.0 if h2h_probs else 0.33
-                    h2h_draw = h2h_probs.get('Draw', 0) / 100.0 if h2h_probs else 0.33
-                    h2h_away = h2h_probs.get('Away Team Win', 0) / 100.0 if h2h_probs else 0.33
+                    h2h_home = h2h_probs.get('Home Team Win', 33.3) / 100.0
+                    h2h_draw = h2h_probs.get('Draw', 33.3) / 100.0
+                    h2h_away = h2h_probs.get('Away Team Win', 33.4) / 100.0
+                    
+                    # Normalize H2H probabilities to ensure they sum to 1.0
+                    total_h2h = h2h_home + h2h_draw + h2h_away
+                    if total_h2h > 0:
+                        h2h_home /= total_h2h
+                        h2h_draw /= total_h2h
+                        h2h_away /= total_h2h
+                    else:
+                        h2h_home, h2h_draw, h2h_away = 0.33, 0.33, 0.34
                     
                     params = urlencode({
                         'home_team': home_team,

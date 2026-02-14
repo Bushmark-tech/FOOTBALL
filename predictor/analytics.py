@@ -341,39 +341,34 @@ def calculate_probabilities_model2(home, away, data, version="v2"):
         if total_dir1 > 0:
             if is_numeric_res:
                  # 2=Home, 1=Draw, 0=Away (Standard numeric encoding)
-                 w_home += counts1.get(2, 0) * 1.0 + counts1.get('2', 0) * 1.0
-                 w_draw += counts1.get(1, 0) * 1.0 + counts1.get('1', 0) * 1.0
-                 w_away += counts1.get(0, 0) * 1.0 + counts1.get('0', 0) * 1.0
+                 c_h = counts1.get(2, 0) + counts1.get('2', 0)
+                 c_d = counts1.get(1, 0) + counts1.get('1', 0)
+                 c_a = counts1.get(0, 0) + counts1.get('0', 0)
             else:
-                 w_home += counts1.get('H', 0) * 1.0
-                 w_draw += counts1.get('D', 0) * 1.0
-                 w_away += counts1.get('A', 0) * 1.0
-            w_total += total_dir1 * 1.0
+                 c_h = counts1.get('H', 0)
+                 c_d = counts1.get('D', 0)
+                 c_a = counts1.get('A', 0)
+            
+            w_home += c_h * 1.0
+            w_draw += c_d * 1.0
+            w_away += c_a * 1.0
+            w_total += (c_h + c_d + c_a) * 1.0
             
         if total_dir2 > 0:
             # Reversed: They Home = Our Away (Loss)
             if is_numeric_res:
-                 # Flip: 2(Their Home Win) -> Our Loss(Away Win for us means we lost as visitor?), 
-                 # wait: 
-                 # Direct match: Leeds (Home) vs Arsenal (Away). result=2 (Home Win) -> Leeds Win.
-                 # Reverse match: Arsenal (Home) vs Leeds (Away). result=2 (Home Win) -> Arsenal Win -> Leeds Loss.
-                 # So:
-                 # Their 2 (Home Win) -> Our Away Win (Loss for us) -> No, 'Away Team Win' key usually means 'Guest' won?
-                 # Let's align with return keys: "Home Team Win" (Us), "Away Team Win" (Them).
-                 
-                 # Logic for Reverse Match (We are Away):
-                 # Result 2 (Home Win) -> They Won -> We Lost -> Add to "Away Team Win" key (Opponent Win)
-                 # Result 0 (Away Win) -> They Lost -> We Won -> Add to "Home Team Win" key (We Won)
-                 # Result 1 (Draw) -> Draw -> Add to "Draw"
-                 
-                 w_home += counts2.get(0, 0) * 0.6 + counts2.get('0', 0) * 0.6  # We Won (They lost at home)
-                 w_draw += counts2.get(1, 0) * 0.6 + counts2.get('1', 0) * 0.6
-                 w_away += counts2.get(2, 0) * 0.6 + counts2.get('2', 0) * 0.6  # They Won (We lost away)
+                 c_h = counts2.get(0, 0) + counts2.get('0', 0)  # We Won (They lost at home)
+                 c_d = counts2.get(1, 0) + counts2.get('1', 0)
+                 c_a = counts2.get(2, 0) + counts2.get('2', 0)  # They Won (We lost away)
             else:
-                 w_home += counts2.get('A', 0) * 0.6  # We Won (They lost at home)
-                 w_draw += counts2.get('D', 0) * 0.6
-                 w_away += counts2.get('H', 0) * 0.6  # They Won (We lost away)
-            w_total += total_dir2 * 0.6
+                 c_h = counts2.get('A', 0)  # We Won (They lost at home)
+                 c_d = counts2.get('D', 0)
+                 c_a = counts2.get('H', 0)  # They Won (We lost away)
+            
+            w_home += c_h * 0.6
+            w_draw += c_d * 0.6
+            w_away += c_a * 0.6
+            w_total += (c_h + c_d + c_a) * 0.6
             
         # Smoothing
         w_home += 1.0; w_draw += 1.0; w_away += 1.0
@@ -768,12 +763,24 @@ def advanced_predict_match(home_team, away_team, model1=None, model2=None, **kwa
                       elif best_stat - confidence < 0.10:
                            pass # Keep original model prediction
         
-        # Historical Display Probs
+        # Ensure prob_dict sums to 1.0 (Normalization for AI Prediction)
+        total_p = sum(prob_dict.values())
+        if total_p > 0:
+            prob_dict = {k: v / total_p for k, v in prob_dict.items()}
+        else:
+            prob_dict = {0: 0.33, 1: 0.34, 2: 0.33}
+
+        # Historical Display Probs (Normalization for H2H Display)
         historical_probs = {
             "Home Team Win": probs.get("Home Team Win", 33.3) if probs else 33.3,
             "Draw": probs.get("Draw", 33.3) if probs else 33.3,
             "Away Team Win": probs.get("Away Team Win", 33.3) if probs else 33.3
         }
+        total_h = sum(historical_probs.values())
+        if total_h > 0:
+            historical_probs = {k: (v / total_h * 100) for k, v in historical_probs.items()}
+        else:
+            historical_probs = {"Home Team Win": 33.3, "Draw": 33.4, "Away Team Win": 33.3}
         
         return {
             'prediction_number': prediction,

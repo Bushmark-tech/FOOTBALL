@@ -1079,7 +1079,8 @@
 
                         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
                             <div style="text-align: center;">
-                                <div style="color: #00d4aa; font-size: 1.5rem; font-weight: 800; margin-bottom: 8px;"
+                                <div id="hist-prob-home"
+                                    style="color: #00d4aa; font-size: 1.5rem; font-weight: 800; margin-bottom: 8px;"
                                     data-prob="{{ historical_probabilities.Home }}">0%</div>
                                 <div
                                     style="color: #94a3b8; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
@@ -1092,7 +1093,8 @@
                                 </div>
                             </div>
                             <div style="text-align: center;">
-                                <div style="color: #f59e0b; font-size: 1.5rem; font-weight: 800; margin-bottom: 8px;"
+                                <div id="hist-prob-draw"
+                                    style="color: #f59e0b; font-size: 1.5rem; font-weight: 800; margin-bottom: 8px;"
                                     data-prob="{{ historical_probabilities.Draw }}">0%</div>
                                 <div
                                     style="color: #94a3b8; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
@@ -1105,7 +1107,8 @@
                                 </div>
                             </div>
                             <div style="text-align: center;">
-                                <div style="color: #ff6b35; font-size: 1.5rem; font-weight: 800; margin-bottom: 8px;"
+                                <div id="hist-prob-away"
+                                    style="color: #ff6b35; font-size: 1.5rem; font-weight: 800; margin-bottom: 8px;"
                                     data-prob="{{ historical_probabilities.Away }}">0%</div>
                                 <div
                                     style="color: #94a3b8; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
@@ -1617,11 +1620,11 @@
 
         // Update Historical Probabilities display with proper rounding to 100%
         function updateHistoricalProbabilities() {
-            // Find all elements with data-prob attribute in the Historical Probabilities section
+            // Find all elements with unique IDs in the Historical Probabilities section
             const histElements = {
-                home: document.querySelector('[data-prob="{{ historical_probabilities.Home }}"]'),
-                draw: document.querySelector('[data-prob="{{ historical_probabilities.Draw }}"]'),
-                away: document.querySelector('[data-prob="{{ historical_probabilities.Away }}"]')
+                home: document.getElementById('hist-prob-home'),
+                draw: document.getElementById('hist-prob-draw'),
+                away: document.getElementById('hist-prob-away')
             };
 
             if (histElements.home && histElements.draw && histElements.away) {
