@@ -13,7 +13,9 @@ class SafeAccountAdapter(DefaultAccountAdapter):
         find the reset link in the terminal logs if SMTP authentication fails.
         """
         try:
+            logger.info(f"[ALLAUTH EMAIL] Attempting to send '{template_prefix}' email to: {email}")
             super().send_mail(template_prefix, email, context)
+            logger.info(f"[ALLAUTH EMAIL] '{template_prefix}' email sent successfully to: {email}")
         except Exception as e:
             logger.error(f"CRITICAL EMAIL FAILURE: {e}")
             

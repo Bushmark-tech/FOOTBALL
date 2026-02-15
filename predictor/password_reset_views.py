@@ -19,7 +19,9 @@ class CustomPasswordResetView(PasswordResetView):
         Override to add logging before sending email
         """
         email = form.cleaned_data.get('email')
-        logger.info(f"[PASSWORD RESET] Attempting to send password reset email to: {email}")
+        domain = self.extra_email_context.get('domain', 'unknown')
+        site_name = self.extra_email_context.get('site_name', 'unknown')
+        logger.info(f"[PASSWORD RESET] Attempting to send password reset email to: {email} (Domain: {domain}, Site: {site_name})")
         
         try:
             # Call the parent form_valid which sends the email

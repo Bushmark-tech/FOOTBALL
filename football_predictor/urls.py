@@ -16,7 +16,13 @@ urlpatterns = [
     path('robots.txt', TemplateView.as_view(template_name="robots.txt", content_type="text/plain")),
     
     # Password Reset URLs (with custom logging)
-    path('password_reset/', CustomPasswordResetView.as_view(extra_email_context={'domain': 'leon-football.com', 'protocol': 'https'}), name='password_reset'),
+    path('password_reset/', CustomPasswordResetView.as_view(
+        extra_email_context={
+            'domain': 'leon-football.com', 
+            'protocol': 'https',
+            'site_name': 'Football Predictor'
+        }
+    ), name='password_reset'),
     path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
