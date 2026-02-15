@@ -259,16 +259,6 @@ if DEBUG or IS_RENDER:
     if not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
         print("WARNING: EMAIL_HOST_USER or EMAIL_HOST_PASSWORD not set!")
 
-# Enable email logging to capture SMTP errors
-import logging
-logging.basicConfig(level=logging.DEBUG if DEBUG else logging.INFO)
-email_logger = logging.getLogger('django.core.mail')
-email_logger.setLevel(logging.DEBUG)
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.DEBUG)
-formatter = logging.Formatter('[EMAIL] %(levelname)s: %(message)s')
-console_handler.setFormatter(formatter)
-email_logger.addHandler(console_handler)
 
 # Site URL for emails
 # Site URL for emails
