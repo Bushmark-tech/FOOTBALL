@@ -366,13 +366,13 @@ def register_view(request):
             ip_addr = get_client_ip(request)
             ua_string = request.META.get('HTTP_USER_AGENT', '')[:255]
             
-            UserProfile.objects.create(
-                user=user, 
-                free_matches_limit=1,
-                last_ip=ip_addr,
-                last_device=ua_string,
-                last_activity=timezone.now()
-            )
+            # Create or update user profile (Signal might have created it already)
+            profile, created = UserProfile.objects.get_or_create(user=user)
+            profile.free_matches_limit = 1
+            profile.last_ip = ip_addr
+            profile.last_device = ua_string
+            profile.last_activity = timezone.now()
+            profile.save()
             
             # Send Verification Email
             if send_verification_email(user, request):
