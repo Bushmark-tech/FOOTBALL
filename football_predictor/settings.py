@@ -241,6 +241,24 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'Football Predictor <noreply@football-predictor.com>')
 
+# Log email configuration on startup
+if DEBUG or IS_RENDER:
+    print("=" * 80)
+    print(f"EMAIL CONFIGURATION ({'Production' if IS_RENDER else 'Development'})")
+    print("=" * 80)
+    print(f"EMAIL_BACKEND: {EMAIL_BACKEND}")
+    print(f"EMAIL_HOST: {EMAIL_HOST}")
+    print(f"EMAIL_PORT: {EMAIL_PORT}")
+    print(f"EMAIL_USE_TLS: {EMAIL_USE_TLS}")
+    print(f"EMAIL_HOST_USER: {EMAIL_HOST_USER}")
+    print(f"EMAIL_HOST_PASSWORD: {'SET (' + str(len(EMAIL_HOST_PASSWORD)) + ' chars)' if EMAIL_HOST_PASSWORD else 'NOT SET'}")
+    print(f"DEFAULT_FROM_EMAIL: {DEFAULT_FROM_EMAIL}")
+    print("=" * 80)
+    if EMAIL_BACKEND == 'django.core.mail.backends.console.EmailBackend':
+        print("WARNING: Using console email backend - emails will NOT be sent!")
+    if not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
+        print("WARNING: EMAIL_HOST_USER or EMAIL_HOST_PASSWORD not set!")
+
 # Site URL for emails
 # Site URL for emails
 SITE_URL = os.environ.get('SITE_URL', 'http://127.0.0.1:8000')

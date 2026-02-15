@@ -164,6 +164,34 @@ LOGGING = {
 ADMINS = [('Admin', os.environ.get('ADMIN_EMAIL', 'admin@example.com'))]
 SERVER_EMAIL = os.environ.get('SERVER_EMAIL', 'server@example.com')
 
+# Email Configuration - Ensure SMTP is used in production
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() == 'true'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'Football Predictor <noreply@leon-football.com>')
+
+# Log email configuration (without exposing password)
+print("=" * 80)
+print("EMAIL CONFIGURATION (Production)")
+print("=" * 80)
+print(f"EMAIL_BACKEND: {EMAIL_BACKEND}")
+print(f"EMAIL_HOST: {EMAIL_HOST}")
+print(f"EMAIL_PORT: {EMAIL_PORT}")
+print(f"EMAIL_USE_TLS: {EMAIL_USE_TLS}")
+print(f"EMAIL_HOST_USER: {EMAIL_HOST_USER}")
+print(f"EMAIL_HOST_PASSWORD: {'SET (' + str(len(EMAIL_HOST_PASSWORD)) + ' chars)' if EMAIL_HOST_PASSWORD else 'NOT SET'}")
+print(f"DEFAULT_FROM_EMAIL: {DEFAULT_FROM_EMAIL}")
+print("=" * 80)
+
+# Warn if email is not properly configured
+if EMAIL_BACKEND == 'django.core.mail.backends.console.EmailBackend':
+    print("WARNING: Using console email backend in production!")
+if not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
+    print("WARNING: EMAIL_HOST_USER or EMAIL_HOST_PASSWORD not set!")
+
 # Database query optimization
 # Log slow queries (queries taking more than 0.5 seconds)
 if DEBUG:
