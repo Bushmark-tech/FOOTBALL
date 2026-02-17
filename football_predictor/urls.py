@@ -10,9 +10,16 @@ from django.conf.urls.static import static
 from django.views.generic.base import TemplateView
 from predictor.password_reset_views import CustomPasswordResetView
 
+from predictor.allauth_views import RateLimitedSignupView
+
 urlpatterns = [
     path('system-core-database/', admin.site.urls),
-    path('accounts/', include('allauth.urls')),  # Google OAuth URLs
+    
+    # Custom rate-limited signup (must come BEFORE allauth.urls)
+    path('accounts/signup/', RateLimitedSignupView.as_view(), name='account_signup'),
+    
+    # Google OAuth and other allauth URLs
+    path('accounts/', include('allauth.urls')),
     path('robots.txt', TemplateView.as_view(template_name="robots.txt", content_type="text/plain")),
     
     # Password Reset URLs (with custom logging)
